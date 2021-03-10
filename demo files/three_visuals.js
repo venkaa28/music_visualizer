@@ -66,37 +66,40 @@ function init() {
     scene.add(group);
 
     document.body.appendChild(renderer.domElement);
-    console.log(ball.geometry.attributes.position);
+    //console.log(ball.geometry.attributes.position);
     render();
     function render() { // this function runs at every update
 
-        analyzer.getByteFrequencyData(dataArray);
-        //console.log(dataArray);
+        //if(typeof analyzer != "undefined") {
+            analyzer.getByteFrequencyData(dataArray);
+            console.log("analyzer is not null");
+            //console.log(dataArray);
 
-        let lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
-        let upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
+            let lowerHalfArray = dataArray.slice(0, (dataArray.length / 2) - 1);
+            let upperHalfArray = dataArray.slice((dataArray.length / 2) - 1, dataArray.length - 1);
 
-        let overallAvg = avg(dataArray);
-        let lowerMax = max(lowerHalfArray);
-        let lowerAvg = avg(lowerHalfArray);
-        let upperMax = max(upperHalfArray);
-        let upperAvg = avg(upperHalfArray);
+            let overallAvg = avg(dataArray);
+            let lowerMax = max(lowerHalfArray);
+            let lowerAvg = avg(lowerHalfArray);
+            let upperMax = max(upperHalfArray);
+            let upperAvg = avg(upperHalfArray);
 
-        let lowerMaxFr = lowerMax / lowerHalfArray.length;
-        let lowerAvgFr = lowerAvg / lowerHalfArray.length;
-        let upperMaxFr = upperMax / upperHalfArray.length;
-        let upperAvgFr = upperAvg / upperHalfArray.length;
+            let lowerMaxFr = lowerMax / lowerHalfArray.length;
+            let lowerAvgFr = lowerAvg / lowerHalfArray.length;
+            let upperMaxFr = upperMax / upperHalfArray.length;
+            let upperAvgFr = upperAvg / upperHalfArray.length;
 
-        //console.log(plane.geometry.isBufferGeometry);
-        //console.log(plane2.geometry.isBufferGeometry);
-        makeRoughGround(plane, modulate(upperAvgFr, 0, 1, 0.5, 4));
-        makeRoughGround(plane2, modulate(lowerMaxFr, 0, 1, 0.5, 4));
+            //console.log(plane.geometry.isBufferGeometry);
+            //console.log(plane2.geometry.isBufferGeometry);
+            makeRoughGround(plane, modulate(upperAvgFr, 0, 1, 0.5, 4));
+            makeRoughGround(plane2, modulate(lowerMaxFr, 0, 1, 0.5, 4));
 
-        makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
-        //group.rotation.y += 0.005;
+            makeRoughBall(ball, modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), modulate(upperAvgFr, 0, 1, 0, 4));
+            //group.rotation.y += 0.005;
 
-        renderer.render(scene, camera);
-        requestAnimationFrame(render);
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        //}
     }
 
     function makeRoughBall(mesh, bassFr, treFr) {

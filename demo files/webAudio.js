@@ -4,7 +4,7 @@ console.clear();
 //instigate our audio context
 
 //for cross browser if webkitAudioContext works
-const AudioContext = window.AudioContext; //|| window.webkitAudioContext;
+const AudioContext = window.AudioContext; // || window.webkitAudioContext;
 let audioCtx;
 const audioElement = document.getElementById("audio_file");
 let track;
@@ -37,10 +37,10 @@ playButton.addEventListener('click', function () {
 
 //if track ends
 
-audioElement.addEventListener('ended', () => {
-    playButton.dataset.playing = 'false';
-    playButton.setAttribute("aria-checked", "false");
-}, false);
+// audioElement.addEventListener('ended', () => {
+//     playButton.dataset.playing = 'false';
+//     playButton.setAttribute("aria-checked", "false");
+// }, false);
 
 function init() {
     audioCtx = new AudioContext();
