@@ -1,8 +1,14 @@
+/* Links to check out:
+ * Validators: https://angular.io/api/forms/Validators
+ * Angular Material Tags: https://material.angular.io/guide/typography
+ * AuthService: services/auth.service
+ */
+
+
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { User } from '../../classes/user';
-import { AuthService } from '../../services/auth.service'
-import {FormBuilder, FormControl, Validators} from "@angular/forms";
+import { AuthService } from '../../services/auth.service';
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-login-page',
@@ -10,29 +16,39 @@ import {FormBuilder, FormControl, Validators} from "@angular/forms";
   styleUrls: ['./login-page.component.css']
 })
 export class LoginPageComponent implements OnInit {
-  title = 'Test';
-  private user: User = new User();
+  // html form validator/input for user email
+  public email : FormControl = new FormControl('', [Validators.required, Validators.email]);
 
-  loginForm = this.formBuilder.group({
-    email: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required])
-  });
+  // html form validator/input for user password
+  public pwd : FormControl = new FormControl('', [Validators.required, Validators.minLength(5)]);
 
-  constructor(private authService: AuthService, public router: Router, private formBuilder: FormBuilder) { }
+  // prints error msg if email invalid, nothing if valid
+  getEmailMessage() {
+    return this.email.hasError('email') ? 'Not a valid email' : '';
+  }
+
+  // prints error msg if password invalid, nothing if valid
+  getPasswordMessage() {
+    return this.pwd.hasError('minlength') ? 'Passwords must be at least 5 characters long' : '';
+  }
+
+  // called when submit button is clicked, authenticates user on firebase and routes to next page
+  // if valid user
+  async login() {
+    this.authService.loginUser(this.email.value, this.pwd.value)
+    .then(async () => {
+      const uniqueEmail = this.email.value.replace(/[@.]/g, '_');
+      this.authService.getUserData(uniqueEmail).then(async () => {
+          await this.router.navigate(['../../VisualizationPage']);
+      });
+    }).catch((error) => {
+        window.alert('Invalid username or password!');
+    });
+  }
+
+  constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
   }
 
-  onSubmit = () => {
-
-    this.authService.loginUser(this.loginForm.get(['email'])?.value, this.loginForm.get(['password'])?.value)
-      .then(async () => {
-        const uniqueEmail = this.user.email.replace(/[@.]/g, '_');
-        this.authService.getUserData(uniqueEmail).then(async () => {
-          window.alert('Valid User');
-        });
-      }).catch((error) => {
-      window.alert('Invalid username or password!');
-    });
-  };
 }
