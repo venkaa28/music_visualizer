@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import {MatButton} from "@angular/material/button";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-home-page',
@@ -6,9 +8,9 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./home-page.component.css']
 })
 export class HomePageComponent implements OnInit {
-  title = "Home test";
+  title = 'Home test';
 
-  constructor() { }
+  constructor(public router: Router) { }
 
   ngOnInit(): void {
   }
