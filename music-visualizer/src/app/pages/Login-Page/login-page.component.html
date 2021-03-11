@@ -1,0 +1,19 @@
+<div class="background-out">
+    <div class="background-tile">
+        <h1 class="login">Login</h1><br>
+
+        <div class="form">
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <label for="email">Email:</label><br>
+                <input formControlName="email" type="email" id="email" name="email" placeholder="Enter your email"><br>
+                <label for="pwd">Password:</label><br>
+                <input formControlName="password" type="password" id="pwd" name="pwd" placeholder="Enter your password"><br>
+                <a mat-button (click)="router.navigate(['ForgotPasswordPage'])"> Forgot Password?</a>
+              <button mat-raised-button color = "primary" type="submit" [disabled]="loginForm.invalid"> LOGIN </button>
+            </form>
+        </div>
+        <div class="register">
+            <p>Don't have a account? Register here.</p>
+        </div>
+    </div>
+</div>
