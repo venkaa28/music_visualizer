@@ -1,19 +1,33 @@
-<div class="background-out">
-    <div class="background-tile">
-        <h1 class="login">Login</h1><br>
+<div id="background-out">
+    <div id="background-tile">
+        <section class="mat-typography">
+            <h1 class="mat-display-4" id="login">Login</h1><br>
+        </section>
 
-        <div class="form">
-            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-                <label for="email">Email:</label><br>
-                <input formControlName="email" type="email" id="email" name="email" placeholder="Enter your email"><br>
-                <label for="pwd">Password:</label><br>
-                <input formControlName="password" type="password" id="pwd" name="pwd" placeholder="Enter your password"><br>
-                <a mat-button (click)="router.navigate(['ForgotPasswordPage'])"> Forgot Password?</a>
-              <button mat-raised-button color = "primary" type="submit" [disabled]="loginForm.invalid"> LOGIN </button>
+        <div id="form">
+            <form>
+                <div id="email">
+                    <mat-label for="email">Email</mat-label>
+                    <mat-error *ngIf="email.invalid">*</mat-error><br>
+                    <input matInput name="email" class="pwd" [formControl]="email" placeholder="Enter your email" required><br>
+                    <mat-error *ngIf="email.invalid">{{getEmailMessage()}}</mat-error><br>
+                </div>
+                <div id="pwd">
+                    <mat-label for="pwd">Password</mat-label>
+                    <mat-error *ngIf="pwd.invalid">*</mat-error><br>
+                    <input matInput type="password" class="pwd" name="pwd" [formControl]="pwd" placeholder="Enter your password"><br>
+                    <a routerLink="../ForgotPasswordPage">
+                        <p class="mat-body" id="forgot-password">Forgot Password?</p>
+                    </a>
+                    <mat-error *ngIf="pwd.invalid">{{getPasswordMessage()}}</mat-error><br>
+                </div>
             </form>
         </div>
-        <div class="register">
-            <p>Don't have a account? Register here.</p>
+        <div>
+            <button mat-raised-button color="primary" [disabled]="email.invalid || pwd.invalid" (click)="login()">LOGIN</button>
+        </div>
+        <div id="register">
+            <p>Don't have a account? <a routerLink="../RegisterPage">Register here.</a></p>
         </div>
     </div>
 </div>
