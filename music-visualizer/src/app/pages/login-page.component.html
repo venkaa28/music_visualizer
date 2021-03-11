@@ -4,15 +4,21 @@
 
         <div class="form">
             <form>
-                <label for="email">Email:</label><br>
-                <input type="text" id="email" name="email" placeholder="Enter your email"><br>
-                <label for="pwd">Password:</label><br>
-                <input type="password" id="pwd" name="pwd" placeholder="Enter your password"><br>
-                <p class="forgot-password">Forgot Password?</p>
+                <div class="email">
+                    <mat-label for="email">Email:</mat-label><br>
+                    <input matInput id="email" name="email" [formControl]="email" placeholder="Enter your email" required><br>
+                    <mat-error *ngIf="email.invalid">{{getEmailMessage()}}</mat-error><br>
+                </div>
+                <div class="pwd">
+                    <mat-label for="pwd">Password:</mat-label><br>
+                    <input matInput type="password" id="pwd" name="pwd" [formControl]="pwd" placeholder="Enter your password"><br>
+                    <mat-error *ngIf="pwd.invalid">{{getPasswordMessage()}}</mat-error><br>
+                    <p class="forgot-password">Forgot Password?</p>
+                </div>
             </form>
         </div>
         <div>
-            <button class="submit" (click)="login()">LOGIN</button>
+            <button mat-raised-button [disabled]="email.invalid || pwd.invalid" (click)="login()">LOGIN</button>
         </div>
         <div class="register">
             <p>Don't have a account? Register here.</p>
