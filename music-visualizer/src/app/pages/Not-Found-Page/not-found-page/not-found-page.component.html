@@ -1,5 +1,7 @@
 <div id="animated-gif-container">
-    <h1>404</h1>
-    <p>Uh oh. We can't seem to find the page your looking for.</p>
-    <p><a routerLink="../">Click here</a> to head back to the homepage.</p>
+    <div id="back-box">
+        <h1>404</h1>
+        <p>Uh oh. We can't seem to find the page your looking for.</p>
+        <p><a routerLink={{getRoute()}}>Click here</a> to head back to the {{getRouteName()}}.</p>
+    </div>
 </div>
