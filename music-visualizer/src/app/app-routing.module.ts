@@ -7,6 +7,7 @@ import { LoginPageComponent } from './pages/Login-Page/login-page.component';
 import { VisualizationPageComponent } from "./pages/Visualization-Page/visualization-page.component";
 import { ForgotPasswordPageComponent } from "./pages/Forgot-Password-Page/forgot-password-page.component";
 import { RegisterPageComponent } from './pages/Register-Page/register-page/register-page.component';
+import { NotFoundPageComponent } from './pages/Not-Found-Page/not-found-page/not-found-page.component';
 
 const routes: Routes = [
   {
@@ -28,6 +29,14 @@ const routes: Routes = [
   {
     path: 'RegisterPage',
     component: RegisterPageComponent
+  },
+  {
+    path: '404',
+    component: NotFoundPageComponent
+  },
+  {
+    path: '**',
+    redirectTo: '/404'
   }
 ];
 
