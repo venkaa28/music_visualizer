@@ -21,6 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RegisterPageComponent } from './pages/Register-Page/register-page/register-page.component';
+import { NotFoundPageComponent } from './pages/Not-Found-Page/not-found-page/not-found-page.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { RegisterPageComponent } from './pages/Register-Page/register-page/regis
     HomePageComponent,
     VisualizationPageComponent,
     ForgotPasswordPageComponent,
-    RegisterPageComponent
+    RegisterPageComponent,
+    NotFoundPageComponent
   ],
   imports: [
     FormsModule,
