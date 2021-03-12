@@ -16,4 +16,8 @@ export class MusicPlayer {
     this.isPublic = true;
     this.exception = new Exception();
   }
+
+  playMusic(timestamp: number): void {
+    
+  }
 }

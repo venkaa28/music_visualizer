@@ -6,6 +6,10 @@ export class Exception {
     this.message = '';
     this.routeToURL = '';
   }
+
+  displayError(message: string, routeToURL: string): void {
+
+  }
 }
 
 

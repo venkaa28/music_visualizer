@@ -12,4 +12,12 @@ export class Controller {
     this.visualPage = new VisualPage();
     this.exception = new Exception();
   }
+
+  getUserAccount(): void {
+
+  }
+
+  initVisualPage(): void {
+
+  }
 }
