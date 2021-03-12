@@ -13,6 +13,7 @@ import {User} from '../classes/user';
 })
 export class AuthService {
   userData: User;
+  private loggedIn: boolean = false;
   constructor(public ngFireAuth: AngularFireAuth, public afStore: AngularFirestore, public router: Router, public ngZone: NgZone,
               public afDB: AngularFireDatabase) {
     this.userData = new User();
@@ -21,6 +22,7 @@ export class AuthService {
     email: string,
     password: string
   ) {
+    this.loggedIn = true;
     return this.ngFireAuth.signInWithEmailAndPassword(email, password);
   }
 
@@ -28,6 +30,7 @@ export class AuthService {
     email: string,
     password: string
   ) {
+    this.loggedIn = true;
     return this.ngFireAuth.createUserWithEmailAndPassword(email, password);
   }
 
@@ -36,6 +39,7 @@ export class AuthService {
   }
 
   logOutUser(): Promise<void>{
+    this.loggedIn = false;
     return this.ngFireAuth.signOut();
   }
 
@@ -59,4 +63,7 @@ export class AuthService {
     return this.userData;
   }
 
+  getLoggedIn() {
+    return this.loggedIn;
+  }
 }

@@ -8,6 +8,7 @@ import { VisualizationPageComponent } from "./pages/Visualization-Page/visualiza
 import { ForgotPasswordPageComponent } from "./pages/Forgot-Password-Page/forgot-password-page.component";
 import { RegisterPageComponent } from './pages/Register-Page/register-page/register-page.component';
 import { NotFoundPageComponent } from './pages/Not-Found-Page/not-found-page/not-found-page.component';
+import { UserAuthGuard } from './guards/user-auth.guard';
 
 const routes: Routes = [
   {
@@ -15,20 +16,21 @@ const routes: Routes = [
     component: HomePageComponent
   },
   {
-    path: 'LoginPage',
-    component: LoginPageComponent
+    path: 'RegisterPage',
+    component: RegisterPageComponent
   },
   {
-    path: 'VisualizationPage',
-    component: VisualizationPageComponent
+    path: 'LoginPage',
+    component: LoginPageComponent
   },
   {
     path: 'ForgotPasswordPage',
     component: ForgotPasswordPageComponent
   },
   {
-    path: 'RegisterPage',
-    component: RegisterPageComponent
+    path: 'VisualizationPage',
+    canActivate: [UserAuthGuard],
+    component: VisualizationPageComponent
   },
   {
     path: '404',
@@ -36,7 +38,7 @@ const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: '/404'
+    redirectTo: '404'
   }
 ];
 
