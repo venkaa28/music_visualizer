@@ -14,4 +14,13 @@ export class VisualPlayer {
     this.music = new Music();
     this.exception = new Exception();
   }
+
+  // what's the data type of canvas?
+  // initCanvas(): canvas {
+  //
+  // }
+
+  displayAnimation(timestamp: number): void {
+
+  }
 }

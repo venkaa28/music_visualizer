@@ -23,4 +23,36 @@ export class VisualPage {
     this.playList = [];
     this.exception = new Exception();
   }
+
+  play(timestamp: number): void {
+
+  }
+
+  pause(): void {
+
+  }
+
+  previousSong(): void {
+
+  }
+
+  nextSong(): void {
+
+  }
+
+  previousStyle(): void {
+
+  }
+
+  nextStyle(style: number): void {
+
+  }
+
+  addSongToPlaylist(MusicID: string): void {
+
+  }
+
+  removeSongFromPlaylist(MusicID: string): void {
+
+  }
 }

@@ -24,6 +24,21 @@ export class User {
     this.previousMusic = [];
     this.previousStyles = [];
   }
+
+  resetPassword(): void {
+
+  }
+
+  getSongsFromDatabase(): string[] {
+    return [];
+  }
+
+  removeSongFromDatabase(musicID: string): void {
+
+  }
+  uploadSongToDatabase(pathOfSong: string): void {
+
+  }
 }
 
 
