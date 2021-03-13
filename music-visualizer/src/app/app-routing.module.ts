@@ -10,6 +10,7 @@ import { VisualizationPageComponent } from './pages/Visualization-Page/visualiza
 import { ForgotPasswordPageComponent } from './pages/Forgot-Password-Page/forgot-password-page.component';
 import { RegisterPageComponent } from './pages/Register-Page/register-page.component';
 import { NotFoundPageComponent } from './pages/Not-Found-Page/not-found-page.component';
+import { LoggedInGuard } from './guards/logged-in.guard';
 
 const routes: Routes = [
   {
@@ -22,6 +23,7 @@ const routes: Routes = [
   },
   {
     path: 'LoginPage',
+    canActivate: [LoggedInGuard],
     component: LoginPageComponent
   },
   {
