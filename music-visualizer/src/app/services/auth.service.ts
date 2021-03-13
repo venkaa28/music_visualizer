@@ -12,51 +12,35 @@ import { CookieService } from 'ngx-cookie-service';
 @Injectable({
   providedIn: 'root'
 })
+
+type Dict = {[key: string]: any};
+
 export class AuthService {
-  userData: User;
-  private loggedIn: boolean = false;
+  private userData: User;
+
   constructor(public ngFireAuth: AngularFireAuth, public afStore: AngularFirestore, public router: Router, public ngZone: NgZone,
               public afDB: AngularFireDatabase, private cookieService: CookieService) {
     this.userData = new User();
   }
-  loginUser(
-    email: string,
-    password: string
-  ) {
-    this.loggedIn = true;
-    this.cookieService.set('email', email);
-    this.cookieService.set('password', password);
-    return this.ngFireAuth.signInWithEmailAndPassword(email, password);
-  }
 
-  signUpUser(
-    email: string,
-    password: string
-  ) {
-    this.loggedIn = true;
-    this.cookieService.set('email', email);
-    this.cookieService.set('password', password);
-    return this.ngFireAuth.createUserWithEmailAndPassword(email, password);
-  }
+  async loginUser(email: string, password: string): Promise<void> {
+    this.ngFireAuth.signInWithEmailAndPassword(email, password).catch((error) => {
+      console.log(error);  
+      this.cookieService.deleteAll();
+      return;
+    })
 
-  resetPassword(email: string) {
-    return this.ngFireAuth.sendPasswordResetEmail(email);
-  }
+    const uid = email.replace(/[@.]/g, '_');
+    var userDict: Dict = {};
 
-  logOutUser(): Promise<void>{
-    this.loggedIn = false;
-    this.cookieService.deleteAll();
-    return this.ngFireAuth.signOut();
-  }
-
-  async getUserData(uid: string): Promise<void> {
     return new Promise((resolve, reject) => {
       firebase.database().ref('accounts/' + uid).on('value', async (snapshot) => {
         if (snapshot.exists()) {
           console.log(snapshot.val());
-          this.userData.email = snapshot.val().email;
-          this.userData.name = snapshot.val().name;
-          // Todo: get user's orders and add to list of current/previous orders
+          userDict['email'] = snapshot.val().email;
+          userDict['name'] = snapshot.val().name;
+          var userJSON: string = JSON.stringify(userDict);
+          this.cookieService.set('account', userJSON);
           resolve();
         } else {
           reject();
@@ -65,31 +49,55 @@ export class AuthService {
     });
   }
 
+  async signUpUser(email: string, password: string, userDict: {[key: string]: any;}): Promise<void> {
+    this.ngFireAuth.createUserWithEmailAndPassword(email, password).catch((error) => {
+      console.log(error);
+      this.cookieService.deleteAll();
+      return;
+    });
+
+    const uid = email.replace(/[@.]/g, '_');
+
+    return new Promise((resolve, reject) => {
+      firebase.database().ref('accounts').child(uid).set(userDict);
+      
+      var userJSON: string = JSON.stringify(userDict);
+      this.cookieService.set('account', userJSON);
+      resolve();
+    });
+  }
+
+  resetPassword(email: string) {
+    return this.ngFireAuth.sendPasswordResetEmail(email);
+  }
+
+  logOutUser(): Promise<void>{
+    this.cookieService.deleteAll();
+    return this.ngFireAuth.signOut();
+  }
+
   getUser(){
+    const cookie: string = this.cookieService.get('account');
+    var userJSON;
+    
+    if (cookie.length === 0) {
+      userJSON = null;
+    } else {
+      userJSON = JSON.parse(cookie);
+    }
+
+    this.userData = userJSON;
     return this.userData;
   }
 
   getLoggedIn() {
-    if (!this.loggedIn) {
-      const un: string = this.cookieService.get('email');
-      const pw: string = this.cookieService.get('password');
+    var userData = this.getUser();
+    console.log(userData);
 
-      if (un.length !== 0) {
-        this.loginUser(un, pw).catch((error) => {
-          console.log(error);
-          return false;
-        });
-
-        this.loggedIn = true;
-      }
-
-      console.log(this.cookieService.get('username'));
-      console.log(this.cookieService.get('username').length);
-      console.log(this.cookieService.get('password'));
-      console.log(this.ngFireAuth.currentUser);
-
+    if (userData === null) {
+      return false;
     }
 
-    return this.loggedIn;
+    return true;
   }
 }

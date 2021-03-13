@@ -5,6 +5,8 @@ import {User} from "../../classes/user";
 import firebase from "firebase";
 import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 
+type Dict = {[key: string]: any};
+
 @Component({
   selector: 'app-register-page',
   templateUrl: './register-page.component.html',
@@ -15,6 +17,7 @@ export class RegisterPageComponent implements OnInit {
   public user: User = new User();
   public signUpForm: FormGroup = new FormGroup({});
   public minLength: number = 6;
+  private dict: Dict = {};
 
   checkPasswords(): null | { notSame: true } {
     const password = this.signUpForm?.get('password')?.value;
@@ -36,6 +39,25 @@ export class RegisterPageComponent implements OnInit {
    return this.signUpForm.get('password')?.value !== this.signUpForm.get('verifyPassword')?.value ? 'Passwords must match': '';
   }
 
+  async signup() {
+    this.dict = {
+      'email': this.signUpForm.get('email')?.value,
+      'name': this.signUpForm.get('name')?.value
+    };
+
+    if( this.signUpForm.get('password')?.value != this.signUpForm.get('verifyPassword')?.value ){
+      window.alert('Error Passwords do not match');
+    } else {
+      this.authService.signUpUser(this.signUpForm.get('email')?.value, this.signUpForm.get('password')?.value, this.dict)
+      .then(async () => {
+        await this.router.navigate(['../../VisualizationPage']);
+      }).catch((error) => {
+        console.error(error);
+        window.alert(error);
+      });
+    }
+  }
+
   constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder) {
     this.signUpForm = this.formBuilder.group({
       name: new FormControl('', [Validators.required]),
@@ -48,28 +70,5 @@ export class RegisterPageComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
-  signup = async () => {
-    if( this.signUpForm.get('password')?.value != this.signUpForm.get('verifyPassword')?.value ){
-      window.alert('Error Passwords do not match');
-    } else {
-      const uniqueEmail = this.user.email.replace(/[@.]/g, '_');
-      this.authService.signUpUser(this.signUpForm.get('email')?.value, this.signUpForm.get('password')?.value).then((userCredential) => {
-        const user = userCredential;
-      }).then(async () => {
-        const uniqueEmail = this.signUpForm.get('email')?.value.replace(/[@.]/g, '_');
-        await firebase.database().ref('accounts').child(uniqueEmail).set({
-          email: this.signUpForm.get('email')?.value,
-          name: this.signUpForm.get('name')?.value,
-        });
-        await this.authService.getUserData(uniqueEmail);
-      }).then(async () => {
-        await this.router.navigate(['../../VisualizationPage']);
-      }).catch((error) => {
-        console.error(error);
-        window.alert(error);
-      });
-    }
-  };
 
 }

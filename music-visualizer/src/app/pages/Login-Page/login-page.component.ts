@@ -46,11 +46,7 @@ export class LoginPageComponent implements OnInit {
   async login() {
     this.authService.loginUser(this.loginForm.get('email')?.value, this.loginForm.get('password')?.value)
     .then(async () => {
-      // might need to rethink our user structure
-      const uniqueEmail = this.loginForm.get('email')?.value.replace(/[@.]/g, '_');
-      this.authService.getUserData(uniqueEmail).then(async () => {
           await this.router.navigate(['../../VisualizationPage']);
-      });
     }).catch((error) => {
         window.alert('Invalid username or password!');
     });
