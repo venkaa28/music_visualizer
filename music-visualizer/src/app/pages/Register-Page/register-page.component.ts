@@ -43,7 +43,7 @@ export class RegisterPageComponent implements OnInit {
       password: new FormControl('', [Validators.required, Validators.minLength(this.minLength)]),
       verifyPassword: new FormControl('', [Validators.required]),
       acceptTerms: [false, Validators.requiredTrue]
-    }, { validators: (control) => this.checkPasswords });
+    }, { validators: (control) => this.checkPasswords() });
   }
 
   ngOnInit(): void {
