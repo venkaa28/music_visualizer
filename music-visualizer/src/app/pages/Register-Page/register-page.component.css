@@ -3,6 +3,11 @@
 
 @import url('../Login-Page/login-page.component.css');
 
+br{
+  margin: 2px 2px 2px 2px;
+  height: 5px;
+}
+
 .register-photo {
   height: 1000px;
   background-size: cover;
@@ -36,7 +41,7 @@
 .register-photo form h2 {
   font-size: 24px;
   line-height: 1.5;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .register-photo form .form-control {
@@ -49,6 +54,10 @@
   color: inherit;
   text-indent: 6px;
   height: 40px;
+}
+
+.register-photo form .form-group {
+  margin-bottom: 0;
 }
 
 .register-photo form .form-check {
