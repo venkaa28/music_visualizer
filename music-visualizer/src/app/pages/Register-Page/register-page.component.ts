@@ -13,24 +13,26 @@ import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 export class RegisterPageComponent implements OnInit {
 
   public user: User = new User();
-
-  public signUpForm = new FormGroup({});
+  public signUpForm: FormGroup = new FormGroup({});
+  public minLength: number = 6;
 
   checkPasswords(): null | { notSame: true } {
-    const pstring = 'password';
-    const vpstring = 'password';
-    const password = this.signUpForm?.controls[pstring]?.value;
-    const confirmPassword = this.signUpForm?.controls[vpstring]?.value;
+    const password = this.signUpForm?.get('password')?.value;
+    const confirmPassword = this.signUpForm?.get('verifyPassword')?.value;
 
     return password === confirmPassword ? null : { notSame: true };
   }
 
-  getEmailMessage = () => this.signUpForm.get('email')?.hasError ? 'Not a valid email' : '';
+  getEmailMessage(): string {
+    return this.signUpForm.get('email')?.hasError ? 'Not a valid email' : '';
+  }
 
   // prints error msg if password invalid, nothing if valid
-  getPasswordMessage = () => this.signUpForm.get('password')?.hasError('minlength') ? 'Passwords must be at least 5 characters long' : '';
+  getPasswordMessage(): string {
+    return this.signUpForm.get('password')?.hasError('minlength') ? `Passwords must be at least ${this.minLength} characters long` : '';
+  }
 
-  getVerifyPasswordMessage(){
+  getVerifyPasswordMessage(): string{
    return this.signUpForm.get('password')?.value !== this.signUpForm.get('verifyPassword')?.value ? 'Passwords must match': '';
   }
 
@@ -38,8 +40,9 @@ export class RegisterPageComponent implements OnInit {
     this.signUpForm = this.formBuilder.group({
       name: new FormControl('', [Validators.required]),
       email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required, Validators.minLength(5)]),
-      verifyPassword: new FormControl('', [Validators.required])
+      password: new FormControl('', [Validators.required, Validators.minLength(this.minLength)]),
+      verifyPassword: new FormControl('', [Validators.required]),
+      acceptTerms: [false, Validators.requiredTrue]
     }, { validators: (control) => this.checkPasswords });
   }
 
