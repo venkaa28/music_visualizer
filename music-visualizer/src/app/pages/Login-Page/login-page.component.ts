@@ -22,9 +22,11 @@ export class LoginPageComponent implements OnInit {
   // // html form validator/input for user password
   // public pwd : FormControl = new FormControl('', [Validators.required, Validators.minLength(5)]);
 
+  public minLength: number = 6;
+
   public loginForm: FormGroup = this.formBuilder.group({
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(5)])
+    password: new FormControl('', [Validators.required, Validators.minLength(this.minLength)])
   });
 
   // prints error msg if email invalid, nothing if valid
@@ -35,7 +37,7 @@ export class LoginPageComponent implements OnInit {
 
   // prints error msg if password invalid, nothing if valid
   getPasswordMessage() {
-    return this.loginForm.get('password')?.hasError('minlength') ? 'Passwords must be at least 5 characters long' : '';
+    return this.loginForm.get('password')?.hasError('minlength') ? `Passwords must be at least ${this.minLength} characters long` : '';
     // return this.pwd.hasError('minlength') ? 'Passwords must be at least 5 characters long' : '';
   }
 
