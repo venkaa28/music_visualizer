@@ -20,8 +20,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RegisterPageComponent } from './pages/Register-Page/register-page/register-page.component';
-import { NotFoundPageComponent } from './pages/Not-Found-Page/not-found-page/not-found-page.component';
+import { RegisterPageComponent } from './pages/Register-Page/register-page.component';
+import { NotFoundPageComponent } from './pages/Not-Found-Page/not-found-page.component';
+import {DoBootstrap} from "@angular/core";
 
 @NgModule({
   declarations: [
