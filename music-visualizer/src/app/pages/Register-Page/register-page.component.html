@@ -17,16 +17,33 @@
 </nav>
 <section class="register-photo" style="background: midnightblue;">
   <div class="form-container">
-    <form method="post" style="background: var(--blue);">
+    <form [formGroup]="signUpForm" (ngSubmit)="signup()" style="background: var(--blue);">
       <h2 class="text-center" style="font-family: Open Sans,Helvetica Neue,Arial,sans-serif;color: White;"><strong>Create</strong> an account.</h2>
-      <div class="form-group"><input class="form-control" type="text" name="name" placeholder="Name"></div>
-      <div class="form-group"><input class="form-control" type="email" name="email" placeholder="Email"></div>
-      <div class="form-group"><input class="form-control" type="password" name="password" placeholder="Password"></div>
-      <div class="form-group"><input class="form-control" type="password" name="password-repeat" placeholder="Password (repeat)"></div>
+      <div class="form-group">
+        <mat-error *ngIf="this.signUpForm.get('name')?.invalid && (this.signUpForm.get('name')?.dirty || this.signUpForm.get('name')?.touched)">*</mat-error> <br>
+        <input class="form-control" type="text" id="name" name="name" formControlName="name" placeholder="Name" required><br>
+      </div>
+      <div class="form-group">
+        <mat-error *ngIf="this.signUpForm.get('email')?.invalid && (this.signUpForm.get('email')?.dirty || this.signUpForm.get('email')?.touched)">*</mat-error> <br>
+        <input class="form-control" type="email" id="email" name="email" formControlName="email" placeholder="Email" required><br>
+        <mat-error *ngIf="this.signUpForm.get('email')?.invalid && (this.signUpForm.get('email')?.dirty || this.signUpForm.get('email')?.touched)">{{getEmailMessage()}}</mat-error>
+      </div>
+      <div class="form-group">
+        <mat-error *ngIf="this.signUpForm.get('password')?.invalid && (this.signUpForm.get('password')?.dirty || this.signUpForm.get('password')?.touched)">*</mat-error> <br>
+        <input class="form-control" type="password" id="password" name="password" formControlName="password" placeholder="Password" required><br>
+        <mat-error *ngIf="this.signUpForm.get('email')?.invalid && (this.signUpForm.get('email')?.dirty || this.signUpForm.get('email')?.touched)">{{getPasswordMessage()}}</mat-error>
+      </div>
+      <div class="form-group">
+        <mat-error *ngIf="this.signUpForm.get('verifyPassword')?.invalid && (this.signUpForm.get('verifyPassword')?.dirty || this.signUpForm.get('verifyPassword')?.touched)">*</mat-error> <br>
+        <input class="form-control" type="password" id="verifyPassword" name="verifyPassword" formControlName="verifyPassword" placeholder="Verify Password" required><br>
+        <mat-error *ngIf="this.signUpForm.get('verifyPassword')?.hasError && (this.signUpForm.get('verifyPassword')?.dirty || this.signUpForm.get('verifyPassword')?.touched)">{{getVerifyPasswordMessage()}}</mat-error>
+      </div>
       <div class="form-group">
         <div class="form-check"><label class="form-check-label" style="color: white;"><input class="form-check-input" type="checkbox">I agree to the license terms.</label></div>
       </div>
-      <div class="form-group"><button class="btn btn-primary btn-block" type="submit">Sign Up</button></div>
+      <div class="form-group">
+        <button class="btn btn-primary btn-block" type="submit" [disabled]="this.signUpForm.invalid">Sign Up</button>
+      </div>
       <a class="forgot" routerLink="../LoginPage">Already have an Account? Login here.</a>
     </form>
   </div>
