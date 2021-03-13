@@ -9,12 +9,11 @@ import {AngularFireDatabase} from '@angular/fire/database';
 import {User} from '../classes/user';
 import { CookieService } from 'ngx-cookie-service';
 
+type Dict = {[key: string]: any};
+
 @Injectable({
   providedIn: 'root'
 })
-
-type Dict = {[key: string]: any};
-
 export class AuthService {
   private userData: User;
 
