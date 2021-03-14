@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { NotifierModule } from 'angular-notifier';
 
 // firebase
 import firebase from 'firebase';
@@ -42,6 +43,7 @@ import {DoBootstrap} from "@angular/core";
     ReactiveFormsModule,
     MatButtonModule,
     MatInputModule,
+    NotifierModule,
 
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireAuthModule,
