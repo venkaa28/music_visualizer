@@ -9,6 +9,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import { NotifierService } from 'angular-notifier';
 
 @Component({
   selector: 'app-login-page',
@@ -46,13 +47,15 @@ export class LoginPageComponent implements OnInit {
   async login() {
     this.authService.loginUser(this.loginForm.get('email')?.value, this.loginForm.get('password')?.value)
     .then(async () => {
-          await this.router.navigate(['../../VisualizationPage']);
+      console.log('skip');
+      await this.router.navigate(['../../VisualizationPage']);
     }).catch((error) => {
-        window.alert('Invalid username or password!');
+      this.notifierService.notify('error', error);
     });
   }
 
-  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder) { }
+  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder, 
+              private readonly  notifierService: NotifierService) { }
 
   ngOnInit(): void {
   }

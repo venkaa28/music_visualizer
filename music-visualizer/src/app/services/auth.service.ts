@@ -23,17 +23,17 @@ export class AuthService {
   }
 
   async loginUser(email: string, password: string): Promise<void> {
-    this.ngFireAuth.signInWithEmailAndPassword(email, password).catch((error) => {
+    await this.ngFireAuth.signInWithEmailAndPassword(email, password).catch((error) => {
       console.log(error);  
       this.cookieService.deleteAll();
-      return;
+      throw error;
     })
 
     const uid = email.replace(/[@.]/g, '_');
     var userDict: Dict = {};
 
-    return new Promise((resolve, reject) => {
-      firebase.database().ref('accounts/' + uid).on('value', async (snapshot) => {
+    return new Promise(async (resolve, reject) => {
+      await firebase.database().ref('accounts/' + uid).on('value', async (snapshot) => {
         if (snapshot.exists()) {
           console.log(snapshot.val());
           userDict['email'] = snapshot.val().email;
@@ -42,14 +42,14 @@ export class AuthService {
           this.cookieService.set('account', userJSON);
           resolve();
         } else {
-          reject();
+          reject(new Error('Bad login'));
         }
       });
     });
   }
 
   async signUpUser(email: string, password: string, userDict: {[key: string]: any;}): Promise<void> {
-    this.ngFireAuth.createUserWithEmailAndPassword(email, password).catch((error) => {
+    await this.ngFireAuth.createUserWithEmailAndPassword(email, password).catch((error) => {
       console.log(error);
       this.cookieService.deleteAll();
       return;
@@ -57,8 +57,8 @@ export class AuthService {
 
     const uid = email.replace(/[@.]/g, '_');
 
-    return new Promise((resolve, reject) => {
-      firebase.database().ref('accounts').child(uid).set(userDict);
+    return new Promise(async (resolve, reject) => {
+      await firebase.database().ref('accounts').child(uid).set(userDict);
       
       var userJSON: string = JSON.stringify(userDict);
       this.cookieService.set('account', userJSON);
