@@ -4,6 +4,7 @@ import {AuthService} from "../../services/auth.service";
 import {User} from "../../classes/user";
 import firebase from "firebase";
 import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import { NotifierService } from 'angular-notifier';
 
 type Dict = {[key: string]: any};
 
@@ -53,12 +54,12 @@ export class RegisterPageComponent implements OnInit {
         await this.router.navigate(['../../VisualizationPage']);
       }).catch((error) => {
         console.error(error);
-        window.alert(error);
+        this.notifierService.notify('error', error);
       });
     }
   }
 
-  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder) {
+  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder, private readonly notifierService: NotifierService) {
     this.signUpForm = this.formBuilder.group({
       name: new FormControl('', [Validators.required]),
       email: new FormControl('', [Validators.required, Validators.email]),

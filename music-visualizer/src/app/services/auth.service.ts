@@ -52,8 +52,8 @@ export class AuthService {
     await this.ngFireAuth.createUserWithEmailAndPassword(email, password).catch((error) => {
       console.log(error);
       this.cookieService.deleteAll();
-      return;
-    });
+      throw error;
+    })
 
     const uid = email.replace(/[@.]/g, '_');
 
