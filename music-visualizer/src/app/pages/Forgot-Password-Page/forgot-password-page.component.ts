@@ -11,14 +11,11 @@ import {NotifierService} from 'angular-notifier';
 })
 export class ForgotPasswordPageComponent implements OnInit {
 
-  private readonly notifier: NotifierService;
-
   emailForm = this.formBuilder.group({
     email: new FormControl('', [Validators.required, Validators.email])
   });
-  constructor(public router: Router, private formBuilder: FormBuilder, public authService: AuthService, notifierService: NotifierService) {
-    this.notifier = notifierService;
-  }
+  constructor(public router: Router, private formBuilder: FormBuilder, public authService: AuthService, 
+    private readonly notifierService: NotifierService) { }
 
   ngOnInit(): void {
   }
@@ -29,10 +26,10 @@ export class ForgotPasswordPageComponent implements OnInit {
     try {
       const res = await this.authService.resetPassword(this.emailForm.get('email')?.value);
       console.log(res);
-      this.notifier.notify('success', 'Email has been sent!');
+      this.notifierService.notify('success', 'Email has been sent!');
     } catch (error) {
       console.log(error);
-      this.notifier.notify('error', 'Whoops, looks like something went wrong!');
+      this.notifierService.notify('error', 'Whoops, looks like something went wrong!');
     }
   }
 
