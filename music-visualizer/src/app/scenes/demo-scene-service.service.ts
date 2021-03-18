@@ -19,7 +19,7 @@ export class DemoSceneServiceService implements OnDestroy{
   private plane!: THREE.Mesh;
   private plane2!: THREE.Mesh;
 
-  private frameId: any = null;
+  private frameId: number = null;
 
   public ngOnDestroy = (): void => {
     if (this.frameId != null) {
@@ -28,28 +28,32 @@ export class DemoSceneServiceService implements OnDestroy{
   }
 
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
+
     this.scene = new THREE.Scene();
     this.group = new THREE.Group();
     this.canvas = canvas.nativeElement;
-
-    this.camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 50)/(window.innerHeight - 50), 0.1, 1000);
-    this.camera.position.set(0, 0, 100);
-    this.camera.lookAt(this.scene.position);
-    this.scene.add(this.camera);
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
       alpha: true,    // transparent background
       antialias: true // smooth edges
     });
+    this.renderer.setClearColor(0x000000);
 
     this.renderer.setSize(window.innerWidth - 50, window.innerHeight - 50);
     // renderer.shadowMap.enabled = true;
 
+    this.camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 50) / (window.innerHeight - 50), 0.1, 1000);
+    this.camera.position.set(0, 0, 100);
+    this.camera.lookAt(this.scene.position);
+    this.scene.add(this.camera);
+
+
+
 
     const planeGeometry = new THREE.PlaneGeometry(800, 800, 20, 20);
     const planeMaterial = new THREE.MeshLambertMaterial({
-      color: 0x6904ce,
+      color: 0x6904CE,
       side: THREE.DoubleSide,
       wireframe: true
     });
@@ -57,14 +61,14 @@ export class DemoSceneServiceService implements OnDestroy{
     this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
     this.plane.rotation.x = -0.5 * Math.PI;
     this.plane.position.set(0, 30, 0);
-    this.group.add(this.plane);
+    //this.group.add(this.plane);
 
     this.plane2 = new THREE.Mesh(planeGeometry, planeMaterial);
     this.plane2.rotation.x = -0.5 * Math.PI;
     this.plane2.position.set(0, -30, 0);
-    this.group.add(this.plane2);
+    //this.group.add(this.plane2);
 
-    const icosahedronGeometry = new THREE.IcosahedronGeometry(10, 4);
+    const icosahedronGeometry = new THREE.IcosahedronGeometry(10, 10);
     const lambertMaterial = new THREE.MeshLambertMaterial({
       color: 0xff00ee,
       wireframe: true
@@ -100,7 +104,6 @@ export class DemoSceneServiceService implements OnDestroy{
           this.render();
         });
       }
-
       window.addEventListener('resize', () => {
         this.resize();
       });
@@ -115,9 +118,6 @@ export class DemoSceneServiceService implements OnDestroy{
     this.sceneAnimation();
 
     this.renderer.render(this.scene, this.camera);
-    // this.frameId = requestAnimationFrame(() => {
-    //   this.render();
-    // });
   }
 
   sceneAnimation = () => {
@@ -141,17 +141,18 @@ export class DemoSceneServiceService implements OnDestroy{
 
     // console.log(plane.geometry.isBufferGeometry);
     // console.log(plane2.geometry.isBufferGeometry);
-    this.makeRoughGround(this.plane, this.modulate(upperAvgFr, 0, 1, 0.5, 4));
-    this.makeRoughGround(this.plane2, this.modulate(lowerMaxFr, 0, 1, 0.5, 4));
+    //this.makeRoughGround(this.plane, this.modulate(upperAvgFr, 0, 1, 0.5, 4));
+    //this.makeRoughGround(this.plane2, this.modulate(lowerMaxFr, 0, 1, 0.5, 4));
 
     this.makeRoughBall(this.ball, this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(upperAvgFr, 0, 1, 0, 4));
-    // group.rotation.y += 0.005;
+    this.group.rotation.x += 0.001;
+    this.group.rotation.y += 0.001;
 
   }
 
   public resize(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = window.innerWidth - 50;
+    const height = window.innerHeight - 50;
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
@@ -161,27 +162,24 @@ export class DemoSceneServiceService implements OnDestroy{
 
   makeRoughBall = (mesh: any, bassFr: any, treFr: any) => {
     const position = mesh.geometry.attributes.position;
-    //console.log(position);
     const vector = new THREE.Vector3();
     for (let i = 0,  l = position.count; i < l; i++){
       vector.fromBufferAttribute(position, i);
-      vector.applyMatrix4(mesh.matrixWorld);
       const offset = mesh.geometry.parameters.radius;
-      const amp = 7;
+      const amp = 5;
       const time = window.performance.now();
       vector.normalize();
       const rf = 0.00001;
-      const distance = (offset + bassFr ) + this.noise.noise3d((vector.x + time * rf * 7), (vector.y +  time * rf * 8),
-        (vector.z + time * rf * 9)) * amp * treFr;
+      const distance = (offset + bassFr ) + this.noise.noise3d((vector.x + time * rf * 5), (vector.y +  time * rf * 6),
+        (vector.z + time * rf * 7)) * amp * treFr;
       vector.multiplyScalar(distance);
-      //console.log(vector);
       position.setX(i, vector.x);
       position.setY(i, vector.y);
       position.setZ(i, vector.z);
-      mesh.geometry.attributes.position.needsUpdate = true;
-      mesh.geometry.computeVertexNormals();
-      mesh.geometry.computeFaceNormals();
-      mesh.updateMatrix();
+      // mesh.geometry.attributes.position.needsUpdate = true;
+      // mesh.geometry.computeVertexNormals();
+      // mesh.geometry.computeFaceNormals();
+      // mesh.updateMatrix();
     }
     // mesh.geometry.vertices.forEach(function (vertex, i) {
     //     let offset = mesh.geometry.parameters.radius;
@@ -207,7 +205,6 @@ export class DemoSceneServiceService implements OnDestroy{
     const vector = new THREE.Vector3();
     for (let i = 0,  l = position.count; i < l; i++){
       vector.fromBufferAttribute(position, i);
-      vector.applyMatrix4(mesh.matrixWorld);
       // console.log(vector);
       const amp = 1;
       const time = Date.now();
@@ -227,8 +224,8 @@ export class DemoSceneServiceService implements OnDestroy{
     //     vertex.z = distance;
     // });
     mesh.geometry.attributes.position.needsUpdate = true;
-    mesh.geometry.computeVertexNormals();
-    mesh.geometry.computeFaceNormals();
+    // mesh.geometry.computeVertexNormals();
+    // mesh.geometry.computeFaceNormals();
     mesh.updateMatrix();
     // mesh.geometry.verticesNeedUpdate = true;
     // mesh.geometry.normalsNeedUpdate = true;

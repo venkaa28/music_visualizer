@@ -8,7 +8,7 @@
   <p>To go back to the home page <a routerLink="../">click here!</a></p>
   <p>To logout <a href (click)="logout()">click here!</a></p>
   <audio #audioFile id='audio_file' crossorigin="anonymous">
-    <source src="../../../assets/music/RickFlair.mp3" type="audio/mp3" >
+    <source src="../../../assets/music/goodassintro.mp3" type="audio/mp3" >
   </audio>
 <!--  <audio id= "audio_file" src="../../../songs/RickFlair.mp3" crossorigin="anonymous" ></audio>-->
   <div>
@@ -18,7 +18,7 @@
     </button>
 
 <!--    //[(ngModel)]="this.audioService.gainNode.gain.value"-->
-    <input  id= "volume_button" type="range" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
+    <input [(ngModel)]="this.audioService.gainValue" id= "volume_button" type="range" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
     <datalist id="gain-vals">
       <option value="0" label="min">
       <option value="2" label="max">
