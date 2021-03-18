@@ -15,7 +15,8 @@ export class AudioServiceService {
   public analyzer;
   public bufferLength;
   public dataArray;
-  public gainNode: GainNode;
+  public gainNode;
+  public gainValue = 1;
 
   //const playButton = document.getElementById("play_button");
 
@@ -45,11 +46,11 @@ export class AudioServiceService {
     this.track = this.audioCtx.createMediaElementSource(song);
 
     this.gainNode = this.audioCtx.createGain();
-    this.gainNode.gain.value = 1;
-    //  volumeControl = document.getElementById("volume_button");
-    // gainNode.gain.value =
+    this.gainNode.gain.value = 1; //this.gainValue;
+    let volumeControl = document.getElementById("volume_button");
+    //this.gainNode.gain.value = 1;
     // volumeControl.addEventListener('input', () => {
-    //   gainNode.gain.value = volumeControl.;
+    //   this.gainNode.gain.value = volumeControl.getAttribute('value');
     // }, false);
     this.track.connect(this.gainNode);
 
@@ -57,6 +58,7 @@ export class AudioServiceService {
     this.gainNode.connect(this.analyzer);
 
     this.analyzer.connect(this.audioCtx.destination);
+    this.analyzer.smoothingTimeConstant = 0.55;
 
     this.analyzer.fftSize = 512;
     this.bufferLength = this.analyzer.frequencyBinCount;
