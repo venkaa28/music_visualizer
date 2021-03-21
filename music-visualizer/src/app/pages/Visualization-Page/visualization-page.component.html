@@ -18,7 +18,7 @@
     </button>
 
 <!--    //[(ngModel)]="this.audioService.gainNode.gain.value"-->
-    <input [(ngModel)]="this.audioService.gainValue" id= "volume_button" type="range" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
+    <input id= "volume_button" type="range" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
     <datalist id="gain-vals">
       <option value="0" label="min">
       <option value="2" label="max">
