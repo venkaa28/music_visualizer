@@ -62,6 +62,20 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
   }
 
+  async nextSong() {
+    const keys = Object.keys(this.songList);
+    const values = Object.values(this.songList);
+
+    let nextIndex = values.indexOf(this.currentSong) + 1;
+
+    if (nextIndex === keys.length) {
+      nextIndex = 0;
+    }
+
+    this.currentSong = this.songList[keys[nextIndex]];
+    await this.loadSong();
+  }
+
   constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
               public testParticles: TestParticlesService) {
     this.loadList();
