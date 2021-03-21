@@ -51,7 +51,7 @@ export class RegisterPageComponent implements OnInit {
     } else {
       this.authService.signUpUser(this.signUpForm.get('email')?.value, this.signUpForm.get('password')?.value, this.dict)
       .then(async () => {
-        await this.router.navigate(['../../VisualizationPage']);
+        await this.router.navigate(['../../IntroductionPage']);
       }).catch((error) => {
         console.error(error);
         this.notifierService.notify('error', error);
