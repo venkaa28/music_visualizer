@@ -153,7 +153,7 @@ export class AudioServiceService {
     this.dataArray = new Uint8Array(this.bufferLength);
     //console.log(this.dataArray);
 
-    // volume change
+    //volume change
     var copy = this.gainNode; // can't use this.gainNode in change function
     const volumeControl = document.querySelector('[data-action="volume"]');
     volumeControl.addEventListener('input', function() {
