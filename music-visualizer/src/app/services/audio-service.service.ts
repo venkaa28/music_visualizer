@@ -119,6 +119,12 @@ export class AudioServiceService {
     //this.setAttribute('aria-checked', state ? "false" : "true");
 
   }
+
+  async rewind(){
+    this.audioElement.currentTime = 0;
+  }
+
+
   loadSong = (song: HTMLMediaElement) => {
     this.audioElement = song;
     this.audioCtx = new AudioContext();
@@ -152,7 +158,7 @@ export class AudioServiceService {
 
     const pannerControl = document.querySelector('[data-action="panner"]');
     pannerControl.addEventListener('input', function() {
-      panner.pan.value = this.value;	
+      panner.pan.value = this.value;
     }, false);
 
     // connect each component
