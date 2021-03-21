@@ -7,15 +7,14 @@
   <p>For a bad link <a routerLink="badLink">click here!</a></p>
   <p>To go back to the home page <a routerLink="../">click here!</a></p>
   <p>To logout <a href (click)="logout()">click here!</a></p>
-  <button (click)="loadSong()">Load</button>
-  <button (click)="reset()">Reset</button>
+  <button (click)="switchSong()">Switch</button><br>
 
   <label for="uploadFile">Choose a .mp3 file to upload:</label>
   <br>
   <input type="file" id="uploadFile" name="uploadFile" (change)="upload($event.target)" accept=".mp3">
 
   <audio #audioFile id='audio_file' crossorigin="anonymous">
-    <source src={{this.current.filepath}} type="audio/mp3" >
+    <source id="audio_source" type="audio/mp3" >
   </audio>
 <!--  <audio id= "audio_file" src="../../../songs/RickFlair.mp3" crossorigin="anonymous" ></audio>-->
   <div>
