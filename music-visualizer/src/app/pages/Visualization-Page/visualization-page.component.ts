@@ -44,10 +44,12 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   async loadSong(): Promise<string> {
-    this.current = await this.audioService.getSong(this.currentSong);
-    this.audio.src = this.current.filepath
-    this.audio.crossOrigin = 'anonymous'
-    this.audioService.loadSong(this.audio);
+    //this.current = await this.audioService.getSong(this.currentSong);
+    this.current = new Music();
+    this.current.filepath = 'music-visualizer/src/assets/music/juice.mp3';
+    this.audioFile.nativeElement.src = 'music-visualizer/src/assets/music/juice.mp3' ;//this.current.filepath;
+    this.audioFile.nativeElement.crossOrigin = 'anonymous';
+    this.audioService.loadSong(this.audioFile.nativeElement);
     return this.current.filepath;
   }
 
@@ -84,14 +86,15 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement;
+    //this.audio.src = 'music-visualizer/src/assets/music/juice.mp3';
     // this.engServ.createScene(this.rendererCanvas);
     //     this.engServ.animate();
 
     this.audioService.loadSong(this.audio);
-   // this.demoScene.createScene(this.rendererCanvas);
-   //  this.demoScene.animate();
-    this.testParticles.createScene(this.rendererCanvas);
-    this.testParticles.animate();
+   this.demoScene.createScene(this.rendererCanvas);
+    this.demoScene.animate();
+    // this.testParticles.createScene(this.rendererCanvas);
+    // this.testParticles.animate();
 
 
   }
