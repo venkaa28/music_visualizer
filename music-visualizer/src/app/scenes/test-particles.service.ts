@@ -120,7 +120,7 @@ export class TestParticlesService {
     const upperMaxFr = upperMax / upperHalfArray.length;
     const upperAvgFr = upperAvg / upperHalfArray.length;
 
-    this.makeRoughBall(this.particles, this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(upperAvgFr, 0, 1, 0, 4));
+    this.makeRoughBall(this.particles, this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 4), this.modulate(upperAvgFr, 0, 1, 0, 4));
     this.particles.rotation.x += 0.01;
     //this.particles.rotation.y += 0.01;
     //this.particles.rotation.z += 0.01;
