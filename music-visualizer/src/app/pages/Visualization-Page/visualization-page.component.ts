@@ -1,22 +1,41 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router'
-import { AuthService } from '../../services/auth.service'
+import {AfterContentInit, AfterViewInit, Component, ContentChild, ElementRef, OnInit, ViewChild} from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
+import {AudioServiceService} from '../../services/audio-service.service';
+import {TestParticlesService} from '../../scenes/test-particles.service';
 
 @Component({
   selector: 'app-visualization-page',
   templateUrl: './visualization-page.component.html',
   styleUrls: ['./visualization-page.component.css']
 })
-export class VisualizationPageComponent implements OnInit {
+export class VisualizationPageComponent implements AfterViewInit {
+
+  @ViewChild('rendererCanvas', {static: true})
+  public rendererCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('audioFile', {read: ElementRef})
+  public   audioFile!: ElementRef<HTMLMediaElement>;
 
   async logout() {
     await this.authService.logOutUser();
     await this.router.navigate(['../']);
   }
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
+              public testParticles: TestParticlesService) { }
 
-  ngOnInit(): void {
+  ngAfterViewInit(): void {
+    // this.engServ.createScene(this.rendererCanvas);
+    //     this.engServ.animate();
+    this.audioService.loadSong(this.audioFile.nativeElement);
+   // this.demoScene.createScene(this.rendererCanvas);
+   //  this.demoScene.animate();
+    this.testParticles.createScene(this.rendererCanvas);
+    this.testParticles.animate();
+
+
   }
+
 
 }

@@ -12,11 +12,16 @@ import { ForgotPasswordPageComponent } from './pages/Forgot-Password-Page/forgot
 import { RegisterPageComponent } from './pages/Register-Page/register-page.component';
 import { NotFoundPageComponent } from './pages/Not-Found-Page/not-found-page.component';
 import { LoggedInGuard } from './guards/logged-in.guard';
+import { AboutPageComponent } from './pages/About-Page/about-page.component';
 
 const routes: Routes = [
   {
     path: '',
     component: HomePageComponent
+  },
+  {
+    path: 'AboutPage',
+    component: AboutPageComponent
   },
   {
     path: 'RegisterPage',
@@ -38,6 +43,7 @@ const routes: Routes = [
   },
   {
     path: 'IntroductionPage',
+    canActivate: [UserAuthGuard],
     component: IntroductionPageComponent
   },
   {
