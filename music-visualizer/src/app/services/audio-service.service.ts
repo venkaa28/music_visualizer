@@ -39,7 +39,6 @@ export class AudioServiceService {
     //this.setAttribute('aria-checked', state ? "false" : "true");
 
   }
-
   loadSong = (song: HTMLMediaElement) => {
     this.audioElement = song;
     this.audioCtx = new AudioContext();
@@ -47,7 +46,6 @@ export class AudioServiceService {
 
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 1; //this.gainValue;
-    let volumeControl = document.getElementById("volume_button");
     //this.gainNode.gain.value = 1;
     // volumeControl.addEventListener('input', () => {
     //   this.gainNode.gain.value = volumeControl.getAttribute('value');
@@ -64,6 +62,11 @@ export class AudioServiceService {
     this.bufferLength = this.analyzer.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
     //console.log(this.dataArray);
+    var copy = this.gainNode;
+    const volumeControl = document.querySelector('[data-action="volume"]');
+    volumeControl.addEventListener('input', function() {
+      copy.gain.value = this.value;
+    }, false);
   }
 
   constructor() {
