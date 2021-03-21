@@ -5,6 +5,10 @@ import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
 import {AudioServiceService} from '../../services/audio-service.service';
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {Music} from '../../classes/music'
+import { Firebase } from 'src/app/classes/firebase';
+import { FirebaseApp } from '@angular/fire';
+
+type Dict = {[key: string]: any};
 
 @Component({
   selector: 'app-visualization-page',
@@ -18,8 +22,11 @@ export class VisualizationPageComponent implements AfterViewInit {
   @ViewChild('audioFile', {read: ElementRef})
   public   audioFile!: ElementRef<HTMLMediaElement>;
 
-  private currentSong: string = '16162673685204487';
+  public audio: HTMLAudioElement;
+
+  private currentSong: string = '16162754104549215';
   public current: Music = new Music();
+  private songList: Dict;
 
   async logout() {
     await this.authService.logOutUser();
@@ -31,24 +38,42 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.upload(file.files[0]);
   }
 
+  async loadList() {
+    this.songList = await this.audioService.getSongList();
+    console.log(this.songList);
+  }
+
   async loadSong(): Promise<string> {
     this.current = await this.audioService.getSong(this.currentSong);
+    this.audio.src = this.current.filepath
+    this.audio.crossOrigin = 'anonymous'
+    this.audioService.loadSong(this.audio);
     return this.current.filepath;
   }
 
-  reset() {
-    this.audioService.loadSong(this.audioFile.nativeElement);
-    this.testParticles.animate();
+  async switchSong() {
+    for (var key in this.songList) {
+      console.log(key + ':: ' + this.songList[key] + ':: ' + this.currentSong);
+      if (this.songList[key] !== this.currentSong) {
+        this.currentSong = this.songList[key];
+        await this.loadSong();
+        break;
+      }
+    }
   }
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
               public testParticles: TestParticlesService) {
+    this.loadList();
+    this.loadSong();
   }
 
   ngAfterViewInit(): void {
+    this.audio = this.audioFile.nativeElement;
     // this.engServ.createScene(this.rendererCanvas);
     //     this.engServ.animate();
-    this.audioService.loadSong(this.audioFile.nativeElement);
+
+    this.audioService.loadSong(this.audio);
    // this.demoScene.createScene(this.rendererCanvas);
    //  this.demoScene.animate();
     this.testParticles.createScene(this.rendererCanvas);
