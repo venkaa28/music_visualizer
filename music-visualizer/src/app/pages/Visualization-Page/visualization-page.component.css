@@ -3,3 +3,21 @@ H1 {
   text-align: center;
   margin: 50px;
 }
+
+#canvasButtons {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+#renderCanvas {
+  position: relative;
+}
+
+#controls {
+  color: white;
+  position: absolute;
+  margin: auto;
+  left: 32%;
+  top: 90%;
+}
