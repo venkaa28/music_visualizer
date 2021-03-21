@@ -102,22 +102,30 @@ export class AudioServiceService {
     return dict;
   }
 
-  async play(){
-    console.log(this.playing);
-    if (this.audioCtx.state === 'suspended'){
-      await this.audioCtx.resume();
-    }
+  async playOrPause(){
     if(this.playing === false){
-      await this.audioElement.play();
-      this.playing = true;
+      this.play();
 
-    }else if (this.playing === true) {
-      await this.audioElement.pause();
-      this.playing = false;
+    }else  {
+      this.pause()
     }
     //const state = this.getAttribute('aria-checked') === "true";
     //this.setAttribute('aria-checked', state ? "false" : "true");
 
+  }
+
+  async play(){
+    if (this.audioCtx.state === 'suspended'){
+      await this.audioCtx.resume();
+    }
+
+    await this.audioElement.play();
+    this.playing = true;
+  }
+
+  async pause(){
+    await this.audioElement.pause();
+    this.playing = false;
   }
 
   async rewind(){
