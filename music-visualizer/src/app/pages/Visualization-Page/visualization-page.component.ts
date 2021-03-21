@@ -51,8 +51,8 @@ export class VisualizationPageComponent implements AfterViewInit {
     return this.current.filepath;
   }
 
-  async playSong() {
-    this.audioService.play();
+  async playOrPauseSong() {
+    this.audioService.playOrPause();
   }
 
   async nextSong() {
@@ -67,11 +67,13 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.currentSong = this.songList[keys[nextIndex]];
     await this.loadSong();
+
     this.audioService.play();
   }
 
   async rewindSong() {
     this.audioService.rewind();
+    this.audioService.play();
   }
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,

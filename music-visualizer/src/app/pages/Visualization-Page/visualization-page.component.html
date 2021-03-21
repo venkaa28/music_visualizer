@@ -18,7 +18,7 @@
 <!--  <audio id= "audio_file" src="../../../songs/RickFlair.mp3" crossorigin="anonymous" ></audio>-->
   <div>
     <canvas #rendererCanvas id="renderCanvas"></canvas>
-    <button (click)="playSong()" id="play_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
+    <button (click)="playOrPauseSong()" id="play_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
       <span>Play/Pause</span>
     </button>
     <button (click)="nextSong()" id="next_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
