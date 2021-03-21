@@ -1,6 +1,7 @@
 import {Exception} from './exception';
 
 export class Music {
+  name: string;
   source: string;
   metadata: JSON;
   // what's the data type of a music file?
@@ -8,6 +9,7 @@ export class Music {
   uploadEmail: string;
   isPublic: boolean;
   exception: Exception;
+  filepath: string;
 
   constructor() {
     this.source = '';
