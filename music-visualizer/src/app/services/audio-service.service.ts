@@ -46,10 +46,6 @@ export class AudioServiceService {
 
     this.gainNode = this.audioCtx.createGain();
     this.gainNode.gain.value = 1; //this.gainValue;
-    //this.gainNode.gain.value = 1;
-    // volumeControl.addEventListener('input', () => {
-    //   this.gainNode.gain.value = volumeControl.getAttribute('value');
-    // }, false);
     this.track.connect(this.gainNode);
 
     this.analyzer = this.audioCtx.createAnalyser();
@@ -62,7 +58,9 @@ export class AudioServiceService {
     this.bufferLength = this.analyzer.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
     //console.log(this.dataArray);
-    var copy = this.gainNode;
+
+    // volume change
+    var copy = this.gainNode; // can't use this.gainNode in change function
     const volumeControl = document.querySelector('[data-action="volume"]');
     volumeControl.addEventListener('input', function() {
       copy.gain.value = this.value;
