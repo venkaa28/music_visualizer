@@ -20,7 +20,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   @ViewChild('rendererCanvas', {static: true})
   public rendererCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('audioFile', {read: ElementRef})
-  public   audioFile!: ElementRef<HTMLMediaElement>;
+  public audioFile!: ElementRef<HTMLMediaElement>;
 
   public audio: HTMLAudioElement;
 
@@ -44,12 +44,23 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   async loadSong(): Promise<string> {
-    //this.current = await this.audioService.getSong(this.currentSong);
+    this.current = await this.audioService.getSong(this.currentSong);
+    this.audio.src = this.current.filepath;
+    this.audio.crossOrigin = 'anonymous';
+    this.audioService.loadSong(this.audio);
+    return this.current.filepath;
+  }
+
+  loadFilePath() {
     this.current = new Music();
-    this.current.filepath = 'music-visualizer/src/assets/music/juice.mp3';
-    this.audioFile.nativeElement.src = 'music-visualizer/src/assets/music/juice.mp3' ;//this.current.filepath;
-    this.audioFile.nativeElement.crossOrigin = 'anonymous';
-    this.audioService.loadSong(this.audioFile.nativeElement);
+    this.current.filepath = '../../../assets/music/goodassintro.mp3';
+    this.current.isPublic = true;
+    this.current.name = 'test';
+    this.current.source = 'local';
+    this.current.uploadEmail = this.authService.getUser().email;
+
+    this.audio.src = this.current.filepath;
+    this.audioService.loadSong(this.audio);
     return this.current.filepath;
   }
 
@@ -78,6 +89,26 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.play();
   }
 
+  playPauseIcon() {
+    if (typeof this.audio === 'undefined') {
+      return 'fa fa-play';;
+    }
+
+    if (this.audio.paused) {
+      return 'fa fa-play';
+    }
+
+    return 'fa fa-pause';
+  }
+
+  changeSmooth(input) {
+    this.audioService.smoothConstant = input.srcElement.value;
+  }
+
+  test() {
+    console.log(this.audioService.smoothConstant);
+  }
+
   constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
               public testParticles: TestParticlesService) {
     this.loadList();
@@ -91,7 +122,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     //     this.engServ.animate();
 
     this.audioService.loadSong(this.audio);
-   this.demoScene.createScene(this.rendererCanvas);
+    this.demoScene.createScene(this.rendererCanvas);
     this.demoScene.animate();
     // this.testParticles.createScene(this.rendererCanvas);
     // this.testParticles.animate();
