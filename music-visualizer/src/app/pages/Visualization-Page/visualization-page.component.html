@@ -22,6 +22,12 @@
     <button (click)="this.audioService.play()" id="play_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
       <span>Play/Pause</span>
     </button>
+    <button (click)="this.audioService.play()" id="next_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
+      <span>Next</span>
+    </button>
+    <button (click)="this.audioService.play()" id="rewind_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
+      <span>Rewind</span>
+    </button>
 
 <!--    //[(ngModel)]="this.audioService.gainNode.gain.value"-->
     <input [(ngModel)]="this.audioService.gainValue" id= "volume_button" type="range" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
