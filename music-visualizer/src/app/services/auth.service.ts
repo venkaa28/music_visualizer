@@ -1,10 +1,7 @@
-import {Injectable, NgZone} from '@angular/core';
-import {Router} from '@angular/router';
+import {Injectable} from '@angular/core';
 
 import firebase from 'firebase';
 import {AngularFireAuth} from '@angular/fire/auth';
-import {AngularFirestore} from '@angular/fire/firestore';
-import {AngularFireDatabase} from '@angular/fire/database';
 
 import {User} from '../classes/user';
 import { CookieService } from 'ngx-cookie-service';
@@ -17,14 +14,13 @@ type Dict = {[key: string]: any};
 export class AuthService {
   private userData: User;
 
-  constructor(public ngFireAuth: AngularFireAuth, public afStore: AngularFirestore, public router: Router, public ngZone: NgZone,
-              public afDB: AngularFireDatabase, private cookieService: CookieService) {
+  constructor(public ngFireAuth: AngularFireAuth, private cookieService: CookieService) {
     this.userData = new User();
   }
 
   async loginUser(email: string, password: string): Promise<void> {
     await this.ngFireAuth.signInWithEmailAndPassword(email, password).catch((error) => {
-      console.log(error);  
+      console.log(error);
       this.cookieService.deleteAll();
       throw error;
     })
