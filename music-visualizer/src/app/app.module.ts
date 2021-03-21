@@ -31,6 +31,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {DoBootstrap} from "@angular/core";
+import {AudioServiceService} from './services/audio-service.service';
 
 @NgModule({
   declarations: [
@@ -64,7 +65,7 @@ import {DoBootstrap} from "@angular/core";
     ReactiveFormsModule
 
   ],
-  providers: [],
+  providers: [AudioServiceService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
