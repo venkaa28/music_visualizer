@@ -25,6 +25,7 @@ export class AudioServiceService {
   public dataArray: Uint8Array;
   public gainNode: GainNode;
   public gainValue = 1;
+  public smoothConstant = 0.55;
 
   //const playButton = document.getElementById("play_button");
 
@@ -106,7 +107,7 @@ export class AudioServiceService {
     if(this.playing === false){
       this.play();
 
-    }else  {
+    } else {
       this.pause()
     }
     //const state = this.getAttribute('aria-checked') === "true";
@@ -146,7 +147,8 @@ export class AudioServiceService {
     this.gainNode.connect(this.analyzer);
 
     this.analyzer.connect(this.audioCtx.destination);
-    this.analyzer.smoothingTimeConstant = 0.55;
+    this.analyzer.smoothingTimeConstant = this.smoothConstant;
+    console.log(this.analyzer.smoothingTimeConstant);
 
     this.analyzer.fftSize = 512;
     this.bufferLength = this.analyzer.frequencyBinCount;
