@@ -145,5 +145,17 @@ export class AudioServiceService {
     volumeControl.addEventListener('input', function() {
       copy.gain.value = this.value;
     }, false);
+
+    // pan
+    const pannerOptions = {pan: 0};
+    const panner = new StereoPannerNode(this.audioCtx, pannerOptions);
+
+    const pannerControl = document.querySelector('[data-action="panner"]');
+    pannerControl.addEventListener('input', function() {
+      panner.pan.value = this.value;	
+    }, false);
+
+    // connect each component
+    this.track.connect(this.gainNode).connect(panner).connect(this.audioCtx.destination);
   }
 }
