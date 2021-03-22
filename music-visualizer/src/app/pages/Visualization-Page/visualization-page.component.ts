@@ -5,6 +5,7 @@ import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
 import {AudioServiceService} from '../../services/audio-service.service';
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {Music} from '../../classes/music'
+import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
 import { Firebase } from 'src/app/classes/firebase';
 import { FirebaseApp } from '@angular/fire';
 import { fileURLToPath } from 'url';
@@ -124,12 +125,13 @@ export class VisualizationPageComponent implements AfterViewInit {
   changeFFT(input) {
     var time = this.audioService.audioElement.currentTime;
     this.audioService.fftSize = Math.pow(2, input.value);
+    console.log(Math.pow(2, input.value));
     this.audioService.reloadSong();
     this.audioService.audioElement.currentTime = time;
   }
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
-              public testParticles: TestParticlesService) {
+              public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService) {
     this.loadList();
     this.loadSong();
   }
@@ -157,7 +159,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     var secondsTotal = time;
     var outputTime: string = "";
-    
+
     if (secondsTotal > 60) {
       outputTime += Math.floor(secondsTotal/60);
       secondsTotal = secondsTotal % 60;
@@ -166,11 +168,11 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
 
     outputTime += ':';
-    
+
     if (secondsTotal < 10) {
       outputTime += '0';
     }
-    
+
     outputTime += secondsTotal;
 
     return outputTime;
@@ -188,10 +190,12 @@ export class VisualizationPageComponent implements AfterViewInit {
     //     this.engServ.animate();
 
     this.audioService.loadSong(this.audio);
-    this.demoScene.createScene(this.rendererCanvas);
-    this.demoScene.animate();
+    // this.demoScene.createScene(this.rendererCanvas);
+    // this.demoScene.animate();
     // this.testParticles.createScene(this.rendererCanvas);
     // this.testParticles.animate();
+    this.planeScene.createScene(this.rendererCanvas);
+    this.planeScene.animate();
 
 
   }
