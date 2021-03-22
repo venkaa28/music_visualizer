@@ -28,8 +28,11 @@ H1 {
   color: white;
   position: absolute;
   margin: auto;
-  left: 32%;
-  top: 85%;
+  display: flexbox;
+  flex-direction: column;
+  left: 38%;
+  top: 80%;
+  align-items: center;
 }
 
 button {
@@ -53,4 +56,8 @@ input[type=range] {
   border-radius: 5px;
   height: 15px;
   background-color: white;
+}
+
+#progress {
+  width: 700px;
 }

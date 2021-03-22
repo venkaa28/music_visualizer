@@ -7,6 +7,7 @@ import {TestParticlesService} from '../../scenes/test-particles.service';
 import {Music} from '../../classes/music'
 import { Firebase } from 'src/app/classes/firebase';
 import { FirebaseApp } from '@angular/fire';
+import { fileURLToPath } from 'url';
 
 type Dict = {[key: string]: any};
 
@@ -44,28 +45,28 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   async loadSong(): Promise<string> {
-    this.current = await this.audioService.getSong(this.currentSong);
+    this.current = await this.audioService.getRemoteSong(this.currentSong);
     this.audio.src = this.current.filepath;
     this.audio.crossOrigin = 'anonymous';
     this.audioService.loadSong(this.audio);
+    this.changeVolume({'value': 0.5});
     return this.current.filepath;
   }
 
-  loadFilePath() {
+  loadFilePath(event: any) {
+    var file = event as HTMLInputElement;
+
     this.current = new Music();
-    this.current.filepath = '../../../assets/music/goodassintro.mp3';
+    this.current.filepath = URL.createObjectURL(file.files[0]);;
     this.current.isPublic = true;
     this.current.name = 'test';
     this.current.source = 'local';
     this.current.uploadEmail = this.authService.getUser().email;
 
     this.audio.src = this.current.filepath;
+    this.audioService.gainNode.gain.value = 0;
     this.audioService.loadSong(this.audio);
     return this.current.filepath;
-  }
-
-  async playOrPauseSong() {
-    this.audioService.playOrPause();
   }
 
   async nextSong() {
@@ -79,14 +80,21 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
 
     this.currentSong = this.songList[keys[nextIndex]];
-    await this.loadSong();
-
-    this.audioService.play();
+    await this.loadSong().then(() => this.audioService.play());
   }
 
   async rewindSong() {
-    this.audioService.rewind();
-    this.audioService.play();
+    const keys = Object.keys(this.songList);
+    const values = Object.values(this.songList);
+
+    let nextIndex = values.indexOf(this.currentSong) - 1;
+
+    if (nextIndex === -1) {
+      nextIndex = keys.length - 1;
+    }
+
+    this.currentSong = this.songList[keys[nextIndex]];
+    await this.loadSong().then(() => this.audioService.play());
   }
 
   playPauseIcon() {
@@ -101,18 +109,76 @@ export class VisualizationPageComponent implements AfterViewInit {
     return 'fa fa-pause';
   }
 
-  changeSmooth(input) {
-    this.audioService.smoothConstant = input.srcElement.value;
+  changeVolume(input) {
+    console.log(input.value);
+    this.audioService.gainNode.gain.value = input.value;
   }
 
-  test() {
-    console.log(this.audioService.smoothConstant);
+  changeSmooth(input) {
+    var time = this.audioService.audioElement.currentTime;
+    this.audioService.smoothConstant = input.value;
+    this.audioService.reloadSong();
+    this.audioService.audioElement.currentTime = time;
+  }
+
+  changeFFT(input) {
+    var time = this.audioService.audioElement.currentTime;
+    this.audioService.fftSize = Math.pow(2, input.value);
+    this.audioService.reloadSong();
+    this.audioService.audioElement.currentTime = time;
   }
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
               public testParticles: TestParticlesService) {
     this.loadList();
     this.loadSong();
+  }
+
+  duration() {
+    if (typeof this.audioService.audioElement === "undefined") {
+      return 0;
+    }
+
+    return Math.floor(this.audioService.audioElement.duration);
+  }
+
+  progress() {
+    if (typeof this.audioService.audioElement === "undefined") {
+      return 0;
+    }
+
+    return Math.floor(this.audioService.audioElement.currentTime);
+  }
+
+  timeString(time: number) {
+    if (typeof this.audioService.audioElement === "undefined") {
+      return 'NaN';
+    }
+
+    var secondsTotal = time;
+    var outputTime: string = "";
+    
+    if (secondsTotal > 60) {
+      outputTime += Math.floor(secondsTotal/60);
+      secondsTotal = secondsTotal % 60;
+    } else {
+      outputTime += '0';
+    }
+
+    outputTime += ':';
+    
+    if (secondsTotal < 10) {
+      outputTime += '0';
+    }
+    
+    outputTime += secondsTotal;
+
+    return outputTime;
+  }
+
+  changeTime(input) {
+    this.audioService.audioElement.currentTime = input.value;
+    console.log("Fire");
   }
 
   ngAfterViewInit(): void {
