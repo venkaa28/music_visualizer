@@ -9,10 +9,16 @@
   <p>To go back to the home page <a routerLink="../">click here!</a></p>
   <p>To logout <a href (click)="logout()">click here!</a></p>
   <p><a routerLink="../ProfilePage"> Profile Page Button </a></p>
-  <button (click)="loadFilePath()">Test</button>
+
+  <label for="loadFile">Choose a file to visualize: </label>
+  <br>
+  <input type="file" id="uploadFile" name="uploadFile" (change)="loadFilePath($event.target)" accept=".mp3">
+
+  <!-- 
   <label for="uploadFile">Choose a .mp3 file to upload:</label>
   <br>
   <input type="file" id="uploadFile" name="uploadFile" (change)="upload($event.target)" accept=".mp3">
+  -->
 
   <audio #audioFile id='audio_file' crossorigin="anonymous">
     <source src="../../../assets/music/tripleT.mp3" id="audio_source" type="audio/mp3" >
@@ -27,19 +33,16 @@
       <button (click)="rewindSong()" id="rewind_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
         <i class="fa fa-backward"></i>
       </button>
-      <button (click)="playOrPauseSong()" id="play_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
+      <button (click)="this.audioService.playOrPause()" id="play_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
         <i class={{playPauseIcon()}}></i>
       </button>
       <button (click)="nextSong()" id="next_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
         <i class="fa fa-forward"></i>
       </button>
+      <br>
 
   <!--    //[(ngModel)]="this.audioService.gainNode.gain.value"-->
-      <input id= "volume_button" type="range" class="control-volume" min="0" max="2" value="1" list="gain-vals" step="0.01" data-action="volume" />
-      <datalist id="gain-vals">
-        <option value="0" label="min">
-        <option value="2" label="max">
-      </datalist>
+      <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
       <label for="volume_button">VOL</label>
 
       <input type="range" id="panner" class="control-panner" list="pan-vals" min="-1" max="1" value="0" step="0.01" data-action="panner" />
@@ -48,7 +51,19 @@
           <option value="1" label="right">
         </datalist>
         <label for="panner">PAN</label>
-      <input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.5" (input)="changeSmooth($event)">
+      <br>
+
+      <input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.5" (change)="changeSmooth($event.srcElement)">
+      <label>SSC</label>
+      <input id="fft" type="range" min="5" max="15" step="1" value="9" (change)="changeFFT($event.srcElement)">
+      <label>FTT</label>
+      <br>
+
+      <p>
+        {{timeString(progress())}}
+        <input id="progress" type="range" min="0" max={{duration()}} step="1" value={{progress()}} (change)="changeTime($event.srcElement)">
+        {{timeString(duration())}}
+      </p>
     </div>
   </div>
 </body>

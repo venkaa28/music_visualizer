@@ -24,15 +24,13 @@ export class AudioServiceService {
   public bufferLength: number;
   public dataArray: Uint8Array;
   public gainNode: GainNode;
-  public gainValue = 1;
   public smoothConstant = 0.55;
-
-  //const playButton = document.getElementById("play_button");
-
-  public playing:boolean = false;
+  public fftSize = 512;
 
   constructor(private authService: AuthService) {
-    firebase.initializeApp(firebaseConfig);
+    if (firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfig);
+    }
   }
 
   async upload(file: File): Promise<void> {
@@ -55,7 +53,7 @@ export class AudioServiceService {
       throw error;
     });
 
-    var dict = {
+    var dict: Dict = {
       'name': file.name,
       'uploadEmail': this.authService.getUser().email,
       'public': true
@@ -67,7 +65,7 @@ export class AudioServiceService {
     });
   }
 
-  async getSong(uid: string): Promise<Music> {
+  async getRemoteSong(uid: string): Promise<Music> {
     var music: Music = new Music();
 
     await firebase.database().ref('music').child(uid).on('value', async (snapshot) => {
@@ -84,6 +82,8 @@ export class AudioServiceService {
       music.filepath = url;
       console.log(url);
     });
+
+    this.gainNode.gain.value = 0;
 
     return music;
   }
@@ -104,15 +104,11 @@ export class AudioServiceService {
   }
 
   async playOrPause(){
-    if(this.playing === false){
+    if(this.audioElement.paused === true){
       this.play();
-
     } else {
-      this.pause()
+      this.pause();
     }
-    //const state = this.getAttribute('aria-checked') === "true";
-    //this.setAttribute('aria-checked', state ? "false" : "true");
-
   }
 
   async play(){
@@ -121,18 +117,22 @@ export class AudioServiceService {
     }
 
     await this.audioElement.play();
-    this.playing = true;
   }
 
   async pause(){
     await this.audioElement.pause();
-    this.playing = false;
   }
 
   async rewind(){
     this.audioElement.currentTime = 0;
   }
 
+  reloadSong() {
+    this.analyzer = this.audioCtx.createAnalyser();
+    this.analyzer.smoothingTimeConstant = this.smoothConstant;
+    this.analyzer.fftSize = this.fftSize;
+    this.track.connect(this.analyzer);
+  }
 
   loadSong = (song: HTMLMediaElement) => {
     this.audioElement = song;
@@ -140,7 +140,7 @@ export class AudioServiceService {
     this.track = this.audioCtx.createMediaElementSource(song);
 
     this.gainNode = this.audioCtx.createGain();
-    this.gainNode.gain.value = 1; //this.gainValue;
+    this.gainNode.gain.value = 0; //this.gainValue;
     this.track.connect(this.gainNode);
 
     this.analyzer = this.audioCtx.createAnalyser();
@@ -148,19 +148,10 @@ export class AudioServiceService {
 
     this.analyzer.connect(this.audioCtx.destination);
     this.analyzer.smoothingTimeConstant = this.smoothConstant;
-    console.log(this.analyzer.smoothingTimeConstant);
 
-    this.analyzer.fftSize = 512;
+    this.analyzer.fftSize = this.fftSize;
     this.bufferLength = this.analyzer.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
-    //console.log(this.dataArray);
-
-    //volume change
-    var copy = this.gainNode; // can't use this.gainNode in change function
-    const volumeControl = document.querySelector('[data-action="volume"]');
-    volumeControl.addEventListener('input', function() {
-      copy.gain.value = this.value;
-    }, false);
 
     // pan
     const pannerOptions = {pan: 0};
