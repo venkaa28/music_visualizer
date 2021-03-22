@@ -14,7 +14,7 @@
   <br>
   <input type="file" id="uploadFile" name="uploadFile" (change)="loadFilePath($event.target)" accept=".mp3">
 
-  <!-- 
+  <!--
   <label for="uploadFile">Choose a .mp3 file to upload:</label>
   <br>
   <input type="file" id="uploadFile" name="uploadFile" (change)="upload($event.target)" accept=".mp3">
@@ -53,11 +53,11 @@
         <label for="panner">PAN</label>
       <br>
 
-      <input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.5" (change)="changeSmooth($event.srcElement)">
-      <label>SSC</label>
-      <input id="fft" type="range" min="5" max="15" step="1" value="9" (change)="changeFFT($event.srcElement)">
-      <label>FTT</label>
-      <br>
+<!--      <input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.5" (change)="changeSmooth($event.srcElement)">-->
+<!--      <label>SSC</label>-->
+<!--      <input id="fft" type="range" min="5" max="12" step="1" value="9" (change)="changeFFT($event.srcElement)">-->
+<!--      <label>FTT</label>-->
+<!--      <br>-->
 
       <p>
         {{timeString(progress())}}
