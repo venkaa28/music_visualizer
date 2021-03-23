@@ -57,7 +57,7 @@ export class PlaneSceneServiceService {
     this.scene.add(this.camera);
 
 
-    const planeGeometry = new THREE.PlaneGeometry(800, 800, 128, 128);
+    const planeGeometry = new THREE.PlaneGeometry(800, 800, 128);
     const planeMaterial = new THREE.MeshLambertMaterial({
       color: 0xFFFFFF,
       side: THREE.DoubleSide,
@@ -141,11 +141,11 @@ export class PlaneSceneServiceService {
 
     // console.log(position);
     const vector = new THREE.Vector3();
-    for (let i = 0,  l = position.count/2; i < l; i++){
+    for (let i = 0,  l = position.count; i < l; i++){
       vector.fromBufferAttribute(position, i);
       //const time = window.performance.now();
-      const scalor = this.modulate(lowerHalfFrequncyData[i%128], 0, 255, 1, 8);
-      const distance  = -1* lowerHalfFrequncyData[i%128] + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
+      const scalor = this.modulate(lowerHalfFrequncyData[i % 128], 0, 255, 1, 8);
+      const distance  = -1 * lowerHalfFrequncyData[i % 128] + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
       position.setZ(i, distance);
       // if (i <= ((position.count / 3) - 1)){
       //   const distance = (lowFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
