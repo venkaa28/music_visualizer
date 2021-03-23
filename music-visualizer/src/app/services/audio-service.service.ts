@@ -151,6 +151,7 @@ export class AudioServiceService {
 
     this.analyzer.fftSize = this.fftSize;
     this.bufferLength = this.analyzer.frequencyBinCount;
+    console.log(this.bufferLength);
     this.dataArray = new Uint8Array(this.bufferLength);
 
     // pan
