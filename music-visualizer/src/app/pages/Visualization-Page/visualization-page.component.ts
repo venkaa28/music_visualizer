@@ -152,6 +152,9 @@ export class VisualizationPageComponent implements AfterViewInit {
     if (typeof this.audioService.audioElement === "undefined") {
       return 0;
     }
+    
+    var bar = document.getElementById('progress-bar') as HTMLDivElement;
+    bar.style.width = (this.audioService.audioElement.currentTime / this.audioService.audioElement.duration * 100).toString() + '%';
 
     return Math.floor(this.audioService.audioElement.currentTime);
   }
@@ -200,7 +203,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     // this.testParticles.animate();
     this.planeScene.createScene(this.rendererCanvas);
     this.planeScene.animate();
-
 
   }
 }

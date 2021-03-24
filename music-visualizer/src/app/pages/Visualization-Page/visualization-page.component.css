@@ -1,15 +1,5 @@
-html {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-}
-
 H1 {
   text-align: center;
-}
-
-*:focus {
-  outline:none
 }
 
 #canvasButtons {
@@ -31,7 +21,7 @@ H1 {
 #controls {
   color: white;
   position: absolute;
-  margin: auto;
+  margin: 0;
   width: 100%;
   align-items: center;
 }
@@ -41,6 +31,7 @@ button {
   display: inline-block;
   align-items: center;
   outline: none;
+  border: none;
   color: white;
   background-color: rgba(0, 0, 0, 0);
 }
@@ -55,7 +46,7 @@ input[type=range] {
   -webkit-appearance: none;
   margin: 0;
   border-radius: 5px;
-  height: 15px;
+  height: 5px;
   background-color: white;
 }
 
