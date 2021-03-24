@@ -14,8 +14,8 @@ export class TestParticlesService {
   private scene!: THREE.Scene;
   private group!: THREE.Group;
   private SEPARATION = 5;
-  private AMOUNTX = 150;
-  private AMOUNTY = 150;
+  private AMOUNTX = 50;
+  private AMOUNTY = 50;
   private particles: THREE.Points;
   private noise = new SimplexNoise();
   private count = 0;
@@ -32,7 +32,7 @@ export class TestParticlesService {
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     this.canvas = canvas.nativeElement;
     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 4000 );
-    this.camera.position.set(150, 150, 100);
+    this.camera.position.set(100, 25, 100);
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     this.scene = new THREE.Scene();
 
@@ -43,11 +43,31 @@ export class TestParticlesService {
     const scales = new Float32Array( numParticles );
     //const scales = [];
 
+    var inc = Math.PI * (3 - Math.sqrt(5));
+    var x = 0;
+    var y = 0;
+    var z = 0;
+    var r = 0;
+    var phi = 0;
+    var radius = 3;
 
     for (let i = 0,  l = numParticles; i < l; i = i + 3){
+      var off = 2 / numParticles;
+      //var vec3 = new THREE.Vector3();
+      y = i * off - 1 + off / 2;
+      r = Math.sqrt(1 - y * y);
+      phi = i * inc;
+      x = Math.cos(phi) * r;
+      z = (Math.sin(phi) * r);
+      x *= radius;
+      y *= radius;
+      z *= radius;
+
       const position = new THREE.Vector3();
-      position.set(THREE.MathUtils.randFloatSpread(1), THREE.MathUtils.randFloatSpread(1), THREE.MathUtils.randFloatSpread(1));
+      position.set(x, y, z);
       position.setLength(150);
+    //  position.set(THREE.MathUtils.randFloatSpread(1), THREE.MathUtils.randFloatSpread(1), THREE.MathUtils.randFloatSpread(1));
+    //  position.setLength(150);
       positions[i] = position.x;
       positions[i+1] = position.y;
       positions[i+2] = position.z;
@@ -121,9 +141,9 @@ export class TestParticlesService {
     const upperAvgFr = upperAvg / upperHalfArray.length;
 
     this.makeRoughBall(this.particles, this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 4), this.modulate(upperAvgFr, 0, 1, 0, 4));
-    this.particles.rotation.x += 0.01;
-    //this.particles.rotation.y += 0.01;
-    //this.particles.rotation.z += 0.01;
+    //this.particles.rotation.x += 0.01;
+    this.particles.rotation.y += 0.01;
+    this.particles.rotation.z += 0.01;
 
 
 }
@@ -167,7 +187,26 @@ export class TestParticlesService {
     // mesh.geometry.normalsNeedUpdate = true;
     // mesh.geometry.computeVertexNormals();
     // mesh.geometry.computeFaceNormals();
+
+    // TODO: add dynamic particle color change
+    /*
+    var k = 0;
+     const numParticles = this.AMOUNTX * this.AMOUNTY;
+     for (let i = 0,  l = numParticles; i < l; i = i + 3) {
+      var colors = [];
+      var y = 0;
+      var intensity = ( y + 0.1 ) * 7;
+      colors[ 3 * k ] = this.particles.geometry.color[i].r * intensity;
+      colors[ 3 * k + 1 ] = this.particles.geometry.color[i].g * intensity;
+      colors[ 3 * k + 2 ] = this.particles.geometry.color[i].b * intensity;
+      colors[ k ] = ( this.particles.geometry.color[i].clone().multiplyScalar( intensity ) );
+
+    }
+    this.particles.geometry.colors = colors;
+    mesh.geometry.attributes.colors.needsUpdate = true;
+     */
   }
+
 
   fractionate(val: number, minVal: number, maxVal: number) {
     return (val - minVal) / (maxVal - minVal);
