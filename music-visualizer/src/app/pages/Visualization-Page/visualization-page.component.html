@@ -1,15 +1,16 @@
 
 <html>
 <header>
-  <H1> The Visualizer </H1>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+  <!--
+  <link rel="stylesheet" href="./assets/css/Login-Form-Dark.css">
+  -->
 </header>
 <body>
-  <p>For a bad link <a routerLink="badLink">click here!</a></p>
-  <p>To go back to the home page <a routerLink="../">click here!</a></p>
-  <p>To logout <a href (click)="logout()">click here!</a></p>
-  <p><a routerLink="../ProfilePage"> Profile Page Button </a></p>
-
   <label for="loadFile">Choose a file to visualize: </label>
   <br>
   <input type="file" id="uploadFile" name="uploadFile" (change)="loadFilePath($event.target)" accept=".mp3">
@@ -26,9 +27,7 @@
 <!--  <audio id= "audio_file" src="../../../songs/RickFlair.mp3" crossorigin="anonymous" ></audio>-->
   <div id="canvasButtons">
     <canvas #rendererCanvas id="renderCanvas"></canvas>
-    <div id="title">
-      <h1>{{this.current.name}}</h1>
-    </div>
+    <!--
     <div id="controls">
       <button (click)="rewindSong()" id="rewind_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
         <i class="fa fa-backward"></i>
@@ -41,7 +40,7 @@
       </button>
       <br>
 
-  <!--    //[(ngModel)]="this.audioService.gainNode.gain.value"-->
+      //[(ngModel)]="this.audioService.gainNode.gain.value"
       <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
       <label for="volume_button">VOL</label>
 
@@ -53,11 +52,11 @@
         <label for="panner">PAN</label>
       <br>
 
-<!--      <input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.5" (change)="changeSmooth($event.srcElement)">-->
-<!--      <label>SSC</label>-->
-<!--      <input id="fft" type="range" min="5" max="12" step="1" value="9" (change)="changeFFT($event.srcElement)">-->
-<!--      <label>FTT</label>-->
-<!--      <br>-->
+      <input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.5" (change)="changeSmooth($event.srcElement)">
+      <label>SSC</label>
+      <input id="fft" type="range" min="5" max="12" step="1" value="9" (change)="changeFFT($event.srcElement)">
+      <label>FTT</label>
+      <br>
 
       <p>
         {{timeString(progress())}}
@@ -65,6 +64,62 @@
         {{timeString(duration())}}
       </p>
     </div>
+    -->
+  
+    <div id="controls" style="text-align: center; color: white; position: absolute; top: 75%">
+      <p>
+        <div class="progress" style="width: 100%;margin-bottom: 12px;background: rgba(127, 127, 127, 0.3);color: rgb(0, 123, 255);filter: blur(1px);height: 9px;">
+          <div class="progress-bar bg-light" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 50%;"></div>
+        </div>
+
+      <p style="display: inline; width: 87px;border-color: var(--light);color: var(--light);">{{this.current.name}}</p>
+      <button (click)="rewindSong()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-player-skip-back" style="color: var(--light);width: 66px;height: 42px;">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M20 5v14l-12 -7z"></path>
+          <line x1="4" y1="5" x2="4" y2="19"></line>
+      </svg>
+      </button>
+      <button (click)="this.audioService.playOrPause()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-player-play" style="padding: 0px;height: 42px;width: 66px;color: var(--light);margin-left: 0px;margin-right: 0px;">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M7 4v16l13 -8z"></path>
+      </svg>
+      </button>
+      <button (click)="nextSong()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-player-skip-forward" style="padding: 0px;height: 42px;width: 66px;color: var(--light);">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M4 5v14l12 -7z"></path>
+          <line x1="20" y1="5" x2="20" y2="19"></line>
+      </svg>
+      </button>
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-volume-2" style="padding: 0px;height: 17px;width: 20px;color: var(--light);">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M15 8a5 5 0 0 1 0 8"></path>
+          <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path>
+      </svg>
+      <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-volume" style="padding: 0px;height: 17px;width: 20px;color: var(--light);">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M15 8a5 5 0 0 1 0 8"></path>
+          <path d="M17.7 5a9 9 0 0 1 0 14"></path>
+          <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path>
+      </svg>
+
+    <input type="range" id="panner" class="control-panner" list="pan-vals" min="-1" max="1" value="0" step="0.01" data-action="panner" />
+        <datalist id="pan-vals">
+          <option value="-1" label="left">
+          <option value="1" label="right">
+        </datalist>
+        <label for="panner">PAN</label>
+      <br>
   </div>
+</div>
+
+<script src="./assets/js/jquery.min.js"></script>
+<script src="./assets/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+<script src="./assets/js/creative.js"></script>
 </body>
 </html>
