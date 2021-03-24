@@ -14,8 +14,8 @@ export class TestParticlesService {
   private scene!: THREE.Scene;
   private group!: THREE.Group;
   private SEPARATION = 5;
-  private AMOUNTX = 50;
-  private AMOUNTY = 50;
+  private AMOUNTX = 125;
+  private AMOUNTY = 125;
   private particles: THREE.Points;
   private noise = new SimplexNoise();
   private count = 0;
