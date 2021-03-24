@@ -15,7 +15,11 @@ type Dict = {[key: string]: any};
 @Component({
   selector: 'app-visualization-page',
   templateUrl: './visualization-page.component.html',
-  styleUrls: ['./visualization-page.component.css']
+  styleUrls: [
+    './visualization-page.component.css', 
+    '../../../assets/bootstrap/css/bootstrap.min.css',
+    '../../../assets/fonts/font-awesome.min.css',
+  ]
 })
 export class VisualizationPageComponent implements AfterViewInit {
 
