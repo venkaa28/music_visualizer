@@ -22,17 +22,18 @@
     <source src="../../../assets/music/tripleT.mp3" origin="http://localhost:4200" id="audio_source" type="audio/mp3">
   </audio>
 <!--  <audio id= "audio_file" src="../../../songs/RickFlair.mp3" crossorigin="anonymous" ></audio>-->
-  <div id="canvasButtons">
+  <div id="canvas-visualizer">
     <canvas #rendererCanvas id="renderCanvas" height="100%" width="100%"></canvas>
   
-    <div style="position: absolute;top: 1%; left: 98%;">
+    <div id="info-button">
       <button (click)="toggleInfo()">
-        <img src="../../../assets/icons/info.svg" style="height: 25px;width: 25px;">
+        <img src="../../../assets/icons/info.svg" class="ui-button">
       </button><br>
     </div>
   </div>
 
-  <div id="infoBox" style="width: 0%;text-align: left;color: white;opacity: 0;">
+  <!--Control info menu listed when info button is pressed-->
+  <div id="info-menu" style="width: 0%; opacity: 0;">
     <h2>Controls:</h2>
     <p>m     : access the menu<br>
        d     : play the previous song<br>
@@ -40,30 +41,49 @@
        space : play/pause the music</p>
   </div>
 
-  <div id="menu" class="overlay" style="width: 0%;text-align: center;">
+  <div id="menu" class="overlay" style="width: 0%;">
     <div class="overlay-content">
-      <h1 style="margin-top: 40px;text-align: center;border-color: var(--light);color: var(--light);">{{this.current.name}}</h1><br><br>
-      <label for="loadFile" style="cursor: pointer;margin: 0;">Choose a file to visualize</label><br>
-      <input type="file" id="uploadFile" name="uploadFile" style="position: absolute;z-index: 1;opacity: 0;margin-top: -20px;" (change)="loadFilePath($event.target)" accept=".mp3">
+      <!--Profile Page Button-->
+      <button routerLink="../ProfilePage" style="position: absolute;left: 1%;top: 1%;">
+        <img class="ui-button" src="../../../assets/icons/settings.svg">
+      </button>
 
-      <div id="controls" style="text-align: center; color: white; position: absolute; top: 88%;">
-        <div id="buttonControls">
+      <!--Song title-->
+      <h1>{{this.current.name}}</h1>
+      <br>
+
+      <!--File loader-->
+      <label id="file-label" for="upload-file">Choose a file to visualize</label><br>
+      <input type="file" id="upload-file" name="upload-file" (change)="loadFilePath($event.target)" accept=".mp3">
+
+      <!--Song controls-->
+      <div class="controls">
+        <!--Button controls: rewind, play/pause, skip-->
+        <div id="button" style="display: inline;">
+          <!--Rewind button-->
           <button (click)="rewindSong()">
             <img class="custom_icon" src="../../../assets/icons/rewind.svg">
           </button>
+
+          <!--Play/Pause button-->
           <button (click)="this.audioService.playOrPause()">
             <img class="custom_icon" src={{playPauseIcon()}}>
           </button>
+
+          <!--Skip button-->
           <button (click)="nextSong()">
             <img class="custom_icon" src="../../../assets/icons/forward.svg">
           </button>
         </div>
         
-        <div id="silderControls" style="position: absolute;right: 0; top: 10%">
+        <!--Slider controls: volume, pan-->
+        <div id="silder" style="display: inline">
+          <!--Volume slider-->
           <img src="../../../assets/icons/volumedown.svg">
-          <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" style="direction: vertical;" (input)="changeVolume($event.srcElement)">
+          <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
           <img src="../../../assets/icons/volumeup.svg">
 
+          <!--Pan slider-->
           <input type="range" id="panner" class="control-panner slider" list="pan-vals" min="-1" max="1" value="0" step="0.01" data-action="panner"/>
               <datalist id="pan-vals">
                 <option value="-1" label="left">
@@ -72,11 +92,15 @@
               <label for="panner">PAN</label>
             <br>
         </div>
+
+        <!--Progress bar-->
+      <div>
         <p style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
-        <div class="progress" style="display: inline-block;width: 80%;top: 0px;border-radius: 15px;background-color: rgba(127, 127, 127, 0.7);color: rgb(0, 123, 255);height: 9px;">
+        <div class="progress" style="display: inline-block;">
           <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);width: 0%;height: 100%;"></div>
         </div>
         <p style="display: inline-block;padding: 10px;">{{timeString(duration())}}</p>
+      </div>
     </div>
   </div>
 </div>

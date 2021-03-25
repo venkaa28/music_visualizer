@@ -35,11 +35,6 @@ export class VisualizationPageComponent implements AfterViewInit {
   public current: Music = new Music();
   private songList: Dict;
 
-  async logout() {
-    await this.authService.logOutUser();
-    await this.router.navigate(['../']);
-  }
-
   async upload(event: any) {
     var file = event as HTMLInputElement;
     this.audioService.upload(file.files[0]);
@@ -218,7 +213,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   toggleInfo() {
-    var infoBox = document.getElementById('infoBox');
+    var infoBox = document.getElementById('info-menu');
 
     if (infoBox.style.width === '0%') {
       infoBox.style.width = '20%';
