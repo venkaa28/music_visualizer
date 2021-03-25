@@ -114,7 +114,7 @@ export class PlaneSceneServiceService {
     this.group.add(this.plane);
 
     // adding ambient lighting to the scene
-    this.ambLight = new THREE.AmbientLight(0xaaaaaa);
+    this.ambLight = new THREE.AmbientLight(0xaaaaaa, 2);
     this.scene.add(this.ambLight);
 
     // adding a spotlight to the scene
