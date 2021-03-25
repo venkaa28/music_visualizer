@@ -3,6 +3,7 @@ import {Router} from '@angular/router';
 
 import {User} from '../../classes/user';
 import { CookieService } from 'ngx-cookie-service';
+import { AuthService } from '../../services/auth.service'
 
 type Dict = {[key: string]: any};
 
@@ -15,19 +16,16 @@ export class ProfilePageComponent implements OnInit {
   title = 'Profile test';
   public userData: User;
 
-  constructor(public router: Router, private cookieService: CookieService) { 
-    this.userData = new User();
+  constructor(public router: Router, private authService: AuthService) { 
+    this.userData = this.authService.getUser();
   }
 
   ngOnInit(): void {
-    this.getUserData()
+    
   }
 
-  getUserData() {
-    var rawJSON = JSON.parse(this.cookieService.get('account'))
-    this.userData.email = rawJSON['email']
-    this.userData.name = rawJSON['name']
-
+  async logout() {
+    await this.authService.logOutUser();
+    await this.router.navigate(['../']);
   }
-
 }
