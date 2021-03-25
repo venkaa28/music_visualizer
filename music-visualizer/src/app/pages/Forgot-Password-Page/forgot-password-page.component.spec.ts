@@ -40,4 +40,23 @@ describe('ForgotPasswordPageComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('test onSubmit()', () => {
+    component.onSubmit();
+    // Todo: expect something
+  });
+
+  it('test getEmailMessage() with empty email', () => {
+    // an invalid email
+    component.emailForm.controls.email.setValue('');
+    var ret = component.getEmailMessage();
+    expect(ret).toEqual('Not a valid email');
+  });
+
+  it('test getEmailMessage() with vaild email', () => {
+    // a valid email
+    component.emailForm.controls.email.setValue('b@b.bbb');
+    var ret = component.getEmailMessage();
+    expect(ret).toEqual('');
+  });
 });

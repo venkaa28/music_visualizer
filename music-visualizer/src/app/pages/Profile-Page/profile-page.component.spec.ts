@@ -29,4 +29,17 @@ describe('ProfilePageComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('check email and name', () => {
+    const cookie = component.getUserCookie();
+    component.getUserData();
+    if(cookie === '') {
+      expect(component.userData.email).toBe('');
+      expect(component.userData.name).toBe('');
+    }
+    else {
+      expect(component.userData.email).toBe('hustzmx@gmail.com');
+      expect(component.userData.name).toBe('zmx');
+    }
+  });
 });
