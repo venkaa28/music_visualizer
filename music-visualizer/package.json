@@ -9,6 +9,11 @@
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
+  "browser": {
+    "fs": false,
+    "os": false,
+    "path": false
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "~11.2.1",
@@ -25,8 +30,13 @@
     "angular-material": "^1.2.2",
     "angular-notifier": "^9.0.1",
     "boostrap": "^2.0.0",
+    "buffer": "^5.7.1",
+    "fetch": "^1.1.0",
     "firebase": "^8.2.10",
+    "music-metadata-browser": "^2.2.6",
     "ngx-cookie-service": "^11.0.2",
+    "node-id3": "^0.2.2",
+    "process": "^0.11.10",
     "rxjs": "~6.6.0",
     "simplex-noise": "^2.4.0",
     "three": "^0.126.1",

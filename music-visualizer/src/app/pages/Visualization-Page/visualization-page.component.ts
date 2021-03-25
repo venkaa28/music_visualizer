@@ -65,13 +65,30 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.current = new Music();
     this.current.filepath = URL.createObjectURL(file.files[0]);;
     this.current.isPublic = true;
-    this.current.name = 'test';
+    this.current.name = file.files[0].name;
     this.current.source = 'local';
     this.current.uploadEmail = this.authService.getUser().email;
 
     this.audio.src = this.current.filepath;
     this.audioService.gainNode.gain.value = 0;
     this.audioService.loadSong(this.audio);
+
+    return this.current.filepath;
+  }
+
+  loadYoutube() {
+    this.current = new Music();
+    this.current.filepath = 'https://www.youtube.com/get_video_info?video_id=Iu37OXZ6cHk';
+    this.current.isPublic = true;
+    this.current.name = 'test';
+    this.current.source = 'youtube';
+    this.audio.crossOrigin = 'anonymous';
+    this.current.uploadEmail = this.authService.getUser().email;
+
+    this.audio.src = this.current.filepath;
+    this.audioService.gainNode.gain.value = 0;
+    this.audioService.loadSong(this.audio);
+
     return this.current.filepath;
   }
 
@@ -253,5 +270,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.testParticles.animate();
     // this.planeScene.createScene(this.rendererCanvas);
     // this.planeScene.animate();
+
+
   }
 }
