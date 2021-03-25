@@ -6,6 +6,7 @@ import {AudioServiceService} from '../../services/audio-service.service';
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {Music} from '../../classes/music'
 import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
+import { NotifierService } from 'angular-notifier';
 
 type Dict = {[key: string]: any};
 
@@ -146,6 +147,12 @@ export class VisualizationPageComponent implements AfterViewInit {
       return 0;
     }
 
+    if (this.audioService.audioElement.currentTime >= this.audioService.audioElement.duration) {
+      this.notifierService.notify('warning', 'The current song has ended. Please open a new upload mp3 file to continue the visualization.');
+      this.audioService.pause();
+      this.audioService.audioElement.currentTime = 0;
+    }
+
     return Math.floor(this.audioService.audioElement.currentTime);
   }
 
@@ -192,6 +199,18 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
   }
 
+  toggleInfo() {
+    var infoBox = document.getElementById('infoBox');
+
+    if (infoBox.style.width === '0%') {
+      infoBox.style.width = '20%';
+      infoBox.style.opacity = '1';
+    } else if (infoBox.style.width === '20%'){
+      infoBox.style.width = '0%';
+      infoBox.style.opacity = '0';
+    }
+  }
+
   keyListener(event){
     event = event || window.event; //capture the event, and ensure we have an event
     console.log(event.key);
@@ -216,7 +235,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
-      public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService) {
+      public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
     this.loadList();
     this.loadSong();
   }
