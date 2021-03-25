@@ -12,10 +12,6 @@
   -->
 </header>
 <body>
-  <label for="loadFile">Choose a file to visualize: </label>
-  <br>
-  <input type="file" id="uploadFile" name="uploadFile" (change)="loadFilePath($event.target)" accept=".mp3">
-
   <!--
   <label for="uploadFile">Choose a .mp3 file to upload:</label>
   <br>
@@ -27,102 +23,56 @@
   </audio>
 <!--  <audio id= "audio_file" src="../../../songs/RickFlair.mp3" crossorigin="anonymous" ></audio>-->
   <div id="canvasButtons">
-    <canvas #rendererCanvas id="renderCanvas"></canvas>
-    <!--
-    <div id="controls">
-      <button (click)="rewindSong()" id="rewind_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
-        <i class="fa fa-backward"></i>
-      </button>
-      <button (click)="this.audioService.playOrPause()" id="play_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
-        <i class={{playPauseIcon()}}></i>
-      </button>
-      <button (click)="nextSong()" id="next_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
-        <i class="fa fa-forward"></i>
-      </button>
-      <br>
-
-      //[(ngModel)]="this.audioService.gainNode.gain.value"
-      <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
-      <label for="volume_button">VOL</label>
-
-      <input type="range" id="panner" class="control-panner" list="pan-vals" min="-1" max="1" value="0" step="0.01" data-action="panner" />
-        <datalist id="pan-vals">
-          <option value="-1" label="left">
-          <option value="1" label="right">
-        </datalist>
-        <label for="panner">PAN</label>
-      <br>
-
-      <input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.5" (change)="changeSmooth($event.srcElement)">
-      <label>SSC</label>
-      <input id="fft" type="range" min="5" max="12" step="1" value="9" (change)="changeFFT($event.srcElement)">
-      <label>FTT</label>
-      <br>
-
-      <p>
-        {{timeString(progress())}}
-        <input id="progress" type="range" min="0" max={{duration()}} step="1" value={{progress()}} (change)="changeTime($event.srcElement)">
-        {{timeString(duration())}}
-      </p>
-    </div>
-    -->
+    <canvas #rendererCanvas id="renderCanvas" height="100%" width="100%"></canvas>
   
-    <div id="controls" style="text-align: center; color: white; position: absolute; top: 90%;">
-      <p style="display: inline; width: 87px;border-color: var(--light);color: var(--light);">{{this.current.name}}</p>
-      <button (click)="rewindSong()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-player-skip-back" style="color: var(--light);width: 66px;height: 42px;">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <path d="M20 5v14l-12 -7z"></path>
-          <line x1="4" y1="5" x2="4" y2="19"></line>
-      </svg>
-      </button>
-      <button (click)="this.audioService.playOrPause()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-player-play" style="padding: 0px;height: 42px;width: 66px;color: var(--light);margin-left: 0px;margin-right: 0px;">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <path d="M7 4v16l13 -8z"></path>
-      </svg>
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-player-pause" style="padding: 0px;height: 42px;width: 66px;color: var(--light);margin-left: 0px;margin-right: 0px;">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <rect x="6" y="5" width="4" height="14" rx="1"></rect>
-        <rect x="14" y="5" width="4" height="14" rx="1"></rect>
-      </svg>
-      </button>
-      <button (click)="nextSong()">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-player-skip-forward" style="padding: 0px;height: 42px;width: 66px;color: var(--light);">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <path d="M4 5v14l12 -7z"></path>
-          <line x1="20" y1="5" x2="20" y2="19"></line>
-      </svg>
-      </button>
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-volume-2" style="padding: 0px;height: 17px;width: 20px;color: var(--light);">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <path d="M15 8a5 5 0 0 1 0 8"></path>
-          <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path>
-      </svg>
-      <!--
-        <i class="icon-control-pause" style="padding: 0px;height: 106px;width: 177px;color: var(--light);margin-left: 0px;margin-right: 0px;">Test</i>
-      -->
-      <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-volume" style="padding: 0px;height: 17px;width: 20px;color: var(--light);">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <path d="M15 8a5 5 0 0 1 0 8"></path>
-          <path d="M17.7 5a9 9 0 0 1 0 14"></path>
-          <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path>
-      </svg>
+    <div style="position: absolute;top: 1%; left: 98%;">
+      <button (click)="toggleMenu()">
+        <img src="../../../assets/icons/info.svg" style="height: 25px;width: 25px;">
+      </button><br>
+    </div>
+  </div>
 
-    <input type="range" id="panner" class="control-panner" list="pan-vals" min="-1" max="1" value="0" step="0.01" data-action="panner"/>
-        <datalist id="pan-vals">
-          <option value="-1" label="left">
-          <option value="1" label="right">
-        </datalist>
-        <label for="panner">PAN</label>
-      <br>
+  <div id="menu" class="overlay" style="width: 0%;text-align: center;">
+    <div class="overlay-content">
+      <h1 style="display: inline; margin-top: 40px;;text-align: center;border-color: var(--light);color: var(--light);">{{this.current.name}}</h1><br><br>
+      <label for="loadFile" style="cursor: pointer;margin: 0;">Choose a file to visualize</label><br>
+      <input type="file" id="uploadFile" name="uploadFile" style="position: absolute;z-index: 1;opacity: 0;margin-top: -20px;" (change)="loadFilePath($event.target)" accept=".mp3">
 
-      <p style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
-      <div class="progress" style="display: inline-block;width: 80%;margin-top: 20px;border-radius: 15px;background: rgba(127, 127, 127, 0.3);color: rgb(0, 123, 255);height: 9px;">
-        <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);height: 100%;"></div>
+      <div id="controls" style="text-align: center; color: white; position: absolute; top: 90%;">
+        <div id="buttonControls">
+          <button (click)="rewindSong()">
+            <img class="custom_icon" src="../../../assets/icons/rewind.svg">
+          </button>
+          <button (click)="this.audioService.playOrPause()">
+            <img class="custom_icon" src={{playPauseIcon()}}>
+          </button>
+          <button (click)="nextSong()">
+            <img class="custom_icon" src="../../../assets/icons/forward.svg">
+          </button>
+        </div>
+        
+        <div id="silderControls" style="position: absolute;right: 0; top: 10%">
+          <img src="../../../assets/icons/volumedown.svg">
+          <input id= "volume_button" class="slider" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
+          <img src="../../../assets/icons/volumeup.svg">
+
+          <input type="range" id="panner" class="control-panner slider" list="pan-vals" min="-1" max="1" value="0" step="0.01" data-action="panner"/>
+              <datalist id="pan-vals">
+                <option value="-1" label="left">
+                <option value="1" label="right">
+              </datalist>
+              <label for="panner">PAN</label>
+            <br>
+        </div>
+
+        <div id="controls" style="text-align: center; color: white; position: absolute; top: 90%;">
+          <p style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
+          <div class="progress" style="display: inline-block;width: 80%;margin-top: 20px;border-radius: 15px;background: rgba(127, 129, 127, 0.3);color: rgb(0, 123, 255);height: 9px;">
+            <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(0, 0, 0, 1);height: 100%;"></div>
+          </div>
+          <p style="display: inline-block;padding: 10px;">{{timeString(duration())}}</p>
       </div>
-      <p style="display: inline-block;padding: 10px;">{{timeString(duration())}}</p>
+    </div>
   </div>
 </div>
 

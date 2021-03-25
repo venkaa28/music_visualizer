@@ -6,9 +6,6 @@ import {AudioServiceService} from '../../services/audio-service.service';
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {Music} from '../../classes/music'
 import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
-import { Firebase } from 'src/app/classes/firebase';
-import { FirebaseApp } from '@angular/fire';
-import { fileURLToPath } from 'url';
 
 type Dict = {[key: string]: any};
 
@@ -19,7 +16,10 @@ type Dict = {[key: string]: any};
     './visualization-page.component.css', 
     '../../../assets/bootstrap/css/bootstrap.min.css',
     '../../../assets/fonts/font-awesome.min.css',
-  ]
+  ],
+  host: {
+    '(document:keypress)': 'keyListener($event)'
+  }
 })
 export class VisualizationPageComponent implements AfterViewInit {
 
@@ -104,18 +104,17 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   playPauseIcon() {
     if (typeof this.audio === 'undefined') {
-      return 'fa fa-play';;
+      return '../../../assets/icons/play.svg';
     }
 
     if (this.audio.paused) {
-      return 'fa fa-play';
+      return '../../../assets/icons/play.svg';
     }
 
-    return 'fa fa-pause';
+    return '../../../assets/icons/pause.svg';
   }
 
   changeVolume(input) {
-    console.log(input.value);
     this.audioService.gainNode.gain.value = input.value;
   }
 
@@ -134,12 +133,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.audioElement.currentTime = time;
   }
 
-  constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
-              public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService) {
-    this.loadList();
-    this.loadSong();
-  }
-
   duration() {
     if (typeof this.audioService.audioElement === "undefined") {
       return 0;
@@ -152,12 +145,11 @@ export class VisualizationPageComponent implements AfterViewInit {
     if (typeof this.audioService.audioElement === "undefined") {
       return 0;
     }
-    
-    var bar = document.getElementById('progress-bar') as HTMLDivElement;
-    bar.style.width = (this.audioService.audioElement.currentTime / this.audioService.audioElement.duration * 100).toString() + '%';
 
     return Math.floor(this.audioService.audioElement.currentTime);
   }
+
+
 
   timeString(time: number) {
     if (typeof this.audioService.audioElement === "undefined") {
@@ -190,6 +182,45 @@ export class VisualizationPageComponent implements AfterViewInit {
     console.log("Fire");
   }
 
+  toggleMenu() {
+    var overlay = document.getElementById('menu');
+
+    if (overlay.style.width === '0%') {
+      overlay.style.width = '100%';
+    } else if (overlay.style.width === '100%'){
+      overlay.style.width = '0%';
+    }
+  }
+
+  keyListener(event){
+    event = event || window.event; //capture the event, and ensure we have an event
+    console.log(event.key);
+    switch (event.key) {
+      case 'm':
+        this.toggleMenu();
+        break;
+      
+      case ' ':
+        this.audioService.playOrPause();
+        break;
+
+      case 'd':
+        this.nextSong();
+        break;
+
+      case 'a':
+        this.rewindSong();
+        break;
+    }
+
+  }
+
+  constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
+      public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService) {
+    this.loadList();
+    this.loadSong();
+  }
+
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement;
     //this.audio.src = 'music-visualizer/src/assets/music/juice.mp3';
@@ -199,10 +230,9 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.loadSong(this.audio);
     // this.demoScene.createScene(this.rendererCanvas);
     // this.demoScene.animate();
-    // this.testParticles.createScene(this.rendererCanvas);
-    // this.testParticles.animate();
-    this.planeScene.createScene(this.rendererCanvas);
-    this.planeScene.animate();
-
+    this.testParticles.createScene(this.rendererCanvas);
+    this.testParticles.animate();
+    // this.planeScene.createScene(this.rendererCanvas);
+    // this.planeScene.animate();
   }
 }
