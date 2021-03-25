@@ -20,6 +20,7 @@ export class PlaneSceneServiceService {
   private ambLight!: THREE.AmbientLight;
   private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
+  private secondPlane!: THREE.Mesh;
   private loader: GLTFLoader;
   private textureLoader: THREE.TextureLoader;
   private darkSky: THREE.Group;
@@ -56,7 +57,7 @@ export class PlaneSceneServiceService {
 
     this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
       this.darkSky = model.scene;
-      this.darkSky.scale.set(250, 250, 250);
+      this.darkSky.scale.set(450, 450, 450);
       this.darkSky.rotateY(180);
       this.textureLoader.load( '../../../assets/3d_models/fantasy_sky_background/textures/Material__25__background_JPG_002_emissive.jpg',
         ( newTexture ) => {
@@ -90,7 +91,7 @@ export class PlaneSceneServiceService {
     // sets a perspective camera
     this.camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 50) / (window.innerHeight - 50), 0.1, 7000);
     // lets the camera at position x, y, z
-    this.camera.position.set(-500, 500, -2000);
+    this.camera.position.set(-50, 300, -1400);
     // this.camera.position.set(0,20,1500);
     // set the camera to look at the center of the scene
     // this.camera.lookAt(this.scene.position);
@@ -105,15 +106,27 @@ export class PlaneSceneServiceService {
       side: THREE.DoubleSide,
       wireframe: true
     });
+    const secondPlaneGeometry = new THREE.PlaneGeometry(1600, 15000, 100, 100);
+    const secondPlaneMaterial = new THREE.MeshLambertMaterial({
+      color: 0x696969,
+      side: THREE.DoubleSide,
+      wireframe: true
+    });
 
     this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
     this.plane.rotation.x = -0.5 * Math.PI;
     // this.plane.rotation.z =  Math.PI;
     // this.plane.rotation.x = 0.25 * Math.PI;
-    this.plane.position.set(0, -30, 0);
+    this.plane.position.set(0, -30, 400);
+
+    this.secondPlane = new THREE.Mesh(secondPlaneGeometry, secondPlaneMaterial);
+    this.secondPlane.rotation.x = -0.5 * Math.PI;
+    // this.plane.rotation.z =  Math.PI;
+    // this.plane.rotation.x = 0.25 * Math.PI;
+    this.secondPlane.position.set(0, -180, 0);
 
     this.group.add(this.plane);
-
+    this.group.add(this.secondPlane);
     // adding ambient lighting to the scene
     this.ambLight = new THREE.AmbientLight(0xaaaaaa, 2);
     this.scene.add(this.ambLight);
@@ -210,7 +223,15 @@ export class PlaneSceneServiceService {
     // }
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
-    this.darkSky.rotation.y += 0.005;
+    this.darkSky.rotation.y += 0.003;
+    this.secondPlane.position.z += 5;
+    if (this.secondPlane.position.z === 6000){
+      this.secondPlane.position.z = 0;
+    }
+    //console.log(this.secondPlane.position.z);
+    this.secondPlane.geometry.attributes.position.needsUpdate = true;
+    this.secondPlane.updateMatrix();
+
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
     this.plane.geometry.attributes.position.needsUpdate = true;
