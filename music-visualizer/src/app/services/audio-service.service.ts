@@ -83,8 +83,6 @@ export class AudioServiceService {
       console.log(url);
     });
 
-    this.gainNode.gain.value = 0;
-
     return music;
   }
 

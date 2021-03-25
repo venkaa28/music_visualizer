@@ -55,7 +55,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audio.src = this.current.filepath;
     this.audio.crossOrigin = 'anonymous';
     this.audioService.loadSong(this.audio);
-    this.changeVolume({'value': 0.5});
     return this.current.filepath;
   }
 
@@ -70,7 +69,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.current.uploadEmail = this.authService.getUser().email;
 
     this.audio.src = this.current.filepath;
-    this.audioService.gainNode.gain.value = 0;
     this.audioService.loadSong(this.audio);
 
     return this.current.filepath;
