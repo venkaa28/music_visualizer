@@ -34,4 +34,16 @@ describe('NotFoundPageComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('test getRoute()', () => {
+    // Todo: mock login
+    var ret = component.getRoute();
+    expect(ret).toEqual('../');
+  });
+
+  it('test getRouteName()', () => {
+    // Todo: mock login
+    var ret = component.getRouteName();
+    expect(ret).toEqual('Home Page');
+  });
 });

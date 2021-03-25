@@ -22,9 +22,16 @@ export class ProfilePageComponent implements OnInit {
     this.getUserData();
   }
 
+  getUserCookie() {
+    return this.cookieService.get('account');
+  }
+
   getUserData(): void {
-    const rawJSON = JSON.parse(this.cookieService.get('account'));
-    this.userData.email = rawJSON['email'];
-    this.userData.name = rawJSON['name'];
+    const cookie = this.cookieService.get('account');
+    if (cookie !== '') {
+      const rawJSON = JSON.parse(cookie);
+      this.userData.email = rawJSON.email;
+      this.userData.name = rawJSON.name;
+    }
   }
 }

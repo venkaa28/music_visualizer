@@ -37,7 +37,8 @@ describe('VisualizationPageComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
+  // it('testing ngAfterViewInit()', () => {
+  //   expect(component).toBeTruthy();
+  // });
+
 });
