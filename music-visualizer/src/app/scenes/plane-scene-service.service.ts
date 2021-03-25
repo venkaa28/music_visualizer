@@ -51,7 +51,7 @@ export class PlaneSceneServiceService {
     this.renderer.setClearColor(0xFFFFFF);
 
     // sets the size of the canvas
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(window.innerWidth , window.innerHeight);
     this.textureLoader = new THREE.TextureLoader();
     // renderer.shadowMap.enabled = true;
 
@@ -89,10 +89,9 @@ export class PlaneSceneServiceService {
     });
 
     // sets a perspective camera
-    this.camera = new THREE.PerspectiveCamera(45, (window.innerWidth) / (window.innerHeight), 0.1, 7000);
+    this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
     // lets the camera at position x, y, z
-    this.camera.position.set(-50, 300, -1400);
-    // this.camera.position.set(0,20,1500);
+    this.camera.position.set(-10, 425, -1300);
     // set the camera to look at the center of the scene
     // this.camera.lookAt(this.scene.position);
     this.camera.lookAt(0, 0, 0);
@@ -223,7 +222,7 @@ export class PlaneSceneServiceService {
     // }
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
-    this.darkSky.rotation.y += 0.003;
+    this.darkSky.rotation.y += 0.0005;
     this.secondPlane.position.z += 5;
     if (this.secondPlane.position.z === 6000){
       this.secondPlane.position.z = 0;
@@ -280,8 +279,8 @@ export class PlaneSceneServiceService {
 
 
   public resize(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = window.innerWidth - 50;
+    const height = window.innerHeight - 50;
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
