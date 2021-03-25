@@ -164,6 +164,9 @@ export class VisualizationPageComponent implements AfterViewInit {
       return 0;
     }
 
+    var progress = document.getElementById("progress-bar");
+    progress.style.width = Math.floor(this.audioService.audioElement.currentTime / this.audioService.audioElement.duration * 100) + '%';
+
     if (this.audioService.audioElement.currentTime >= this.audioService.audioElement.duration) {
       this.notifierService.notify('warning', 'The current song has ended. Please open a new upload mp3 file to continue the visualization.');
       this.audioService.pause();
@@ -266,10 +269,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.loadSong(this.audio);
     // this.demoScene.createScene(this.rendererCanvas);
     // this.demoScene.animate();
-    this.testParticles.createScene(this.rendererCanvas);
-    this.testParticles.animate();
-    // this.planeScene.createScene(this.rendererCanvas);
-    // this.planeScene.animate();
+    // this.testParticles.createScene(this.rendererCanvas);
+    // this.testParticles.animate();
+    this.planeScene.createScene(this.rendererCanvas);
+    this.planeScene.animate();
 
 
   }
