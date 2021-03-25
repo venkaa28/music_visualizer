@@ -83,8 +83,6 @@ export class AudioServiceService {
       console.log(url);
     });
 
-    this.gainNode.gain.value = 0;
-
     return music;
   }
 
@@ -137,10 +135,12 @@ export class AudioServiceService {
   loadSong = (song: HTMLMediaElement) => {
     this.audioElement = song;
     this.audioCtx = new AudioContext();
+
+
     this.track = this.audioCtx.createMediaElementSource(song);
 
     this.gainNode = this.audioCtx.createGain();
-    this.gainNode.gain.value = 0; //this.gainValue;
+    this.gainNode.gain.value = 1; //this.gainValue;
     this.track.connect(this.gainNode);
 
     this.analyzer = this.audioCtx.createAnalyser();

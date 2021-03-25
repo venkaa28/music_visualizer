@@ -1,63 +1,132 @@
-html {
-  margin: 0;
-}
-
+/******************************************************************************
+                                HTML Elements
+******************************************************************************/
 H1 {
+  margin-top: 40px;
   text-align: center;
-}
-
-#canvasButtons {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-}
-
-#renderCanvas {
-  position: relative;
-}
-
-#title {
-  color: white;
-  position: absolute;
-  text-align: center;
-  top: 3%;
-  width: 100%;
-}
-
-#controls {
-  color: white;
-  position: absolute;
-  margin: auto;
-  display: flexbox;
-  flex-direction: column;
-  left: 38%;
-  top: 80%;
-  align-items: center;
+  border-color: var(--light);
+  color: var(--light);
 }
 
 button {
-  padding: 15px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.4);
+  padding: 0px;
   display: inline-block;
   align-items: center;
-  margin: 10px;
-}
-
-i {
-  padding: 0;
-  margin: 0;
+  outline: none;
+  border: none;
   color: white;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 input[type=range] {
   -webkit-appearance: none;
   margin: 0;
   border-radius: 5px;
-  height: 15px;
+  height: 5px;
   background-color: white;
 }
 
-#progress {
-  width: 700px;
+/******************************************************************************
+                                    Classes
+******************************************************************************/
+.ui-button {
+  height: 25px;
+  width: 25px;
+}
+
+.overlay {
+  text-align: center;
+  height: 100%;
+  width: 0%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgba(0,0,0, 0.4);
+  overflow-x: hidden;
+}
+
+.overlay-content {
+  color: white;
+}
+
+.controls {
+  color: white;
+  position: absolute;
+  margin: 0;
+  width: 100%;
+  align-items: center;
+  top: 88%;
+}
+
+.custom_icon {
+  width: 50px;
+  height: 50px;
+}
+
+.progress {
+  display: inline-block;
+  width: 80%;
+  top: 0px;
+  border-radius: 15px !important;
+  background-color: rgba(127, 127, 127, 0.7) !important;
+  color: rgb(0, 123, 255);
+  height: 9px !important;
+}
+
+/*******************************************************************************
+                                      ID's
+*******************************************************************************/
+#canvas-visualizer {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+#renderCanvas {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+#info-button {
+  position: absolute;
+  top: 1%;
+  left: 98%;
+}
+
+#info-menu {
+  text-align: left;
+  color: white;
+  opacity: 0;
+  height: 20%;
+  width: 0%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: rgba(0,0,0, 0.4);
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+#file-label {
+  cursor: pointer;
+}
+
+#upload-file{
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
+
+#button {
+  width: 50%;
+  align-items: center;
+  margin-left: 40%;
+  margin-right: 25%;
 }
