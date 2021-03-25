@@ -30,8 +30,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import {DoBootstrap} from "@angular/core";
-import {AudioServiceService} from './services/audio-service.service';
+import { DoBootstrap } from "@angular/core";
+import { AudioServiceService } from './services/audio-service.service';
 
 @NgModule({
   declarations: [
@@ -62,8 +62,7 @@ import {AudioServiceService} from './services/audio-service.service';
     HttpClientModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    ReactiveFormsModule
-
+    ReactiveFormsModule,
   ],
   providers: [AudioServiceService],
   bootstrap: [AppComponent]
