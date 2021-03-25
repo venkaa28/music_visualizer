@@ -2,6 +2,8 @@ import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioServiceService} from '../services/audio-service.service';
+import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
+
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +20,10 @@ export class PlaneSceneServiceService {
   private ambLight!: THREE.AmbientLight;
   private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
-  private t = 0;
+  private loader: GLTFLoader;
+  private textureLoader: THREE.TextureLoader;
+  private darkSky: THREE.Group;
+  private rain: THREE.Points;
 
   private frameId: number = null;
 
@@ -32,40 +37,78 @@ export class PlaneSceneServiceService {
     this.scene = new THREE.Scene();
     this.group = new THREE.Group();
     this.canvas = canvas.nativeElement;
-
+    this.loader = new GLTFLoader();
 
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas, // grabs the canvas element
       alpha: true,    // transparent background
       antialias: true // smooth edges
     });
+    this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
+    //this.renderer.setClearColor(this.scene.fog.color);
     // sets the background color to black
-    this.renderer.setClearColor(0x000000);
+    this.renderer.setClearColor(0xFFFFFF);
 
     // sets the size of the canvas
     this.renderer.setSize(window.innerWidth - 50, window.innerHeight - 50);
+    this.textureLoader = new THREE.TextureLoader();
     // renderer.shadowMap.enabled = true;
 
+    this.loader.load("../../../assets/3d_models/fantasy_sky_background/scene.gltf", (model) => {
+      this.darkSky = model.scene;
+      this.darkSky.scale.set(250, 250, 250);
+      this.darkSky.rotateY(180);
+      this.textureLoader.load( "../../../assets/3d_models/fantasy_sky_background/textures/Material__25__background_JPG_002_emissive.jpg", ( newTexture ) => {
+
+        newTexture.encoding = THREE.sRGBEncoding;
+        newTexture.flipY = false;
+        newTexture.wrapS = THREE.RepeatWrapping;
+        newTexture.wrapT = THREE.RepeatWrapping;
+
+        this.darkSky.traverse(( child ) => {
+
+          if (child instanceof THREE.Mesh) {
+            //create a global var to reference later when changing textures
+            //apply texture
+
+            (<any> child.material).map = newTexture;
+            (<any> child.material).backside = true;
+            (<any> child.material).needsUpdate = true;
+            (<any> child.material).map.needsUpdate = true;
+
+          }
+        });
+        console.log(this.darkSky);
+
+      });
+
+      this.group.add(this.darkSky);
+      console.log(this.darkSky.position);
+    });
+
     // sets a perspective camera
-    this.camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 50) / (window.innerHeight - 50), 0.1, 2000);
+    this.camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 50) / (window.innerHeight - 50), 0.1, 7000);
     // lets the camera at position x, y, z
-    this.camera.position.set(-500, 500, -1000);
-    // this.camera.position.set(0,20,800);
+    this.camera.position.set(-500, 500, -2000);
+    //this.camera.position.set(0,20,1500);
     // set the camera to look at the center of the scene
-    this.camera.lookAt(this.scene.position);
+    //this.camera.lookAt(this.scene.position);
+    this.camera.lookAt(0, 0, 0);
     // adds the camera to the scene
     this.scene.add(this.camera);
 
 
-    const planeGeometry = new THREE.PlaneGeometry(800, 800, 128);
+    const planeGeometry = new THREE.PlaneGeometry(1600, 1600, 100, 100);
     const planeMaterial = new THREE.MeshLambertMaterial({
-      color: 0xFFFFFF,
+      color: 0x25E0EC,
       side: THREE.DoubleSide,
       wireframe: true
     });
 
     this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    this.plane.rotation.x = 0.5 * Math.PI;
+    this.plane.rotation.x = -0.5 * Math.PI;
+    //this.plane.rotation.z =  Math.PI;
+    //this.plane.rotation.x = 0.25 * Math.PI;
     this.plane.position.set(0, -30, 0);
 
     this.group.add(this.plane);
@@ -75,11 +118,15 @@ export class PlaneSceneServiceService {
     this.scene.add(this.ambLight);
 
     // adding a spotlight to the scene
-    const spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.intensity = 0.9;
-    spotLight.position.set(-10, 40, 20);
-    spotLight.castShadow = true;
-    this.scene.add(spotLight);
+    // const spotLight = new THREE.SpotLight(0xffffff);
+    // spotLight.intensity = 0.9;
+    // spotLight.position.set(-10, 40, 20);
+    // spotLight.castShadow = true;
+    // this.scene.add(spotLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffeedd);
+    directionalLight.position.set(0,0,1);
+    this.scene.add(directionalLight);
 
     //group.rotation.y += 0.005;
     this.scene.add(this.group);
@@ -120,7 +167,7 @@ export class PlaneSceneServiceService {
     const midfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3), (lowerHalfFrequncyData.length / 3) * 2 - 1);
     const highfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3) * 2, lowerHalfFrequncyData.length);
 
-    console.log(lowerHalfFrequncyData.length);
+    //console.log(lowerHalfFrequncyData.length);
 
 
     const lowFreqAvg = this.avg(lowfrequncyData);
@@ -132,21 +179,22 @@ export class PlaneSceneServiceService {
     const highFreqDownScaled = highFreqAvg/highfrequncyData.length;
 
 
-    const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0,1, 0, 8);
-    const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0,1, 0, 8);
-    const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0,1, 0, 8);
+    const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0,1, 0, 15);
+    const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0,1, 0, 25);
+    const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0,1, 0, 20);
 
     const position = this.plane.geometry.attributes.position;
-    const planeSepreration = (position.count / 3) / (numBins / 2);
 
     // console.log(position);
     const vector = new THREE.Vector3();
-    for (let i = 0,  l = position.count; i < l; i++){
-      vector.fromBufferAttribute(position, i);
+    this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
+
+    // for (let i = 0,  l = position.count; i < l; i++){
+    //   vector.fromBufferAttribute(position, i);
       //const time = window.performance.now();
-      const scalor = this.modulate(lowerHalfFrequncyData[i % 128], 0, 255, 1, 8);
-      const distance  = -1 * lowerHalfFrequncyData[i % 128] + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
-      position.setZ(i, distance);
+      // const scalor = this.modulate(lowerHalfFrequncyData[i % 128], 0, 255, 0, 8);
+      // const distance  = -25 * scalor + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
+      // position.setZ(i, distance);
       // if (i <= ((position.count / 3) - 1)){
       //   const distance = (lowFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
       //   position.setZ(i, distance);
@@ -157,13 +205,38 @@ export class PlaneSceneServiceService {
       //   const distance = (highFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + highFreqAvg * 0.001);
       //   position.setZ(i, distance);
       // }
-    }
-    this.group.rotation.y += 0.01;
+    //}
+    //this.group.rotation.y += 0.005;
+    this.plane.rotation.z += 0.005;
+    this.darkSky.rotation.y += 0.005;
+    //this.group.rotation.x += 0.005;
+    // this.group.rotation.z += 0.005;
     this.plane.geometry.attributes.position.needsUpdate = true;
     // this.plane.geometry.computeVertexNormals();
     this.plane.updateMatrix();
 
     }
+    // for re-use
+
+  wavesBuffer( waveSize, magnitude1,  magnitude2) {
+
+    const pos = this.plane.geometry.attributes.position;
+    const center = new THREE.Vector3(0, 0, 0);
+    let vec3 = new THREE.Vector3();
+
+    const time = window.performance.now() * .001;
+    for (let i = 0, l = pos.count; i < l; i++) {
+
+      vec3.fromBufferAttribute(pos, i);
+      vec3.sub(center);
+
+      const sampleNoise = this.noise.noise3d((vec3.x + time * 0.00001), (vec3.y + time * 0.00001), (vec3.z + time * 0.00001));
+      const z = Math.sin(vec3.length() / -(waveSize) + (time)) * (magnitude1 + (sampleNoise * magnitude1 / 2.5)) - (magnitude2);
+      pos.setZ(i, z);
+
+    }
+  }
+
 
   fractionate(val: number, minVal: number, maxVal: number) {
     return (val - minVal) / (maxVal - minVal);

@@ -24,7 +24,7 @@ export class AudioServiceService {
   public bufferLength: number;
   public dataArray: Uint8Array;
   public gainNode: GainNode;
-  public smoothConstant = 0.55;
+  public smoothConstant = 0.75;
   public fftSize = 512;
 
   constructor(private authService: AuthService) {
@@ -151,7 +151,7 @@ export class AudioServiceService {
 
     this.analyzer.fftSize = this.fftSize;
     this.bufferLength = this.analyzer.frequencyBinCount;
-    console.log(this.bufferLength);
+    //console.log(this.bufferLength);
     this.dataArray = new Uint8Array(this.bufferLength);
 
     // pan
