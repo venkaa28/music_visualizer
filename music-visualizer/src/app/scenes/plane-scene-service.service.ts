@@ -222,7 +222,7 @@ export class PlaneSceneServiceService {
     // }
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
-    this.darkSky.rotation.y += 0.003;
+    this.darkSky.rotation.y += 0.0005;
     this.secondPlane.position.z += 5;
     if (this.secondPlane.position.z === 6000){
       this.secondPlane.position.z = 0;
