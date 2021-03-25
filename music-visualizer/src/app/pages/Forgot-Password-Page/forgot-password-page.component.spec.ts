@@ -55,7 +55,7 @@ describe('ForgotPasswordPageComponent', () => {
 
   it('test getEmailMessage() with vaild email', () => {
     // a valid email
-    component.emailForm.controls.email.setValue('b@b.bbb');
+    component.emailForm.controls.email.setValue('b@bbb.com');
     var ret = component.getEmailMessage();
     expect(ret).toEqual('');
   });
