@@ -138,6 +138,7 @@ export class AudioServiceService {
     this.audioElement = song;
     this.audioCtx = new AudioContext();
 
+
     this.track = this.audioCtx.createMediaElementSource(song);
 
     this.gainNode = this.audioCtx.createGain();
