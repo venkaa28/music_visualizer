@@ -16,16 +16,20 @@ export class ProfilePageComponent implements OnInit {
   title = 'Profile test';
   public userData: User;
 
-  constructor(public router: Router, private authService: AuthService) { 
+  constructor(public router: Router, private authService: AuthService) {
     this.userData = this.authService.getUser();
   }
 
   ngOnInit(): void {
-    
+
   }
 
   async logout() {
     await this.authService.logOutUser();
     await this.router.navigate(['../']);
+  }
+
+  async goBackToVisualPage() {
+    await this.router.navigate(['../../VisualizationPage']);
   }
 }

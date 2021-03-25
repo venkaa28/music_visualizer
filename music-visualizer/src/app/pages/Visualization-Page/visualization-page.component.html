@@ -24,7 +24,7 @@
 <!--  <audio id= "audio_file" src="../../../songs/RickFlair.mp3" crossorigin="anonymous" ></audio>-->
   <div id="canvas-visualizer">
     <canvas #rendererCanvas id="renderCanvas" height="100%" width="100%"></canvas>
-  
+
     <div id="info-button">
       <button (click)="toggleInfo()">
         <img src="../../../assets/icons/info.svg" class="ui-button">
@@ -35,7 +35,7 @@
   <!--Control info menu listed when info button is pressed-->
   <div id="info-menu" style="width: 0%; opacity: 0;">
     <h2>Controls:</h2>
-    <p>m     : access the menu<br>
+    <p>m     : toggle the menu<br>
        d     : play the previous song<br>
        a     : play the next song<br>
        space : play/pause the music</p>
@@ -75,7 +75,7 @@
             <img class="custom_icon" src="../../../assets/icons/forward.svg">
           </button>
         </div>
-        
+
         <!--Slider controls: volume, pan-->
         <div id="silder" style="display: inline">
           <!--Volume slider-->
