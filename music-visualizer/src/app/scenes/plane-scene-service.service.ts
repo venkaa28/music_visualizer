@@ -51,7 +51,7 @@ export class PlaneSceneServiceService {
     this.renderer.setClearColor(0xFFFFFF);
 
     // sets the size of the canvas
-    this.renderer.setSize(window.innerWidth - 50, window.innerHeight - 50);
+    this.renderer.setSize(window.innerWidth , window.innerHeight);
     this.textureLoader = new THREE.TextureLoader();
     // renderer.shadowMap.enabled = true;
 
@@ -89,10 +89,9 @@ export class PlaneSceneServiceService {
     });
 
     // sets a perspective camera
-    this.camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 50) / (window.innerHeight - 50), 0.1, 7000);
+    this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
     // lets the camera at position x, y, z
-    this.camera.position.set(-50, 300, -1400);
-    // this.camera.position.set(0,20,1500);
+    this.camera.position.set(-10, 425, -1300);
     // set the camera to look at the center of the scene
     // this.camera.lookAt(this.scene.position);
     this.camera.lookAt(0, 0, 0);
