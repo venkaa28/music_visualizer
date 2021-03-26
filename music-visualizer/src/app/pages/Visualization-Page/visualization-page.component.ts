@@ -260,7 +260,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     //     this.engServ.animate();
 
     this.audioService.loadSong(this.audio);
-    // this.demoScene.createScene(this.rendererCanvas);
+    // this.demoScene.createScene(this.rendererCanvas);r
     // this.demoScene.animate();
     //this.testParticles.createScene(this.rendererCanvas);
     //this.testParticles.animate();
