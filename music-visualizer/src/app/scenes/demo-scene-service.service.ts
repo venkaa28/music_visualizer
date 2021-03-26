@@ -48,9 +48,6 @@ export class DemoSceneServiceService implements OnDestroy{
     this.camera.lookAt(this.scene.position);
     this.scene.add(this.camera);
 
-
-
-
     const planeGeometry = new THREE.PlaneGeometry(800, 800, 20, 20);
     const planeMaterial = new THREE.MeshLambertMaterial({
       color: 0x6904CE,

@@ -32,9 +32,9 @@ export class AuthService {
       await firebase.database().ref('accounts/' + uid).on('value', async (snapshot) => {
         if (snapshot.exists()) {
           console.log(snapshot.val());
-          userDict['email'] = snapshot.val().email;
-          userDict['name'] = snapshot.val().name;
-          var userJSON: string = JSON.stringify(userDict);
+          userDict.email = snapshot.val().email;
+          userDict.name = snapshot.val().name;
+          const userJSON: string = JSON.stringify(userDict);
           this.cookieService.set('account', userJSON);
           resolve();
         } else {
@@ -55,7 +55,7 @@ export class AuthService {
 
     return new Promise(async (resolve, reject) => {
       await firebase.database().ref('accounts').child(uid).set(userDict);
-      
+
       var userJSON: string = JSON.stringify(userDict);
       this.cookieService.set('account', userJSON);
       resolve();
@@ -74,7 +74,7 @@ export class AuthService {
   getUser(){
     const cookie: string = this.cookieService.get('account');
     var userJSON;
-    
+
     if (cookie.length === 0) {
       userJSON = null;
     } else {
