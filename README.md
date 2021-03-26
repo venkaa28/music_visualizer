@@ -21,3 +21,6 @@ gear icon: navigates to user profile page
 To visualize a song, click m, then click "Choose a file to visualize", and upload an mp3 file
 After successful file upload, click play to begin the visualization. 
 Clicking m again will hide the menu. 
+
+To run code coverage, run:
+ng test --code-coverage
