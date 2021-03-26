@@ -1,19 +1,17 @@
 
 <html>
 <header>
-  <H1> The Visualizer </H1>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
+  <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+  <!--
+  <link rel="stylesheet" href="./assets/css/Login-Form-Dark.css">
+  -->
 </header>
 <body>
-  <p>For a bad link <a routerLink="badLink">click here!</a></p>
-  <p>To go back to the home page <a routerLink="../">click here!</a></p>
-  <p>To logout <a href (click)="logout()">click here!</a></p>
-  <p><a routerLink="../ProfilePage"> Profile Page Button </a></p>
-
-  <label for="loadFile">Choose a file to visualize: </label>
-  <br>
-  <input type="file" id="uploadFile" name="uploadFile" (change)="loadFilePath($event.target)" accept=".mp3">
-
   <!--
   <label for="uploadFile">Choose a .mp3 file to upload:</label>
   <br>
@@ -21,50 +19,96 @@
   -->
 
   <audio #audioFile id='audio_file' crossorigin="anonymous">
-    <source src="../../../assets/music/tripleT.mp3" id="audio_source" type="audio/mp3" >
+    <source src="../../../assets/music/tripleT.mp3" origin="http://localhost:4200" id="audio_source" type="audio/mp3">
   </audio>
 <!--  <audio id= "audio_file" src="../../../songs/RickFlair.mp3" crossorigin="anonymous" ></audio>-->
-  <div id="canvasButtons">
-    <canvas #rendererCanvas id="renderCanvas"></canvas>
-    <div id="title">
-      <h1>{{this.current.name}}</h1>
-    </div>
-    <div id="controls">
-      <button (click)="rewindSong()" id="rewind_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
-        <i class="fa fa-backward"></i>
-      </button>
-      <button (click)="this.audioService.playOrPause()" id="play_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
-        <i class={{playPauseIcon()}}></i>
-      </button>
-      <button (click)="nextSong()" id="next_button" data-playing="false" class="tape-controls-play" role="switch" aria-checked="false">
-        <i class="fa fa-forward"></i>
-      </button>
-      <br>
+  <div id="canvas-visualizer">
+    <canvas #rendererCanvas id="renderCanvas" height="100%" width="100%"></canvas>
 
-  <!--    //[(ngModel)]="this.audioService.gainNode.gain.value"-->
-      <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
-      <label for="volume_button">VOL</label>
-
-      <input type="range" id="panner" class="control-panner" list="pan-vals" min="-1" max="1" value="0" step="0.01" data-action="panner" />
-        <datalist id="pan-vals">
-          <option value="-1" label="left">
-          <option value="1" label="right">
-        </datalist>
-        <label for="panner">PAN</label>
-      <br>
-
-<!--      <input id="smoothing" type="range" min="0" max="1" step="0.01" value="0.5" (change)="changeSmooth($event.srcElement)">-->
-<!--      <label>SSC</label>-->
-<!--      <input id="fft" type="range" min="5" max="12" step="1" value="9" (change)="changeFFT($event.srcElement)">-->
-<!--      <label>FTT</label>-->
-<!--      <br>-->
-
-      <p>
-        {{timeString(progress())}}
-        <input id="progress" type="range" min="0" max={{duration()}} step="1" value={{progress()}} (change)="changeTime($event.srcElement)">
-        {{timeString(duration())}}
-      </p>
+    <div id="info-button">
+      <button (click)="toggleInfo()">
+        <img src="../../../assets/icons/info.svg" class="ui-button">
+      </button><br>
     </div>
   </div>
+
+  <!--Control info menu listed when info button is pressed-->
+  <div id="info-menu" style="width: 0%; opacity: 0;">
+    <h2>Controls:</h2>
+    <p>m     : toggle the menu<br>
+       d     : play the previous song<br>
+       a     : play the next song<br>
+       space : play/pause the music</p>
+  </div>
+
+  <div id="menu" class="overlay" style="width: 0%;">
+    <div class="overlay-content">
+      <!--Profile Page Button-->
+      <button routerLink="../ProfilePage" style="position: absolute;left: 1%;top: 1%;">
+        <img class="ui-button" src="../../../assets/icons/settings.svg">
+      </button>
+
+      <!--Song title-->
+      <h1>{{this.current.name}}</h1>
+      <br>
+
+      <!--File loader-->
+      <label id="file-label" for="upload-file">Choose a file to visualize</label><br>
+      <input type="file" id="upload-file" name="upload-file" (change)="loadFilePath($event.target)" accept=".mp3">
+
+      <!--Song controls-->
+      <div class="controls">
+        <!--Button controls: rewind, play/pause, skip-->
+        <div id="button" style="display: inline;">
+          <!--Rewind button-->
+          <button (click)="rewindSong()">
+            <img class="custom_icon" src="../../../assets/icons/rewind.svg">
+          </button>
+
+          <!--Play/Pause button-->
+          <button (click)="this.audioService.playOrPause()">
+            <img class="custom_icon" src={{playPauseIcon()}}>
+          </button>
+
+          <!--Skip button-->
+          <button (click)="nextSong()">
+            <img class="custom_icon" src="../../../assets/icons/forward.svg">
+          </button>
+        </div>
+
+        <!--Slider controls: volume, pan-->
+        <div id="silder" style="display: inline">
+          <!--Volume slider-->
+          <img src="../../../assets/icons/volumedown.svg">
+          <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
+          <img src="../../../assets/icons/volumeup.svg">
+
+          <!--Pan slider-->
+          <input type="range" id="panner" class="control-panner slider" list="pan-vals" min="-1" max="1" value="0" step="0.01" data-action="panner"/>
+              <datalist id="pan-vals">
+                <option value="-1" label="left">
+                <option value="1" label="right">
+              </datalist>
+              <label for="panner">PAN</label>
+            <br>
+        </div>
+
+        <!--Progress bar-->
+      <div>
+        <p style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
+        <div class="progress" style="display: inline-block;">
+          <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);width: 0%;height: 100%;"></div>
+        </div>
+        <p style="display: inline-block;padding: 10px;">{{timeString(duration())}}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./assets/js/jquery.min.js"></script>
+<script src="./assets/bootstrap/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+<script src="./assets/js/creative.js"></script>
 </body>
 </html>

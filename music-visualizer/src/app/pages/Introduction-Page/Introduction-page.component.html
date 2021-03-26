@@ -15,12 +15,12 @@
     text-align: center;
     animation: glow 1s ease-in-out infinite alternate;
   }
-  
+
   @keyframes glow {
     from {
       text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff0000, 0 0 40px #ff0000, 0 0 50px #ff0000, 0 0 60px #ff0000, 0 0 70px #ff0000;
     }
-    
+
     to {
       text-shadow: 0 0 20px #fff, 0 0 30px #dc143c, 0 0 40px #dc143c, 0 0 50px #dc143c, 0 0 60px #dc143c, 0 0 70px #dc143c, 0 0 80px #dc143c;
     }
@@ -47,6 +47,9 @@
       <h1 class="glow" style="margin: 0 0 20px 0">WARNING</h1>
       <p class="text-faded mb-5">
         This application is prone to causing seizures due to fast moving visuals and changing colors. If you are epileptic, please be mindful.
+      </p>
+      <p class="text-faded mb-5">
+        Click the info on the upper right corner to access keyboard controls.
       </p>
       <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" routerLink="../VisualizationPage"> Continue to visualizations page </a>
     </div>
