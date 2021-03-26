@@ -32,8 +32,13 @@
     <h1 class="text-uppercase"><strong>Current Stored Data:</strong></h1>
     <p> {{this.userData.name}} </p>
     <p> {{this.userData.email}} </p>
+    <div style="margin-top: 30%;width: 100%;text-align: center;">
+      <p>To go back to the visualization page <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" (click)="goBackToVisualPage()">click here.</a></p>
+      <p>To logout of your account <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" (click)="logout()">click here.</a></p>
+    </div>
   </div>
 </header>
+
 <script src="assets/js/jquery.min.js"></script>
 <script src="assets/bootstrap/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>

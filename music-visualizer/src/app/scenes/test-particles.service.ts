@@ -79,8 +79,8 @@ export class TestParticlesService {
     geometry.setAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
     geometry.setAttribute( 'scale', new THREE.BufferAttribute( scales, 1 ) );
 
-    const material = new THREE.PointsMaterial( { color: this.getRandomColor() } );
-
+    //const material = new THREE.PointsMaterial( { color: this.getRandomColor() } );
+    const material = new THREE.PointsMaterial( {color:0xFFFFFF});
     //
 
     this.particles = new THREE.Points( geometry, material );
@@ -142,8 +142,8 @@ export class TestParticlesService {
 
     this.makeRoughBall(this.particles, this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 4), this.modulate(upperAvgFr, 0, 1, 0, 4));
     //this.particles.rotation.x += 0.01;
-    this.particles.rotation.y += 0.01;
-    this.particles.rotation.z += 0.01;
+    this.particles.rotation.y += 0.005;
+    this.particles.rotation.z += 0.005;
 
 
 }
