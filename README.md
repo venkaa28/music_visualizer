@@ -24,3 +24,6 @@ Clicking m again will hide the menu.
 
 To run code coverage, run:
 ng test --code-coverage
+
+Live deployment link:
+ https://music-visualizer-b2ae6.web.app/
