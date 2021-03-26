@@ -44,3 +44,8 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Remove problems with different versions
+package-lock.json
+music-visualizer/.gitignore
+workspace.code-workspace

@@ -27,6 +27,7 @@ export class ProfilePageComponent implements OnInit {
       this.userData.email = rawJSON.email;
       this.userData.name = rawJSON.name;
     }
+  }
 
   constructor(public router: Router, private authService: AuthService, private cookieService: CookieService) {
     this.userData = this.authService.getUser();
