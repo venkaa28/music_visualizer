@@ -236,13 +236,13 @@ export class PlaneSceneServiceService {
 
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
-    if (this.frame++ % 10 === 0) {
-      this.plane.material.color.setRGB(
-        lowFreqAvgScalor > 0 ? 1/lowFreqAvgScalor * 40 : 255,
-        midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 40 : 255,
-        highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 40 : 255
-      );
-    }
+    // if (this.frame++ % 10 === 0) {
+    //   this.plane.material.color.setRGB(
+    //     lowFreqAvgScalor > 0 ? 1/lowFreqAvgScalor * 40 : 255,
+    //     midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 40 : 255,
+    //     highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 40 : 255
+    //   );
+    // }
 
 
     this.plane.geometry.attributes.position.needsUpdate = true;

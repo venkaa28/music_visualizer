@@ -1,0 +1,11 @@
+
+{
+  "/api": {
+    "target": "https://accounts.spotify.com/",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}

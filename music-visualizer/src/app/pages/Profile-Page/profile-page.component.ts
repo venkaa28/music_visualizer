@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import {Router} from '@angular/router';
 import {User} from '../../classes/user';
 import { CookieService } from 'ngx-cookie-service';
-import { AuthService } from '../../services/auth.service'
+import { AuthService } from '../../services/auth.service';
+import {SpotifyService} from "../../services/spotify.service";
+
 
 type Dict = {[key: string]: any};
 
@@ -29,7 +31,7 @@ export class ProfilePageComponent implements OnInit {
     }
   }
 
-  constructor(public router: Router, private authService: AuthService, private cookieService: CookieService) {
+  constructor(public router: Router, private authService: AuthService, private cookieService: CookieService, private spotifyService: SpotifyService) {
     this.userData = this.authService.getUser();
   }
 
@@ -44,5 +46,9 @@ export class ProfilePageComponent implements OnInit {
 
   async goBackToVisualPage() {
     await this.router.navigate(['../../VisualizationPage']);
+  }
+
+  async authorizeSpotify() {
+    this.spotifyService.getAuth();
   }
 }
