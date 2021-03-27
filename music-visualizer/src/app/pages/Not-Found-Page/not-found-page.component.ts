@@ -13,9 +13,8 @@ export class NotFoundPageComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  // Depreciated: set the route to return the user to
   getRoute(): string {
-    console.log(this.authService.getUser());
-
     if (this.authService.getLoggedIn()) {
       return '../VisualizationPage';
     }
@@ -23,6 +22,7 @@ export class NotFoundPageComponent implements OnInit {
     return '../';
   }
 
+  // Depreciated: set the name to display for the route
   getRouteName(): string {
     if (this.authService.getLoggedIn()) {
       return 'Visualizer';

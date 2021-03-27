@@ -20,21 +20,34 @@
 <section class="login-dark">
   <form [formGroup]="loginForm" (ngSubmit)="login()">
     <h1 class="text-center text-white">Login</h1>
+
+    <!--Email form-->
     <div class="form-group">
       <label for="email"></label>
+      <!--Display required asterisk '*' next to email form label if invalid password-->
       <mat-error *ngIf="this.loginForm.get('email')?.invalid && (this.loginForm.get('email')?.dirty || this.loginForm.get('email')?.touched)">*</mat-error> <br>
       <input class="form-control" type="email" id="email" name="email" formControlName="email" placeholder="Email" required><br>
+      <!--Display required message under email form if invalid password-->
       <mat-error *ngIf="this.loginForm.get('email')?.invalid && (this.loginForm.get('email')?.dirty || this.loginForm.get('email')?.touched)">{{getEmailMessage()}}</mat-error> <br>
     </div>
+
+    <!--Password form-->
     <div class="form-group">
       <label for="pwd"></label>
+      <!--Display required asterisk '*' next to password form label if invalid password-->
       <mat-error *ngIf="this.loginForm.get('password')?.invalid && (this.loginForm.get('password')?.dirty || this.loginForm.get('password')?.touched)">*</mat-error><br>
       <input class="form-control" formControlName="password" type="password" id="pwd" name="pwd" placeholder="Password"><br>
+      <!--Display required message under password form if invalid password-->
       <mat-error *ngIf="this.loginForm.get('password')?.invalid && (this.loginForm.get('password')?.dirty || this.loginForm.get('password')?.touched)">{{getPasswordMessage()}}</mat-error><br>
     </div>
+
+    <!--Submit button-->
     <div class="form-group">
+      <!--Button is disabled until the email and password are valid-->
       <button class="btn btn-primary btn-block" type="submit" [disabled]="this.loginForm.get('email')?.invalid || this.loginForm?.get('password')?.invalid">Log In</button>
     </div>
+    
+    <!--Navigation links-->
     <a class="forgot" routerLink="../ForgotPasswordPage">Forgot your password?</a>
     <a class="forgot" routerLink="../RegisterPage">Dont have an Account? Register here.</a>
   </form>

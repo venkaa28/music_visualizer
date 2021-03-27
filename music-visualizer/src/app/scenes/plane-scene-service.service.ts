@@ -236,11 +236,11 @@ export class PlaneSceneServiceService {
 
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
-    if (this.frame++ % 10 === 0) {
+    if (this.frame++ % 1 === 0) {
       this.plane.material.color.setRGB(
-        lowFreqAvgScalor > 0 ? 1/lowFreqAvgScalor * 40 : 255,
-        midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 40 : 255,
-        highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 40 : 255
+        lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 20 : 255,
+        midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 20 : 255,
+        highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 20 : 255
       );
     }
 
