@@ -1,7 +1,7 @@
 import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
-import {AudioServiceService} from "../services/audio-service.service";
+import {AudioService} from "../services/audio.service";
 
 @Injectable({
   providedIn: 'root'
@@ -107,5 +107,5 @@ export class TemplateSceneServiceService {
     this.renderer.setSize(width, height);
   }
 
-  constructor(private ngZone: NgZone, public audioService: AudioServiceService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService) { }
 }
