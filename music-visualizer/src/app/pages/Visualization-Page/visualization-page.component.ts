@@ -2,7 +2,7 @@ import {AfterContentInit, AfterViewInit, Component, ContentChild, ElementRef, On
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
-import {AudioServiceService} from '../../services/audio-service.service';
+import {AudioService} from '../../services/audio.service';
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {Music} from '../../classes/music'
 import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
@@ -31,7 +31,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   public audio: HTMLAudioElement;
 
-  private currentSong: string = '16162754104549215';
+  private currentSong: string = '';
   public current: Music = new Music();
   private songList: Dict;
 
@@ -65,6 +65,8 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.audio.src = this.current.filepath;
     this.audioService.loadSong(this.audio);
+    
+    this.planeScene.animate();
 
     return this.current.filepath;
   }
@@ -79,7 +81,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.current.uploadEmail = this.authService.getUser().email;
 
     this.audio.src = this.current.filepath;
-    this.audioService.gainNode.gain.value = 0;
     this.audioService.loadSong(this.audio);
 
     return this.current.filepath;
@@ -129,19 +130,8 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.gainNode.gain.value = input.value;
   }
 
-  changeSmooth(input) {
-    var time = this.audioService.audioElement.currentTime;
-    this.audioService.smoothConstant = input.value;
-    this.audioService.reloadSong();
-    this.audioService.audioElement.currentTime = time;
-  }
-
-  changeFFT(input) {
-    var time = this.audioService.audioElement.currentTime;
-    this.audioService.fftSize = Math.pow(2, input.value);
-    console.log(Math.pow(2, input.value));
-    this.audioService.reloadSong();
-    this.audioService.audioElement.currentTime = time;
+  changePan(input) {
+    this.audioService.panNode.pan.value = input.value;
   }
 
   duration() {
@@ -247,10 +237,9 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   }
 
-  constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
+  constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
       public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
     this.loadList();
-    this.loadSong();
   }
 
   ngAfterViewInit(): void {
@@ -259,14 +248,11 @@ export class VisualizationPageComponent implements AfterViewInit {
     // this.engServ.createScene(this.rendererCanvas);
     //     this.engServ.animate();
 
-    this.audioService.loadSong(this.audio);
+    // this.audioService.loadSong(this.audio);
     // this.demoScene.createScene(this.rendererCanvas);r
     // this.demoScene.animate();
     //this.testParticles.createScene(this.rendererCanvas);
     //this.testParticles.animate();
     this.planeScene.createScene(this.rendererCanvas);
-    this.planeScene.animate();
-
-
   }
 }

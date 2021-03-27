@@ -11,20 +11,16 @@ type Dict = {[key: string]: any};
 @Injectable({
   providedIn: 'root'
 })
-export class AudioServiceService {
-
-  // @ViewChild('audioFile', {static: true})
-  // public audioFile!: ElementRef<HTMLMediaElement>;
-
-  public AudioContext = window.AudioContext; // || window.webkitAudioContext;
-  public audioCtx: AudioContext;
-  public audioElement: HTMLAudioElement;// = this.audioFile.nativeElement;
-  public track: MediaElementAudioSourceNode;
+export class AudioService {
+  public AudioContext: AudioContext = new AudioContext();
+  public audioElement: HTMLAudioElement;
   public analyzer: AnalyserNode;
+  public track: MediaElementAudioSourceNode;
   public bufferLength: number;
   public dataArray: Uint8Array;
   public gainNode: GainNode;
-  public smoothConstant = 0.75;
+  public panNode: StereoPannerNode;
+  public smoothConstant = 0.74;
   public fftSize = 512;
 
   constructor(private authService: AuthService) {
@@ -110,8 +106,8 @@ export class AudioServiceService {
   }
 
   async play(){
-    if (this.audioCtx.state === 'suspended'){
-      await this.audioCtx.resume();
+    if (this.AudioContext.state === 'suspended'){
+      await this.AudioContext.resume();
     }
 
     await this.audioElement.play();
@@ -121,49 +117,33 @@ export class AudioServiceService {
     await this.audioElement.pause();
   }
 
-  async rewind(){
-    this.audioElement.currentTime = 0;
-  }
-
   reloadSong() {
-    this.analyzer = this.audioCtx.createAnalyser();
     this.analyzer.smoothingTimeConstant = this.smoothConstant;
     this.analyzer.fftSize = this.fftSize;
-    this.track.connect(this.analyzer);
   }
 
-  loadSong = (song: HTMLMediaElement) => {
+  loadSong(song: HTMLMediaElement) {
     this.audioElement = song;
-    this.audioCtx = new AudioContext();
 
+    if (typeof this.track === 'undefined') {
+      this.track = this.AudioContext.createMediaElementSource(song);
+    } else {
+      this.track.disconnect();
+    }
 
-    this.track = this.audioCtx.createMediaElementSource(song);
+    this.gainNode = this.AudioContext.createGain();
+    this.panNode = this.AudioContext.createStereoPanner();
+    this.analyzer = this.AudioContext.createAnalyser();
+    
+    this.track
+    .connect(this.gainNode)
+    .connect(this.panNode)
+    .connect(this.analyzer)
+    .connect(this.AudioContext.destination);
 
-    this.gainNode = this.audioCtx.createGain();
-    this.gainNode.gain.value = 1; //this.gainValue;
-    this.track.connect(this.gainNode);
-
-    this.analyzer = this.audioCtx.createAnalyser();
-    this.gainNode.connect(this.analyzer);
-
-    this.analyzer.connect(this.audioCtx.destination);
     this.analyzer.smoothingTimeConstant = this.smoothConstant;
-
     this.analyzer.fftSize = this.fftSize;
     this.bufferLength = this.analyzer.frequencyBinCount;
-    //console.log(this.bufferLength);
     this.dataArray = new Uint8Array(this.bufferLength);
-
-    // pan
-    const pannerOptions = {pan: 0};
-    const panner = new StereoPannerNode(this.audioCtx, pannerOptions);
-
-    const pannerControl = document.querySelector('[data-action="panner"]');
-    pannerControl.addEventListener('input', function() {
-      panner.pan.value = this.value;
-    }, false);
-
-    // connect each component
-    this.track.connect(this.gainNode).connect(panner).connect(this.audioCtx.destination);
   }
 }
