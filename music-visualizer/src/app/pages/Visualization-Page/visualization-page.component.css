@@ -2,6 +2,7 @@
                                 HTML Elements
 ******************************************************************************/
 html {
+  overflow-x: hidden;
   overflow-y: hidden;
 }
 
@@ -48,6 +49,7 @@ input[type=range] {
   left: 0;
   background-color: rgba(0,0,0, 0.4);
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 .overlay-content {
@@ -131,6 +133,6 @@ input[type=range] {
 #button {
   width: 50%;
   align-items: center;
-  margin-left: 40%;
+  margin-left: 44%;
   margin-right: 25%;
 }

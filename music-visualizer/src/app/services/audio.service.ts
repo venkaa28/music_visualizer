@@ -16,16 +16,21 @@ type Dict = {[key: string]: any};
   providedIn: 'root'
 })
 export class AudioService {
-  public AudioContext: AudioContext = new AudioContext(); // The audio context
-  public audioElement: HTMLAudioElement; // The html audio element
+  // Audio elements
+  private AudioContext: AudioContext = new AudioContext(); // The audio context
+  private audioElement: HTMLAudioElement; // The html audio element
+  private track: MediaElementAudioSourceNode; // Set audio source
+
+  // Audio nodes
+  private gainNode: GainNode; // volume control
+  private panNode: StereoPannerNode; // pan control
   public analyzer: AnalyserNode; // The analyser
-  public track: MediaElementAudioSourceNode; // Set audio source
-  public bufferLength: number; // buffer length
+
+  // Analyser settings
   public dataArray: Uint8Array; // array of frequencies
-  public gainNode: GainNode; // volume control
-  public panNode: StereoPannerNode; // pan control
-  public smoothConstant = 0.74; // smoothing constant for analyser
-  public fftSize = 512; // fourier frequency transform
+  private bufferLength: number; // buffer length
+  private smoothConstant = 0.74; // smoothing constant for analyser
+  private fftSize = 512; // fourier frequency transform
 
   constructor(private authService: AuthService) {
     // make sure firebase is initialized
@@ -105,7 +110,6 @@ export class AudioService {
       }
     });
 
-    console.log(dict);
     return dict;
   }
 
@@ -139,6 +143,48 @@ export class AudioService {
   reloadSong() {
     this.analyzer.smoothingTimeConstant = this.smoothConstant;
     this.analyzer.fftSize = this.fftSize;
+  }
+
+  setGain(level: number) {
+    if (typeof this.gainNode !== 'undefined') {
+      this.gainNode.gain.value = level;
+    }
+  }
+
+  setPan(level: number) {
+    if (typeof this.panNode !== 'undefined') {
+      this.panNode.pan.value = level;
+    }
+  }
+
+  setTime(time: number) {
+    if (typeof this.audioElement !== 'undefined'){
+      this.audioElement.currentTime = time;
+    }
+  }
+
+  getTime() {
+    if (typeof this.audioElement !== 'undefined') {
+      return this.audioElement.currentTime;
+    }
+
+    return 0;
+  }
+
+  getDuration() {
+    if (typeof this.audioElement !== 'undefined') {
+      return this.audioElement.duration
+    }
+
+    return 0;
+  }
+
+  isOver() {
+    if (typeof this.audioElement !== 'undefined') {
+      return (this.audioElement.currentTime === 0) ? false : (this.audioElement.currentTime >= this.audioElement.duration)
+    }
+
+    return false;
   }
 
   // load a song into the audio context

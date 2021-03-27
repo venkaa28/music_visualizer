@@ -11,8 +11,10 @@ import { CookieService } from 'ngx-cookie-service';
 // Local libs
 import {User} from '../classes/user';
 
+
 // typedef dict
 type Dict = {[key: string]: any};
+
 
 @Injectable({
   providedIn: 'root'
@@ -41,11 +43,12 @@ export class AuthService {
       await firebase.database().ref('accounts/' + uid).on('value', async (snapshot) => {
         // make sure account exists
         if (snapshot.exists()) {
-          console.log(snapshot.val());
           userDict.email = snapshot.val().email; // grab email
           userDict.name = snapshot.val().name; // grab user's name
-          const userJSON: string = JSON.stringify(userDict); // convert user json dict to json string
-          this.cookieService.set('account', userJSON); // set account cookie
+          
+          // convert json dict to string and set as account cookie
+          this.cookieService.set('account', JSON.stringify(userDict));
+          
           resolve();
         } else {
           reject(new Error('Bad login'));
@@ -55,7 +58,7 @@ export class AuthService {
   }
 
   // sign up the user and add account to firebase
-  async signUpUser(email: string, password: string, userDict: {[key: string]: any;}): Promise<void> {
+  async signUpUser(email: string, password: string, userDict: Dict): Promise<void> {
     // create user account in fire auth
     await this.ngFireAuth.createUserWithEmailAndPassword(email, password).catch((error) => {
       console.log(error);
@@ -71,10 +74,9 @@ export class AuthService {
       // store user data in rtdb
       await firebase.database().ref('accounts').child(uid).set(userDict);
 
-      // convert data to json string
-      var userJSON: string = JSON.stringify(userDict);
-      // store it as a cookie
-      this.cookieService.set('account', userJSON);
+      // convert data to json string and store it as a cookie
+      this.cookieService.set('account', JSON.stringify(userDict));
+
       resolve();
     });
   }
@@ -95,30 +97,16 @@ export class AuthService {
   // get user data from cookie if it exists, allows for persistent log in
   getUser(){
     const cookie: string = this.cookieService.get('account'); // get account cookie
-    var userJSON; // user json dict
 
     // make sure cookie exists
-    if (cookie.length === 0) {
-      userJSON = null; // no cookie
-    } else {
-      userJSON = JSON.parse(cookie); // parse json string into json dict
-    }
+    this.userData = (cookie.length === 0) ? null : JSON.parse(cookie);
 
     // store in global user object
-    this.userData = userJSON;
     return this.userData;
   }
 
   // use cookies to see if user is logged in
   getLoggedIn() {
-    var userData = this.getUser();
-    console.log(userData);
-
-    // no cookie stored = no user
-    if (userData === null) {
-      return false;
-    }
-
-    return true;
+    return (this.getUser() === null) ? false : true;
   }
 }

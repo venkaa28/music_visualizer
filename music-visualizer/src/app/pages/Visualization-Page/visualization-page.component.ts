@@ -43,6 +43,58 @@ export class VisualizationPageComponent implements AfterViewInit {
   private songList: Dict; // list of songs on firebase
   private scene: string = 'plane'; // current scene being used
 
+  constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
+    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
+    // this.loadList(); // get list of songs from firebase
+  }
+
+  ngAfterViewInit(): void {
+    this.audio = this.audioFile.nativeElement; // grab audio element from html
+    
+    // generate scene
+    switch (this.scene) {
+      case 'plane':
+        this.planeScene.createScene(this.rendererCanvas);
+        break;
+
+      case 'demo':
+        this.demoScene.createScene(this.rendererCanvas);
+        break;
+
+      case 'particle':
+        this.testParticles.createScene(this.rendererCanvas);
+        break;
+    }
+
+    setInterval(() => {
+      this.progress();
+    }, 10);
+  }
+
+  // listen to keyboard events, perform actions if certain keys are pressed
+  keyListener(event){
+    event = event || window.event; //capture the event, and ensure we have an event
+    
+    switch (event.key) {
+      case 'm': // menu
+        this.toggleMenu();
+        break;
+      
+      case ' ': // play/pause
+        this.audioService.playOrPause();
+        break;
+
+      case 'd': // fast forward
+        this.nextSong();
+        break;
+
+      case 'a': // rewind
+        this.rewindSong();
+        break;
+    }
+
+  }
+
   // upload mp3 file to firebase
   async upload(event: any) {
     var file = event as HTMLInputElement;
@@ -156,56 +208,45 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   // change volume based on slider input
   changeVolume(input) {
-    this.audioService.gainNode.gain.value = input.value;
+    this.audioService.setGain(input.value);
   }
 
   // change pan based on slider input
   changePan(input) {
-    this.audioService.panNode.pan.value = input.value;
+    this.audioService.setPan(input.value);
   }
 
   // get the duration of the current song
   duration() {
-    // check if audio element is undefined
-    if (typeof this.audioService.audioElement === "undefined") {
-      return 0;
-    }
-
-    return Math.floor(this.audioService.audioElement.duration);
+    return Math.floor(this.audioService.getDuration());
   }
 
   // get the current time in the song, and update progress bar
   progress() {
-    // check if audio element is undefined
-    if (typeof this.audioService.audioElement === "undefined") {
-      return 0;
-    }
-
     // get the progress bar div on the html page
     var progress = document.getElementById("progress-bar");
     // set width as percent song complete
-    progress.style.width = Math.floor(this.audioService.audioElement.currentTime / this.audioService.audioElement.duration * 100) + '%';
+    progress.style.width = Math.floor(this.audioService.getTime() / this.audioService.getDuration() * 100) + '%';
 
     // check if song is done
-    if (this.audioService.audioElement.currentTime >= this.audioService.audioElement.duration) {
+    if (this.audioService.isOver()) {
       // notify
       this.notifierService.notify('warning', 'The current song has ended. Please open a new upload mp3 file to continue the visualization.');
       // stop playback
       this.audioService.pause();
       // reset song
-      this.audioService.audioElement.currentTime = 0;
+      this.audioService.setTime(0);
     }
 
-    return Math.floor(this.audioService.audioElement.currentTime);
+    return Math.floor(this.audioService.getTime());
+  }
+
+  setTime(event: any) {
+    this.audioService.setTime(event.value);
   }
 
   // convert time in seconds to a formatted output string mm:ss
   timeString(time: number) {
-    // check if audio element is undefined
-    if (typeof this.audioService.audioElement === "undefined") {
-      return 'NaN';
-    }
-
     var secondsTotal = time; // raw seconds of current place in song
     var outputTime: string = ""; // string used for output
 
@@ -231,12 +272,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     return outputTime;
   }
 
-  // change the time in the song
-  // depreciated: div's don't have input
-  changeTime(input) {
-    this.audioService.audioElement.currentTime = input.value;
-  }
-
   // display or hide menu
   toggleMenu() {
     var overlay = document.getElementById('menu'); // menu element on html
@@ -260,54 +295,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     } else if (infoBox.style.width === '20%'){
       infoBox.style.width = '0%';
       infoBox.style.opacity = '0';
-    }
-  }
-
-  // listen to keyboard events, perform actions if certain keys are pressed
-  keyListener(event){
-    event = event || window.event; //capture the event, and ensure we have an event
-    
-    switch (event.key) {
-      case 'm': // menu
-        this.toggleMenu();
-        break;
-      
-      case ' ': // play/pause
-        this.audioService.playOrPause();
-        break;
-
-      case 'd': // fast forward
-        this.nextSong();
-        break;
-
-      case 'a': // rewind
-        this.rewindSong();
-        break;
-    }
-
-  }
-
-  constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
-      public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
-    // this.loadList(); // get list of songs from firebase
-  }
-
-  ngAfterViewInit(): void {
-    this.audio = this.audioFile.nativeElement; // grab audio element from html
-    
-    // generate scene
-    switch (this.scene) {
-      case 'plane':
-        this.planeScene.createScene(this.rendererCanvas);
-        break;
-
-      case 'demo':
-        this.demoScene.createScene(this.rendererCanvas);
-        break;
-
-      case 'particle':
-        this.testParticles.createScene(this.rendererCanvas);
-        break;
     }
   }
 }
