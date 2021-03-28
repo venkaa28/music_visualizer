@@ -41,7 +41,8 @@ export class VisualizationPageComponent implements AfterViewInit {
   private currentSong: string = ''; // path/uid to current song
   public current: Music = new Music(); // music object
   private songList: Dict; // list of songs on firebase
-  private scene: string = 'plane'; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene]; // current scene being used
+  private scene = this.scenesAvailable[0];
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
     public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
@@ -51,20 +52,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement; // grab audio element from html
     
-    // generate scene
-    switch (this.scene) {
-      case 'plane':
-        this.planeScene.createScene(this.rendererCanvas);
-        break;
-
-      case 'demo':
-        this.demoScene.createScene(this.rendererCanvas);
-        break;
-
-      case 'particle':
-        this.testParticles.createScene(this.rendererCanvas);
-        break;
-    }
+    this.scene.createScene(this.rendererCanvas);
 
     setInterval(() => {
       this.progress();
@@ -94,6 +82,9 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
 
   }
+
+
+  /**************************************Loading functions**************************************/
 
   // upload mp3 file to firebase
   async upload(event: any) {
@@ -130,20 +121,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audio.src = this.current.filepath; // set source to be the file in the html
     this.audioService.loadSong(this.audio); // load the audio into the audio context
 
-    // choose what scene to animate
-    switch (this.scene) {
-      case 'plane':
-        this.planeScene.animate();
-        break;
-
-      case 'demo':
-        this.demoScene.animate();
-        break;
-
-      case 'particle':
-        this.testParticles.animate();
-        break;
-    }
+    this.scene.animate();
 
     return this.current.filepath;
   }
@@ -190,30 +168,33 @@ export class VisualizationPageComponent implements AfterViewInit {
     await this.loadSong().then(() => this.audioService.play());
   }
 
-  // displays appropiate play or pause icon based on the state of the audio
-  playPauseIcon() {
-    // audio uninitialized
-    if (typeof this.audio === 'undefined') {
-      return '../../../assets/icons/play.svg';
-    }
 
-    // paused music, show play icon
-    if (this.audio.paused) {
-      return '../../../assets/icons/play.svg';
-    }
+  /**************************************Audio controls**************************************/
 
-    // playing music, show pause icon
-    return '../../../assets/icons/pause.svg';
+  // change the current visualization scene
+  changeScene(event: any) {
+    this.scene = this.scenesAvailable[event.value];
+    this.scene.createScene(this.rendererCanvas);
+    this.scene.animate();
+  }
+
+  // change fft value based on slider input
+  changeFFT(event: any) {
+    this.audioService.setFFT(Math.pow(2, event.value));
+  }
+
+  changeSC(event: any) {
+    this.audioService.setSC(event.value);
   }
 
   // change volume based on slider input
-  changeVolume(input) {
-    this.audioService.setGain(input.value);
+  changeVolume(event: any) {
+    this.audioService.setGain(event.value);
   }
 
   // change pan based on slider input
-  changePan(input) {
-    this.audioService.setPan(input.value);
+  changePan(event: any) {
+    this.audioService.setPan(event.value);
   }
 
   // get the duration of the current song
@@ -243,6 +224,25 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   setTime(event: any) {
     this.audioService.setTime(event.value);
+  }
+
+
+  /**************************************Visuals**************************************/
+
+  // displays appropiate play or pause icon based on the state of the audio
+  playPauseIcon() {
+    // audio uninitialized
+    if (typeof this.audio === 'undefined') {
+      return '../../../assets/icons/play.svg';
+    }
+
+    // paused music, show play icon
+    if (this.audio.paused) {
+      return '../../../assets/icons/play.svg';
+    }
+
+    // playing music, show pause icon
+    return '../../../assets/icons/pause.svg';
   }
 
   // convert time in seconds to a formatted output string mm:ss

@@ -139,10 +139,16 @@ export class AudioService {
     await this.audioElement.pause();
   }
 
-  // not currently used, but for updating visualizer settings without reloading the whole app
-  reloadSong() {
-    this.analyzer.smoothingTimeConstant = this.smoothConstant;
-    this.analyzer.fftSize = this.fftSize;
+  setFFT(level: number) {
+    this.fftSize = level;
+    this.analyzer.fftSize = level;
+
+    console.log(level);
+  }
+
+  setSC(level: number) {
+    this.smoothConstant = level;
+    this.analyzer.smoothingTimeConstant = level;
   }
 
   setGain(level: number) {
@@ -188,7 +194,7 @@ export class AudioService {
   }
 
   // load a song into the audio context
-  loadSong(song: HTMLMediaElement) {
+  loadSong(song: HTMLMediaElement = this.audioElement) {
     this.audioElement = song; // set the audio as the song
 
     // initialize the track if it doesn't exist
