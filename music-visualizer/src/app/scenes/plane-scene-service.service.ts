@@ -238,9 +238,9 @@ export class PlaneSceneServiceService {
     // this.group.rotation.z += 0.005;
     if (this.frame++ % 1 === 0) {
       this.plane.material.color.setRGB(
-        lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 30 : 255,
+        highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 30 : 255,
         midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 30 : 255,
-        highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 30 : 255
+        lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 30 : 255
       );
     }
 
@@ -297,7 +297,7 @@ export class PlaneSceneServiceService {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
-    this.renderer.setSize(width, height - 10);
+    this.renderer.setSize(width, height);
     this.createScene(this.canvasRef);
   }
 }

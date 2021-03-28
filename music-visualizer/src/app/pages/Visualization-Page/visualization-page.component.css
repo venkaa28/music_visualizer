@@ -23,6 +23,12 @@ button {
   background-color: rgba(0, 0, 0, 0);
 }
 
+input[type=file] {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
+
 input[type=range] {
   -webkit-appearance: none;
   border-radius: 5px;
@@ -120,14 +126,12 @@ input[type=range] {
   overflow-y: hidden;
 }
 
-#file-label {
+#load-label {
   cursor: pointer;
 }
 
-#upload-file{
-  position: absolute;
-  z-index: -1;
-  opacity: 0;
+#upload-label{
+  cursor: pointer;
 }
 
 #button {

@@ -9,12 +9,6 @@
   <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
 </header>
 <body>
-  <!--
-  <label for="uploadFile">Choose a .mp3 file to upload:</label>
-  <br>
-  <input type="file" id="uploadFile" name="uploadFile" (change)="upload($event.target)" accept=".mp3">
-  -->
-
   <audio #audioFile id='audio_file' crossorigin="anonymous">
     <source src="../../../assets/music/ILLENIUM, X Ambassadors - In Your Arms (Visualizer).mp3" origin="http://localhost:4200" id="audio_source" type="audio/mp3">
   </audio>
@@ -50,8 +44,12 @@
       <br>
 
       <!--File loader-->
-      <label id="file-label" for="upload-file">Choose a file to visualize</label><br>
-      <input type="file" id="upload-file" name="upload-file" (change)="loadFilePath($event.target)" accept=".mp3">
+      <label id="load-label" for="load-file">Choose a file to visualize</label><br>
+      <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept=".mp3">
+
+      <!--Upload file-->
+      <label id="upload-label" for="upload-file">Choose a .mp3 file to upload</label>
+      <input type="file" id="upload-file" name="upload-file" (change)="upload($event.target)" accept=".mp3">
 
       <!--Song controls-->
       <div class="controls">
@@ -75,6 +73,26 @@
 
         <!--Slider controls: volume, pan-->
         <div id="slider">
+          <!--Scene slider: broken right now-->
+          <!--
+            <div id="scene">
+            <label for="scene-slider">Scene </label>
+            <input id="scene-slider" type="range" min="0" max="2" value="0" step="1" (change)="changeScene($event.srcElement)">
+          </div>
+          -->
+
+          <!--FFT slider-->
+          <div id="fft">
+            <label for="fft-slider">FFT </label>
+            <input id="fft-slider" type="range" min="5" max="15" value="4" step="1" (change)="changeFFT($event.srcElement)">
+          </div>
+
+          <!--Smoothing time constant slider-->
+          <div id="sc">
+            <label for="sc-slider">SC</label>
+            <input id="sc-slider" type="range" min="0" max="0.99" value="0.74" step="0.01" (change)="changeSC($event.srcElement)">
+          </div>
+
           <!--Volume slider-->
           <div id="volume">
             <img src="../../../assets/icons/volumedown.svg">
