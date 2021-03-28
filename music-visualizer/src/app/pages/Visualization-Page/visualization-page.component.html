@@ -56,7 +56,7 @@
       <!--Song controls-->
       <div class="controls">
         <!--Button controls: rewind, play/pause, skip-->
-        <div id="button" style="display: inline;">
+        <div id="button" style="display: inline-block;">
           <!--Rewind button-->
           <button (click)="rewindSong()">
             <img class="custom_icon" src="../../../assets/icons/rewind.svg">
@@ -74,16 +74,20 @@
         </div>
 
         <!--Slider controls: volume, pan-->
-        <div id="silder" style="display: inline">
+        <div id="slider">
           <!--Volume slider-->
-          <img src="../../../assets/icons/volumedown.svg">
-          <input id= "volume_button" type="range" min="0" max="1" value="1" step="0.1" (input)="changeVolume($event.srcElement)">
-          <img src="../../../assets/icons/volumeup.svg">
-
+          <div id="volume">
+            <img src="../../../assets/icons/volumedown.svg">
+            <input id= "volume-slider" type="range" min="0" max="1" value="1" step="0.1" (input)="changeVolume($event.srcElement)">
+            <img src="../../../assets/icons/volumeup.svg">
+          </div>
+          
           <!--Pan slider-->
-          <input type="range" id="panner" min="-1" max="1" value="0" step="0.01" (input)="changePan($event.srcElement)">
-          <label for="panner">PAN</label>
-            <br>
+          <div id="panner">
+            <p style="display: inline;">L</p>
+            <input id="panner-slider" type="range" style="display: inline;" min="-1" max="1" value="0" step="0.01" (input)="changePan($event.srcElement)">
+            <p style="display: inline;">R</p>
+          </div>
         </div>
 
         <!--Progress bar-->
