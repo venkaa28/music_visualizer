@@ -2,9 +2,6 @@
 import { ElementRef, OnInit, ViewChild, Injectable} from '@angular/core';
 
 // firebase
-import firebase from 'firebase';
-import { firebaseConfig } from '../firebase';
-
 // local libs
 import {AuthService} from './auth.service';
 import {Music} from '../classes/music';
@@ -33,84 +30,6 @@ export class AudioService {
   private fftSize = 512; // fourier frequency transform
 
   constructor(private authService: AuthService) {
-    // make sure firebase is initialized
-    if (firebase.apps.length === 0) {
-      firebase.initializeApp(firebaseConfig);
-    }
-  }
-
-  // upload mp3 to firebase
-  async upload(file: File): Promise<void> {
-    var date: string = new Date().getTime().toString(); // get current date
-    var rand: string = Math.floor(Math.random() * 9999).toString(); // add random int to avoid collisions
-
-    // add zeros to the random int
-    while (rand.length < 4) {
-      rand = '0' + rand;
-    }
-
-    var uid: string = date + rand; // set string uid for storaged in firebase
-
-    //upload file to storage
-    firebase.storage().ref().child(uid + '.mp3').put(file).then((snapshot) =>{
-      console.log('Upload successful!');
-    }).catch((error) => {
-      console.log(error);
-      throw error;
-    });
-
-    // set data for music in rtdb
-    var dict: Dict = {
-      'name': file.name, 
-      'uploadEmail': this.authService.getUser().email,
-      'public': true
-    };
-
-    return new Promise(async (resolve, reject) => {
-      // store music data in rtdb
-      await firebase.database().ref('music').child(uid).set(dict);
-      resolve();
-    });
-  }
-
-  // get song from firebase storage
-  async getRemoteSong(uid: string): Promise<Music> {
-    var music: Music = new Music(); // store the music in a music object
-
-    // get music data from rtdb
-    await firebase.database().ref('music').child(uid).on('value', async (snapshot) => {
-      if (snapshot.exists()) {
-        music.name = snapshot.val().name; // get music name
-        music.source = 'firebase'; // set source
-        music.uploadEmail = snapshot.val().uploadEmail; // get upload email
-      } else {
-        // music not on rtdb
-        throw new Error('A song with that id does not exist on the database');
-      }
-    });
-
-    // get music file from firebase storage
-    await firebase.storage().ref(uid + '.mp3').getDownloadURL().then((url) => {
-      music.filepath = url; // get the firebase url for the song
-      console.log(url);
-    });
-
-    return music;
-  }
-
-  // get a list of all songs from rtdb to reduce firebase calls
-  async getSongList(): Promise<Dict> {
-    var dict: Dict = {}; // key value of songs and their uid's
-
-    await firebase.database().ref('music').on('value', (snapshot) => {
-      if (snapshot.exists()) {
-        for (var obj in snapshot.val()) {
-          dict[snapshot.val()[obj].name] = obj; // set key as name, value as uid
-        }
-      }
-    });
-
-    return dict;
   }
 
   // toggle playing state of current audio
