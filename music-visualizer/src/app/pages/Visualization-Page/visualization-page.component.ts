@@ -43,10 +43,11 @@ export class VisualizationPageComponent implements AfterViewInit {
   private songList: Dict; // list of songs on firebase
   public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene]; // current scene being used
   private scene = this.scenesAvailable[0];
+  private menuTimeout: number = 3000;
+  private timeout: number;
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
     public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
-    // this.loadList(); // get list of songs from firebase
   }
 
   ngAfterViewInit(): void {
@@ -69,7 +70,7 @@ export class VisualizationPageComponent implements AfterViewInit {
         break;
       
       case ' ': // play/pause
-        this.audioService.playOrPause();
+        this.togglePlay();
         break;
 
       case 'd': // fast forward
@@ -101,8 +102,12 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.loadSong(this.audio); // load the audio into the audio context
 
     this.scene.animate();
-
     return this.current.filepath;
+  }
+
+  // handle play or pause
+  async togglePlay() {
+    await this.audioService.playOrPause().then(() => this.resetMenuTimeout());
   }
 
   // load next song from firebase
@@ -112,6 +117,8 @@ export class VisualizationPageComponent implements AfterViewInit {
     } else {
       this.audioService.setTime(this.audioService.getTime() + 10);
     }
+
+    this.resetMenuTimeout();
   }
 
   // load previous song from firebase
@@ -121,6 +128,8 @@ export class VisualizationPageComponent implements AfterViewInit {
     } else {
       this.audioService.setTime(this.audioService.getTime() - 10);
     }
+
+    this.resetMenuTimeout();
   }
 
 
@@ -136,20 +145,25 @@ export class VisualizationPageComponent implements AfterViewInit {
   // change fft value based on slider input
   changeFFT(event: any) {
     this.audioService.setFFT(Math.pow(2, event.value));
+    this.resetMenuTimeout();
   }
 
+  // change the smoothing constant
   changeSC(event: any) {
     this.audioService.setSC(event.value);
+    this.resetMenuTimeout();
   }
 
   // change volume based on slider input
   changeVolume(event: any) {
     this.audioService.setGain(event.value);
+    this.resetMenuTimeout();
   }
 
   // change pan based on slider input
   changePan(event: any) {
     this.audioService.setPan(event.value);
+    this.resetMenuTimeout();
   }
 
   // get the duration of the current song
@@ -179,10 +193,29 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   setTime(event: any) {
     this.audioService.setTime(event.value);
+    this.resetMenuTimeout();
   }
 
 
   /**************************************Visuals**************************************/
+
+  // close menu on interaction timeout
+  resetMenuTimeout() {
+    var menu = document.getElementById('menu'); // menu element
+
+    window.clearTimeout(this.timeout); // clear previous timeout
+
+    // choose action base on if song is paused or not
+    if (this.audioService.paused() === true) {
+      menu.style.width = '100%'; // open menu
+    } else {
+      // set menu to close in menuTimeout ms
+      this.timeout = window.setTimeout(() => {
+        menu.style.width = "0%"; // close menu
+      }, this.menuTimeout);
+      
+    }
+  }
 
   // displays appropiate play or pause icon based on the state of the audio
   playPauseIcon() {
@@ -234,6 +267,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     // change width to display or hide
     if (overlay.style.width === '0%') {
       overlay.style.width = '100%';
+      this.resetMenuTimeout();
     } else if (overlay.style.width === '100%'){
       overlay.style.width = '0%';
     }

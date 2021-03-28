@@ -1,10 +1,9 @@
 // angular
-import { ElementRef, OnInit, ViewChild, Injectable} from '@angular/core';
+import { Injectable} from '@angular/core';
 
 // firebase
 // local libs
 import {AuthService} from './auth.service';
-import {Music} from '../classes/music';
 
 // typedef dict
 type Dict = {[key: string]: any};
@@ -58,6 +57,12 @@ export class AudioService {
     await this.audioElement.pause();
   }
 
+  // return whether song is playing or not
+  paused() {
+    return (this.audioElement.paused);
+  }
+
+  // set the fft value of the analyser
   setFFT(level: number) {
     this.fftSize = level;
     this.analyzer.fftSize = level;
@@ -65,29 +70,34 @@ export class AudioService {
     console.log(level);
   }
 
+  // set the smoothing constant of the analyser
   setSC(level: number) {
     this.smoothConstant = level;
     this.analyzer.smoothingTimeConstant = level;
   }
 
+  // set the gain level
   setGain(level: number) {
     if (typeof this.gainNode !== 'undefined') {
       this.gainNode.gain.value = level;
     }
   }
 
+  // set the pan level
   setPan(level: number) {
     if (typeof this.panNode !== 'undefined') {
       this.panNode.pan.value = level;
     }
   }
 
+  // set the time in the song
   setTime(time: number) {
     if (typeof this.audioElement !== 'undefined'){
       this.audioElement.currentTime = time;
     }
   }
 
+  // return the current time in the song
   getTime() {
     if (typeof this.audioElement !== 'undefined') {
       return this.audioElement.currentTime;
@@ -96,6 +106,7 @@ export class AudioService {
     return 0;
   }
 
+  // return how long the song is
   getDuration() {
     if (typeof this.audioElement !== 'undefined') {
       return this.audioElement.duration
@@ -104,6 +115,7 @@ export class AudioService {
     return 0;
   }
 
+  // return whether or not the song is over
   isOver() {
     if (typeof this.audioElement !== 'undefined') {
       return (this.audioElement.currentTime === 0) ? false : (this.audioElement.currentTime >= this.audioElement.duration)
