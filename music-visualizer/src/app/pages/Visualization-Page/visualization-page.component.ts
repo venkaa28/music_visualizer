@@ -86,27 +86,6 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   /**************************************Loading functions**************************************/
 
-  // upload mp3 file to firebase
-  async upload(event: any) {
-    var file = event as HTMLInputElement;
-    this.audioService.upload(file.files[0]);
-  }
-
-  // load list of songs from firebase
-  async loadList() {
-    this.songList = await this.audioService.getSongList();
-    console.log(this.songList);
-  }
-
-  // load song from firebase
-  async loadSong(): Promise<string> {
-    this.current = await this.audioService.getRemoteSong(this.currentSong); // load song from firebase
-    this.audio.src = this.current.filepath; // firebase url
-    this.audio.crossOrigin = 'anonymous'; // set cors policy
-    this.audioService.loadSong(this.audio); // load song into audio context to play
-    return this.current.filepath;
-  }
-
   // load song from local file
   loadFilePath(event: any) {
     var file = event as HTMLInputElement; // get filelist from html
@@ -126,46 +105,22 @@ export class VisualizationPageComponent implements AfterViewInit {
     return this.current.filepath;
   }
 
-  // load song from youtube url
-  loadYoutube() {
-    this.current = new Music();
-    this.current.filepath = 'https://www.youtube.com/get_video_info?video_id=Iu37OXZ6cHk';
-    this.current.isPublic = true;
-    this.current.name = 'test';
-    this.current.source = 'youtube';
-    this.audio.crossOrigin = 'anonymous';
-    this.current.uploadEmail = this.authService.getUser().email;
-
-    this.audio.src = this.current.filepath;
-    this.audioService.loadSong(this.audio);
-
-    return this.current.filepath;
-  }
-
   // load next song from firebase
   async nextSong() {
-    const keys = Object.keys(this.songList); // song names
-    const values = Object.values(this.songList); // song uids
-
-    // cycle forwards through songs
-    let nextIndex = (values.indexOf(this.currentSong) + 1) % keys.length;
-
-    // load next song as current song
-    this.currentSong = this.songList[keys[nextIndex]];
-    await this.loadSong().then(() => this.audioService.play());
+    if (this.audioService.getTime() + 10 > this.audioService.getDuration()) {
+      this.audioService.setTime(this.audioService.getDuration());
+    } else {
+      this.audioService.setTime(this.audioService.getTime() + 10);
+    }
   }
 
   // load previous song from firebase
   async rewindSong() {
-    const keys = Object.keys(this.songList); // song names
-    const values = Object.values(this.songList); // song uids
-
-    // cycle backwards through songs
-    let nextIndex = ((values.indexOf(this.currentSong) - 1) + keys.length) % keys.length;
-
-    // load prev song as current song
-    this.currentSong = this.songList[keys[nextIndex]];
-    await this.loadSong().then(() => this.audioService.play());
+    if (this.audioService.getTime() - 10 < 0) {
+      this.audioService.setTime(0);
+    } else {
+      this.audioService.setTime(this.audioService.getTime() - 10);
+    }
   }
 
 
