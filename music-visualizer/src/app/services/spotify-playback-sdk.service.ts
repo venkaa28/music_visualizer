@@ -2,7 +2,7 @@ import {Injectable, NgZone} from '@angular/core';
 import {SpotifyService} from "./spotify.service";
 import { BehaviorSubject, Observable } from 'rxjs';
 import {AuthService} from "./auth.service";
-//import '@types/spotify-web-playback-sdk/index.d.ts';
+import '@types/spotify-web-playback-sdk/index.d.ts';
 
 declare global {
   interface window {

@@ -76,13 +76,13 @@ export class AuthService {
     var userJSON;
 
     if (cookie.length === 0) {
-      userJSON = null;
-    } else {
-      userJSON = JSON.parse(cookie);
+      return null;
     }
-
+    
+    userJSON = JSON.parse(cookie);
     this.userData.email = userJSON.email;
     this.userData.name = userJSON.name;
+
     return this.userData;
   }
 
