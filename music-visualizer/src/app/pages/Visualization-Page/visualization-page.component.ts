@@ -7,6 +7,7 @@ import {TestParticlesService} from '../../scenes/test-particles.service';
 import {Music} from '../../classes/music'
 import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
 import { NotifierService } from 'angular-notifier';
+import {SpotifyPlaybackSdkService} from "../../services/spotify-playback-sdk.service";
 
 type Dict = {[key: string]: any};
 
@@ -14,7 +15,7 @@ type Dict = {[key: string]: any};
   selector: 'app-visualization-page',
   templateUrl: './visualization-page.component.html',
   styleUrls: [
-    './visualization-page.component.css', 
+    './visualization-page.component.css',
     '../../../assets/bootstrap/css/bootstrap.min.css',
     '../../../assets/fonts/font-awesome.min.css',
   ],
@@ -65,7 +66,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.audio.src = this.current.filepath;
     this.audioService.loadSong(this.audio);
-    
+
     this.planeScene.animate();
 
     return this.current.filepath;
@@ -221,7 +222,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       case 'm':
         this.toggleMenu();
         break;
-      
+
       case ' ':
         this.audioService.playOrPause();
         break;
@@ -238,12 +239,13 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
-      public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
+      public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
+              private spotifyPlaybackService: SpotifyPlaybackSdkService,) {
     this.loadList();
   }
 
   ngAfterViewInit(): void {
-    this.audio = this.audioFile.nativeElement;
+   // this.audio = this.audioFile.nativeElement;
     //this.audio.src = 'music-visualizer/src/assets/music/juice.mp3';
     // this.engServ.createScene(this.rendererCanvas);
     //     this.engServ.animate();
@@ -253,6 +255,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     // this.demoScene.animate();
     //this.testParticles.createScene(this.rendererCanvas);
     //this.testParticles.animate();
+    if(this.authService.getSpotifyAuthToken() != ''){
+      console.log(this.authService.getSpotifyAuthToken());
+      this.spotifyPlaybackService.addSpotifyPlaybackSdk();
+    }
     this.planeScene.createScene(this.rendererCanvas);
   }
 }
