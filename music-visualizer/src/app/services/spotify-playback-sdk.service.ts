@@ -1,8 +1,8 @@
 import {Injectable, NgZone} from '@angular/core';
 import {SpotifyService} from "./spotify.service";
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {AuthService} from "./auth.service";
-import '@types/spotify-web-playback-sdk/index.d.ts';
+//import '@types/spotify-web-playback-sdk/index.d.ts';
 
 declare global {
   interface window {
@@ -18,6 +18,9 @@ export class SpotifyPlaybackSdkService {
   private player: Spotify.SpotifyPlayer;
   private deviceId: string;
   private state: Spotify.PlaybackState;
+  private currTrackID: string;
+  private currTrackAnalysisData: Subscription;
+  private currTrackFeatureData: Subscription;
 
   private subjectPlayState = new BehaviorSubject<Spotify.PlaybackState>(null);
   private subjectTrackEnded = new BehaviorSubject<boolean>(false);
@@ -50,7 +53,20 @@ export class SpotifyPlaybackSdkService {
       this.player.addListener('account_error', ({ message }) => { console.error(message); });
       this.player.addListener('playback_error', ({ message }) => { console.error(message); });
 
-      this.player.addListener('player_state_changed', state => { console.log(state); });
+      this.player.addListener('player_state_changed', ({
+                                                    position,
+                                                    duration,
+                                                    track_window: { current_track },
+                                                  }) => {
+        console.log('Currently Playing', current_track['uri']);
+        this.currTrackID = current_track['id'];
+        this.currTrackAnalysisData = this.spotifyService.getTrackAnalysisData(this.currTrackID);
+        this.currTrackFeatureData = this.spotifyService.getTrackFeatureData(this.currTrackID);
+        console.log('Position in Song', position);
+        console.log('Duration of Song', duration);
+
+      });
+     // this.player.addListener('player_state_changed', state => { track_window: { current_track } });
 
       this.player.addListener('ready', ({ device_id }) => {
         console.log('Ready with Device ID', device_id);
