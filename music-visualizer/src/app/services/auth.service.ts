@@ -81,7 +81,8 @@ export class AuthService {
       userJSON = JSON.parse(cookie);
     }
 
-    this.userData = userJSON;
+    this.userData.email = userJSON.email;
+    this.userData.name = userJSON.name;
     return this.userData;
   }
 
@@ -95,4 +96,8 @@ export class AuthService {
 
     return true;
   }
+  setSpotifyAuthToken = (token: string) => {
+    this.userData.spotifyAPIKey = token;
+  }
+  getSpotifyAuthToken = () => this.userData.spotifyAPIKey;
 }
