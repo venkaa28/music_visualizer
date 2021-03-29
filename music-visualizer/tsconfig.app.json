@@ -11,6 +11,6 @@
   ],
   "include": [
     "src/**/*.d.ts",
-    "/Users/ani/LocalDev/music_visualizer/music-visualizer/node_modules/@types/spotify-web-playback-sdk/index.d.ts"
+    "./node_modules/@types/spotify-web-playback-sdk/index.d.ts"
   ]
 }
