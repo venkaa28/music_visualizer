@@ -38,17 +38,21 @@ export class VisualizationPageComponent implements AfterViewInit {
   public audioFile!: ElementRef<HTMLMediaElement>;
 
   public audio: HTMLAudioElement; // audio element of window
-  private currentSong: string = ''; // path/uid to current song
-  public current: Music = new Music(); // music object
-  private songList: Dict; // list of songs on firebase
+  public current: Music; // music object
   public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene]; // current scene being used
-  private scene = this.scenesAvailable[0];
-  private menuTimeout: number = 3000;
-  private timeout: number;
+  public micUsed: boolean;
+  
+  private scene: any; // current scene to use
+  private menuTimeout: number; // timeout in ms of menu
+  private timeout: number; // id of current timeout
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
     public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
-  }
+      this.current = new Music();
+      this.micUsed = false;
+      this.scene = this.scenesAvailable[0];
+      this.menuTimeout = 3000;
+    }
 
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement; // grab audio element from html
@@ -56,7 +60,9 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.scene.createScene(this.rendererCanvas);
 
     setInterval(() => {
-      this.progress();
+      if (!this.micUsed) {
+        this.progress();
+      }
     }, 10);
   }
 
@@ -93,17 +99,32 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.current = new Music(); // init new music
     this.current.filepath = URL.createObjectURL(file.files[0]); // get filepath from html input
-    this.current.isPublic = true; // TODO: currently setting all files as public
     this.current.name = file.files[0].name; // user uploaded one mp3 files, so access first file in list
     this.current.source = 'local'; // set source
-    this.current.uploadEmail = this.authService.getUser().email; // keep track of who uploaded the file
 
     this.audio.src = this.current.filepath; // set source to be the file in the html
-    this.audioService.loadSong(this.audio); // load the audio into the audio context
+    this.audioService.loadSong(this.audio);
+    this.micUsed = false;
 
     this.scene.animate();
-    return this.current.filepath;
   }
+
+  async loadMic() {
+    this.current = new Music(); // init new music
+    this.current.source = 'local'; // set source
+    this.audioService.pause();
+
+    await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then((stream) => {
+      this.audioService.loadMic(stream); // load the audio into the audio context
+    });
+
+    this.micUsed = true;
+
+    this.scene.animate();
+  }
+
+  /**************************************Audio controls**************************************/
 
   // handle play or pause
   async togglePlay() {
@@ -131,9 +152,6 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.resetMenuTimeout();
   }
-
-
-  /**************************************Audio controls**************************************/
 
   // change the current visualization scene
   changeScene(event: any) {
@@ -206,14 +224,18 @@ export class VisualizationPageComponent implements AfterViewInit {
     window.clearTimeout(this.timeout); // clear previous timeout
 
     // choose action base on if song is paused or not
-    if (this.audioService.paused() === true) {
+    if (this.micUsed) {
+      // set menu to close in menuTimeout ms
+      this.timeout = window.setTimeout(() => {
+        menu.style.width = "0%"; // close menu
+      }, this.menuTimeout);
+    } else if (this.audioService.paused() === true) {
       menu.style.width = '100%'; // open menu
     } else {
       // set menu to close in menuTimeout ms
       this.timeout = window.setTimeout(() => {
         menu.style.width = "0%"; // close menu
       }, this.menuTimeout);
-      
     }
   }
 
