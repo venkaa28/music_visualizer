@@ -9,8 +9,8 @@
   <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
 </header>
 <body>
-  <audio #audioFile id='audio_file' crossorigin="anonymous">
-    <source src="../../../assets/music/ILLENIUM, X Ambassadors - In Your Arms (Visualizer).mp3" origin="http://localhost:4200" id="audio_source" type="audio/mp3">
+  <audio #audioFile id='audio-file' crossorigin="anonymous">
+    <source id="audio-source" origin="http://localhost:4200" type="audio/*" src="../../../assets/music/ILLENIUM, X Ambassadors - In Your Arms (Visualizer).mp3">
   </audio>
   
   <div id="canvas-visualizer">
@@ -45,10 +45,16 @@
 
       <!--File loader-->
       <label id="load-label" for="load-file">Choose a file to visualize</label><br>
-      <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept=".mp3">
+      <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*">
+
+      <p>OR</p>
+
+      <a id="load-mic" (click)="loadMic()">
+        Use Mic instead
+      </a>
 
       <!--Song controls-->
-      <div class="controls">
+      <div class="controls" *ngIf="!micUsed">
         <!--Button controls: rewind, play/pause, skip-->
         <div id="button" style="display: inline-block;">
           <!--Rewind button-->
@@ -105,7 +111,7 @@
         </div>
 
         <!--Progress bar-->
-      <div>
+      <div id="progress-time" *ngIf="!micUsed">
         <p id="progress-timestamp" style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
         <div class="progress" style="display: inline-block;">
           <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);width: 0%;height: 100%;"></div>

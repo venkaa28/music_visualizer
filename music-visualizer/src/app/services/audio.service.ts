@@ -1,10 +1,6 @@
 // angular
 import { Injectable} from '@angular/core';
 
-// firebase
-// local libs
-import {AuthService} from './auth.service';
-
 // typedef dict
 type Dict = {[key: string]: any};
 
@@ -13,9 +9,11 @@ type Dict = {[key: string]: any};
 })
 export class AudioService {
   // Audio elements
-  private AudioContext: AudioContext = new AudioContext(); // The audio context
-  private audioElement: HTMLAudioElement; // The html audio element
-  private track: MediaElementAudioSourceNode; // Set audio source
+  private context: AudioContext = new AudioContext(); // The audio context
+  private element: HTMLAudioElement; // The html audio element
+  private micStream: MediaStream; // the media stream of the mic
+  private fileTrack: MediaElementAudioSourceNode; // Set audio source
+  private micTrack: MediaStreamAudioSourceNode; // Set mic source
 
   // Audio nodes
   private gainNode: GainNode; // volume control
@@ -25,15 +23,19 @@ export class AudioService {
   // Analyser settings
   public dataArray: Uint8Array; // array of frequencies
   private bufferLength: number; // buffer length
-  private smoothConstant = 0.74; // smoothing constant for analyser
-  private fftSize = 512; // fourier frequency transform
+  private smoothConstant: number; // smoothing constant for analyser
+  private fftSize: number; // fourier frequency transform
 
-  constructor(private authService: AuthService) {
+  constructor() {
+    this.context = new AudioContext();
+    this.smoothConstant = 0.74;
+    this.fftSize = 512;
+
   }
 
   // toggle playing state of current audio
   async playOrPause(){
-    if(this.audioElement.paused === true){
+    if(this.element.paused === true){
       this.play();
     } else {
       this.pause();
@@ -43,23 +45,25 @@ export class AudioService {
   // play the current audio
   async play(){
     // check if song was already started
-    if (this.AudioContext.state === 'suspended'){
+    if (this.context.state === 'suspended'){
       // play from where it was left off
-      await this.AudioContext.resume();
+      await this.context.resume();
     }
 
     // play from the start
-    await this.audioElement.play();
+    await this.element.play();
   }
 
   // pause the song
   async pause(){
-    await this.audioElement.pause();
+    if (typeof this.element !== "undefined") {
+      await this.element.pause();
+    }
   }
 
   // return whether song is playing or not
   paused() {
-    return (this.audioElement.paused);
+    return (this.element.paused);
   }
 
   // set the fft value of the analyser
@@ -92,15 +96,15 @@ export class AudioService {
 
   // set the time in the song
   setTime(time: number) {
-    if (typeof this.audioElement !== 'undefined'){
-      this.audioElement.currentTime = time;
+    if (typeof this.element !== 'undefined'){
+      this.element.currentTime = time;
     }
   }
 
   // return the current time in the song
   getTime() {
-    if (typeof this.audioElement !== 'undefined') {
-      return this.audioElement.currentTime;
+    if (typeof this.element !== 'undefined') {
+      return this.element.currentTime;
     }
 
     return 0;
@@ -108,8 +112,8 @@ export class AudioService {
 
   // return how long the song is
   getDuration() {
-    if (typeof this.audioElement !== 'undefined') {
-      return this.audioElement.duration
+    if (typeof this.element !== 'undefined') {
+      return this.element.duration
     }
 
     return 0;
@@ -117,35 +121,70 @@ export class AudioService {
 
   // return whether or not the song is over
   isOver() {
-    if (typeof this.audioElement !== 'undefined') {
-      return (this.audioElement.currentTime === 0) ? false : (this.audioElement.currentTime >= this.audioElement.duration)
+    if (typeof this.element !== 'undefined') {
+      return (this.element.currentTime === 0) ? false : (this.element.currentTime >= this.element.duration)
     }
 
     return false;
   }
 
-  // load a song into the audio context
-  loadSong(song: HTMLMediaElement = this.audioElement) {
-    this.audioElement = song; // set the audio as the song
+  // load the mic as the audio context
+  loadMic(stream: MediaStream) {
+    this.micStream = stream;
 
     // initialize the track if it doesn't exist
-    if (typeof this.track === 'undefined') {
-      this.track = this.AudioContext.createMediaElementSource(song);
+    if (typeof this.micTrack === 'undefined') {
+      this.micTrack = this.context.createMediaStreamSource(stream);
     } else {
-      this.track.disconnect();
+      this.micTrack.disconnect();
     }
 
     // set nodes here
-    this.gainNode = this.AudioContext.createGain(); // reset volume
-    this.panNode = this.AudioContext.createStereoPanner(); // reset pan
-    this.analyzer = this.AudioContext.createAnalyser(); // reset analyser
+    this.gainNode = this.context.createGain(); // reset volume
+    this.panNode = this.context.createStereoPanner(); // reset pan
+    this.analyzer = this.context.createAnalyser(); // reset analyser
     
     // connect nodes to the track
-    this.track
+    this.micTrack
     .connect(this.gainNode)
     .connect(this.panNode)
     .connect(this.analyzer)
-    .connect(this.AudioContext.destination);
+    .connect(this.context.destination);
+
+    this.analyzer.smoothingTimeConstant = this.smoothConstant; // set smoothing time constant
+    this.analyzer.fftSize = this.fftSize; // set fft
+    this.bufferLength = this.analyzer.frequencyBinCount; // set buffer count
+    this.dataArray = new Uint8Array(this.bufferLength); // set data array
+  }
+
+  // load a song into the audio context
+  loadSong(song: HTMLMediaElement = this.element) {
+    this.element = song; // set the audio as the song
+
+    // initialize the track if it doesn't exist
+    if (typeof this.fileTrack === 'undefined') {
+      this.fileTrack = this.context.createMediaElementSource(song);
+    } else {
+      this.fileTrack.disconnect();
+    }
+
+    if (typeof this.micStream !== 'undefined') {
+      this.micStream.getAudioTracks().forEach(track => {
+        track.stop();
+      });
+    }
+
+    // set nodes here
+    this.gainNode = this.context.createGain(); // reset volume
+    this.panNode = this.context.createStereoPanner(); // reset pan
+    this.analyzer = this.context.createAnalyser(); // reset analyser
+    
+    // connect nodes to the track
+    this.fileTrack
+    .connect(this.gainNode)
+    .connect(this.panNode)
+    .connect(this.analyzer)
+    .connect(this.context.destination);
 
     this.analyzer.smoothingTimeConstant = this.smoothConstant; // set smoothing time constant
     this.analyzer.fftSize = this.fftSize; // set fft
