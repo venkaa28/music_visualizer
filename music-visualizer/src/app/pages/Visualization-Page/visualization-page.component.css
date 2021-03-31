@@ -173,8 +173,8 @@ input[type=range] {
   text-align: center;
   border-radius: 15px;
   padding: 1%;
-  width: 0%;
   opacity: 0;
+  transition: 0.1s 0.2s;
 }
 
 #song-display {
@@ -230,6 +230,7 @@ input[type=range] {
   width: 80%;
   height: 50%;
   text-align: center;
+  transition: 0.1s 0.2s;
 }
 
 #song-title {
