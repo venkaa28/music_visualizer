@@ -289,4 +289,16 @@ export class VisualizationPageComponent implements AfterViewInit {
       songBox.style.opacity = '0';
     }
   }
+
+  toggleEditMenu() {
+    var editBox = document.getElementById('edit-menu');
+    
+    if (editBox.style.width === '0%') {
+      editBox.style.width = '15%';
+      editBox.style.opacity = '1';
+    } else if (editBox.style.width === '15%'){
+      editBox.style.width = '0%';
+      editBox.style.opacity = '0';
+    }
+  }
 }
