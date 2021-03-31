@@ -58,6 +58,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     // TODO: scroll text on hover
     // TODO: get svg icons
     // TODO: upload menu icon fix up
+    // TODO: Show menu when paused
   }
 
   ngAfterViewInit(): void {
@@ -293,11 +294,9 @@ export class VisualizationPageComponent implements AfterViewInit {
   toggleEditMenu() {
     var editBox = document.getElementById('edit-menu');
     
-    if (editBox.style.width === '0%') {
-      editBox.style.width = '15%';
+    if (editBox.style.opacity === '0') {
       editBox.style.opacity = '1';
-    } else if (editBox.style.width === '15%'){
-      editBox.style.width = '0%';
+    } else if (editBox.style.opacity === '1'){
       editBox.style.opacity = '0';
     }
   }
