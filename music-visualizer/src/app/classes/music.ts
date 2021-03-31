@@ -6,17 +6,15 @@ export class Music {
   metadata: JSON;
   // what's the data type of a music file?
   // file: mp3;
-  uploadEmail: string;
-  isPublic: boolean;
-  exception: Exception;
   filepath: string;
+  artist: string
+  album: string;
 
   constructor() {
     this.source = '';
     this.metadata = JSON;
-    // this.file = mp3;
-    this.uploadEmail = '';
-    this.isPublic = true;
-    this.exception = new Exception();
+    this.name = 'Unknown';
+    this.artist = 'Unknown';
+    this.album = '../../assets/icons/disc.svg';
   }
 }
