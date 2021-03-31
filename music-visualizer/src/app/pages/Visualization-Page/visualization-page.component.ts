@@ -1,5 +1,5 @@
 // angular
-import {AfterContentInit, AfterViewInit, Component, ContentChild, ElementRef, OnInit, ViewChild} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { NotifierService } from 'angular-notifier';
 
@@ -48,11 +48,17 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
     public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
-      this.current = new Music();
-      this.micUsed = false;
-      this.scene = this.scenesAvailable[0];
-      this.menuTimeout = 3000;
-    }
+    // initialize variables
+    this.current = new Music();
+    this.micUsed = false;
+    this.scene = this.scenesAvailable[0];
+    this.menuTimeout = 3000;
+
+    // TODO: upload menu appear animation
+    // TODO: scroll text on hover
+    // TODO: get svg icons
+    // TODO: upload menu icon fix up
+  }
 
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement; // grab audio element from html
@@ -71,10 +77,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     event = event || window.event; //capture the event, and ensure we have an event
     
     switch (event.key) {
-      case 'm': // menu
-        this.toggleMenu();
-        break;
-      
       case ' ': // play/pause
         this.togglePlay();
         break;
@@ -95,18 +97,26 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   // load song from local file
   loadFilePath(event: any) {
-    var file = event as HTMLInputElement; // get filelist from html
+    var element = event as HTMLInputElement; // get filelist from html
+    var file = element.files[0];
+
+    if (typeof file === 'undefined') {
+      return;
+    }
 
     this.current = new Music(); // init new music
-    this.current.filepath = URL.createObjectURL(file.files[0]); // get filepath from html input
-    this.current.name = file.files[0].name; // user uploaded one mp3 files, so access first file in list
+    this.current.filepath = URL.createObjectURL(file); // get filepath from html input
+    this.current.name = file.name; // user uploaded one mp3 files, so access first file in list
     this.current.source = 'local'; // set source
+    this.current.artist = 'Local File';
 
     this.audio.src = this.current.filepath; // set source to be the file in the html
     this.audioService.loadSong(this.audio);
     this.micUsed = false;
 
     this.scene.animate();
+    this.toggleSongMenu();
+    this.audioService.play();
   }
 
   async loadMic() {
@@ -128,7 +138,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   // handle play or pause
   async togglePlay() {
-    await this.audioService.playOrPause().then(() => this.resetMenuTimeout());
+    await this.audioService.playOrPause();
   }
 
   // load next song from firebase
@@ -138,8 +148,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     } else {
       this.audioService.setTime(this.audioService.getTime() + 10);
     }
-
-    this.resetMenuTimeout();
   }
 
   // load previous song from firebase
@@ -149,8 +157,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     } else {
       this.audioService.setTime(this.audioService.getTime() - 10);
     }
-
-    this.resetMenuTimeout();
   }
 
   // change the current visualization scene
@@ -163,25 +169,21 @@ export class VisualizationPageComponent implements AfterViewInit {
   // change fft value based on slider input
   changeFFT(event: any) {
     this.audioService.setFFT(Math.pow(2, event.value));
-    this.resetMenuTimeout();
   }
 
   // change the smoothing constant
   changeSC(event: any) {
     this.audioService.setSC(event.value);
-    this.resetMenuTimeout();
   }
 
   // change volume based on slider input
   changeVolume(event: any) {
     this.audioService.setGain(event.value);
-    this.resetMenuTimeout();
   }
 
   // change pan based on slider input
   changePan(event: any) {
     this.audioService.setPan(event.value);
-    this.resetMenuTimeout();
   }
 
   // get the duration of the current song
@@ -211,33 +213,10 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   setTime(event: any) {
     this.audioService.setTime(event.value);
-    this.resetMenuTimeout();
   }
 
 
   /**************************************Visuals**************************************/
-
-  // close menu on interaction timeout
-  resetMenuTimeout() {
-    var menu = document.getElementById('menu'); // menu element
-
-    window.clearTimeout(this.timeout); // clear previous timeout
-
-    // choose action base on if song is paused or not
-    if (this.micUsed) {
-      // set menu to close in menuTimeout ms
-      this.timeout = window.setTimeout(() => {
-        menu.style.width = "0%"; // close menu
-      }, this.menuTimeout);
-    } else if (this.audioService.paused() === true) {
-      menu.style.width = '100%'; // open menu
-    } else {
-      // set menu to close in menuTimeout ms
-      this.timeout = window.setTimeout(() => {
-        menu.style.width = "0%"; // close menu
-      }, this.menuTimeout);
-    }
-  }
 
   // displays appropiate play or pause icon based on the state of the audio
   playPauseIcon() {
@@ -282,19 +261,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     return outputTime;
   }
 
-  // display or hide menu
-  toggleMenu() {
-    var overlay = document.getElementById('menu'); // menu element on html
-
-    // change width to display or hide
-    if (overlay.style.width === '0%') {
-      overlay.style.width = '100%';
-      this.resetMenuTimeout();
-    } else if (overlay.style.width === '100%'){
-      overlay.style.width = '0%';
-    }
-  }
-
   // display or hide control instruction menu
   toggleInfo() {
     var infoBox = document.getElementById('info-menu'); // info box element on html
@@ -306,6 +272,21 @@ export class VisualizationPageComponent implements AfterViewInit {
     } else if (infoBox.style.width === '20%'){
       infoBox.style.width = '0%';
       infoBox.style.opacity = '0';
+    }
+  }
+
+  toggleSongMenu() {
+    var songBox = document.getElementById('upload-menu');
+    var canvas = document.getElementById('renderCanvas');
+
+    if (songBox.style.width === '0%') {
+      songBox.style.width = '80%';
+      canvas.style.filter = "blur(4px)";
+      songBox.style.opacity = '1';
+    } else if (songBox.style.width === '80%'){
+      canvas.style.filter = "blur(0)";
+      songBox.style.width = '0%';
+      songBox.style.opacity = '0';
     }
   }
 }

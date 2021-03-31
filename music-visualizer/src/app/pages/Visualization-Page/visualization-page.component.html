@@ -14,7 +14,7 @@
   </audio>
   
   <div id="canvas-visualizer">
-    <canvas #rendererCanvas id="renderCanvas" height="100%" width="100%"></canvas>
+    <canvas #rendererCanvas id="renderCanvas"></canvas>
 
     <div id="info-button">
       <button (click)="toggleInfo()">
@@ -23,8 +23,61 @@
     </div>
   </div>
 
+  <div id="upload-menu" style="width: 80%;">
+    <!--File loader-->
+    <label id="load-label" for="load-file">Browse your computer for an audio file</label><br>
+    <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*">
+
+    <p>OR</p>
+
+    <a id="load-mic" (click)="loadMic()">
+      Use the microphone
+    </a>
+  </div>
+
+  <div id="edit-menu">
+    <!--Slider controls: volume, pan
+          <div id="slider">
+            <!--Scene slider: broken right now
+            <!--
+              <div id="scene">
+              <label for="scene-slider">Scene </label>
+              <input id="scene-slider" type="range" min="0" max="2" value="0" step="1" (change)="changeScene($event.srcElement)">
+            </div>
+            -->
+            
+
+            <!--FFT slider
+            <div id="fft">
+              <label for="fft-slider">FFT </label>
+              <input id="fft-slider" type="range" min="5" max="15" value="4" step="1" (change)="changeFFT($event.srcElement)">
+            </div>
+
+            <!--Smoothing time constant slider
+            <div id="sc">
+              <label for="sc-slider">SC</label>
+              <input id="sc-slider" type="range" min="0" max="0.99" value="0.74" step="0.01" (change)="changeSC($event.srcElement)">
+            </div>
+
+            <!--Volume slider
+            <div id="volume">
+              <img src="../../../assets/icons/volumedown.svg">
+              <input id= "volume-slider" type="range" min="0" max="1" value="1" step="0.1" (input)="changeVolume($event.srcElement)">
+              <img src="../../../assets/icons/volumeup.svg">
+            </div>
+            
+            <!--Pan slider
+            <div id="panner">
+              <p style="display: inline;">L</p>
+              <input id="panner-slider" type="range" style="display: inline;" min="-1" max="1" value="0" step="0.01" (input)="changePan($event.srcElement)">
+              <p style="display: inline;">R</p>
+            </div>
+          </div>
+        -->
+  </div>
+
   <!--Control info menu listed when info button is pressed-->
-  <div id="info-menu" style="width: 0%; opacity: 0;">
+  <div id="info-menu" style="width: 0%;">
     <h2>Controls:</h2>
     <p>m     : toggle the menu<br>
        d     : play the previous song<br>
@@ -34,90 +87,63 @@
 
   <div id="menu" class="overlay" style="width: 100%;">
     <div class="overlay-content">
-      <!--Profile Page Button-->
-      <button routerLink="../ProfilePage" style="position: absolute;left: 1%;top: 1%;">
-        <img class="ui-button" src="../../../assets/icons/settings.svg">
-      </button>
-
-      <!--Song title-->
-      <h1>{{this.current.name}}</h1>
-      <br>
-
-      <!--File loader-->
-      <label id="load-label" for="load-file">Choose a file to visualize</label><br>
-      <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*">
-
-      <p>OR</p>
-
-      <a id="load-mic" (click)="loadMic()">
-        Use Mic instead
-      </a>
-
       <!--Song controls-->
       <div class="controls" *ngIf="!micUsed">
+        <!--Song title and album art (if exists)-->
+        <div id="song-display">
+          
+          <!--Song title-->
+          <!--
+          <img id="album" style="display: inline-block" src={{current.album}}>
+          -->
+          <p id="song-title" class="song-text">{{this.current.name}}</p>
+          <p id="song-subtitle" class="song-text">{{this.current.artist}}</p>
+        </div>
+
+
         <!--Button controls: rewind, play/pause, skip-->
         <div id="button" style="display: inline-block;">
           <!--Rewind button-->
           <button (click)="rewindSong()">
-            <img class="custom_icon" src="../../../assets/icons/rewind.svg">
+            <img class="custom-icon" src="../../../assets/icons/rewind.svg">
           </button>
 
           <!--Play/Pause button-->
           <button (click)="togglePlay()">
-            <img class="custom_icon" src={{playPauseIcon()}}>
+            <img class="custom-icon-play" src={{playPauseIcon()}}>
           </button>
 
           <!--Skip button-->
           <button (click)="nextSong()">
-            <img class="custom_icon" src="../../../assets/icons/forward.svg">
+            <img class="custom-icon" src="../../../assets/icons/forward.svg">
           </button>
         </div>
 
-        <!--Slider controls: volume, pan-->
-        <div id="slider">
-          <!--Scene slider: broken right now-->
-          <!--
-            <div id="scene">
-            <label for="scene-slider">Scene </label>
-            <input id="scene-slider" type="range" min="0" max="2" value="0" step="1" (change)="changeScene($event.srcElement)">
-          </div>
-          -->
+        <div id="settings">
+          <!--Open music chooser menu-->
+          <button class="settings-button" style="display: inline-block;" (click)="toggleSongMenu()">
+            <img class="ui-button" src="../../../assets/icons/upload.svg">
+          </button>
 
-          <!--FFT slider-->
-          <div id="fft">
-            <label for="fft-slider">FFT </label>
-            <input id="fft-slider" type="range" min="5" max="15" value="4" step="1" (change)="changeFFT($event.srcElement)">
-          </div>
+          <!--Profile Page Button-->
+          <button class="settings-button" style="display: inline-block;" routerLink="../ProfilePage">
+            <img class="ui-button" src="../../../assets/icons/profile.svg">
+          </button>
 
-          <!--Smoothing time constant slider-->
-          <div id="sc">
-            <label for="sc-slider">SC</label>
-            <input id="sc-slider" type="range" min="0" max="0.99" value="0.74" step="0.01" (change)="changeSC($event.srcElement)">
-          </div>
-
-          <!--Volume slider-->
-          <div id="volume">
-            <img src="../../../assets/icons/volumedown.svg">
-            <input id= "volume-slider" type="range" min="0" max="1" value="1" step="0.1" (input)="changeVolume($event.srcElement)">
-            <img src="../../../assets/icons/volumeup.svg">
-          </div>
-          
-          <!--Pan slider-->
-          <div id="panner">
-            <p style="display: inline;">L</p>
-            <input id="panner-slider" type="range" style="display: inline;" min="-1" max="1" value="0" step="0.01" (input)="changePan($event.srcElement)">
-            <p style="display: inline;">R</p>
-          </div>
+          <!--Visualization settings button-->
+          <button class="settings-button" style="display: inline-block;" (click)="toggleSongMenu()">
+            <img class="ui-button" src="../../../assets/icons/settings.svg">
+          </button>
         </div>
 
         <!--Progress bar-->
-      <div id="progress-time" *ngIf="!micUsed">
-        <p id="progress-timestamp" style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
-        <div class="progress" style="display: inline-block;">
-          <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);width: 0%;height: 100%;"></div>
+        <div id="progress-time" *ngIf="!micUsed">
+          <p id="progress-timestamp" style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
+          <div class="progress" style="display: inline-block;">
+            <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);width: 0%;height: 100%;"></div>
+          </div>
+          <p id="duration-timestamp" style="display: inline-block;padding: 10px;">{{timeString(duration())}}</p>
         </div>
-        <p id="duration-timestamp" style="display: inline-block;padding: 10px;">{{timeString(duration())}}</p>
-      </div>
     </div>
   </div>
 </div>
