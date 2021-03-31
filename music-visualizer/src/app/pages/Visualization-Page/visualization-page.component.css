@@ -32,8 +32,7 @@ input[type=range] {
   -webkit-appearance: none;
   border-radius: 5px;
   height: 5px;
-  background-color: white;
-  margin: 0;
+  background-color: black;
 }
 
 /******************************************************************************
@@ -164,6 +163,18 @@ input[type=range] {
 #load-mic {
   cursor: pointer;
   margin-top: -2%;
+}
+
+#edit-menu {
+  position: absolute;
+  bottom: 12%;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  border-radius: 15px;
+  padding: 1%;
+  width: 0%;
+  opacity: 0;
 }
 
 #song-display {
