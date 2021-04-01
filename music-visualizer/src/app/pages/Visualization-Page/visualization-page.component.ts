@@ -162,6 +162,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   // change the current visualization scene
   changeScene(event: any) {
+    this.scene.cancelAnimation();
     this.scene = this.scenesAvailable[event.value];
     this.scene.createScene(this.rendererCanvas);
     this.scene.animate();
@@ -295,8 +296,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     var editBox = document.getElementById('edit-menu');
     
     if (editBox.style.opacity === '0') {
+      editBox.style.width = '15%';
       editBox.style.opacity = '1';
     } else if (editBox.style.opacity === '1'){
+      editBox.style.width = '0%';
       editBox.style.opacity = '0';
     }
   }
