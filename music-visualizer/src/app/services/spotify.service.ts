@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from '@angular/common/http';
 import {environment} from "../../environments/environment";
 import {Router} from "@angular/router";
 import {AuthService} from "./auth.service";
+import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
 })
 export class SpotifyService {
+
+  public currTrackAnalysisData: {};
+  public currTrackFeatureData: {};
 
   constructor(public http: HttpClient, private router: Router, private authService: AuthService) { }
 
@@ -27,9 +31,10 @@ export class SpotifyService {
       .set("Accept", 'application/json')
       .set("Content-Type", 'application/json')
       .set("Authorization", 'Bearer ' + this.authService.getSpotifyAuthToken());
-    const resp = this.http.get(url, {headers}).subscribe(data => console.log(data));
-    console.log(resp);
-    return resp;
+    let analysisData: {} = {};
+    this.http.get(url, {headers}).subscribe((resp) => this.currTrackAnalysisData = resp);
+    console.log(this.currTrackAnalysisData);
+
   }
 
   getTrackFeatureData(trackID: string){
@@ -38,8 +43,7 @@ export class SpotifyService {
       .set("Accept", 'application/json')
       .set("Content-Type", 'application/json')
       .set("Authorization", 'Bearer ' + this.authService.getSpotifyAuthToken());
-    const resp = this.http.get(url, {headers}).subscribe(data => console.log(data));
-    console.log(resp);
-    return resp;
+    this.http.get(url, {headers}).subscribe((resp) => this.currTrackFeatureData = resp);
+    console.log(this.currTrackFeatureData);
   }
 }

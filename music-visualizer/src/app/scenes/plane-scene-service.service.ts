@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import {SpotifyService} from "../services/spotify.service";
+import {SpotifyPlaybackSdkService} from "../services/spotify-playback-sdk.service";
 
 
 @Injectable({
@@ -10,7 +12,8 @@ import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 })
 export class PlaneSceneServiceService {
 
-  constructor(private ngZone: NgZone, public audioService: AudioService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService,
+              private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService) { }
 
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -27,6 +30,8 @@ export class PlaneSceneServiceService {
   private rain: THREE.Points;
   private canvasRef: ElementRef<HTMLCanvasElement>;
   public frame: number = 0;
+  private trackProgress: number = 0;
+
 
   private frameId: number = null;
 
@@ -117,34 +122,24 @@ export class PlaneSceneServiceService {
 
     this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
     this.plane.rotation.x = -0.5 * Math.PI;
-    // this.plane.rotation.z =  Math.PI;
-    // this.plane.rotation.x = 0.25 * Math.PI;
+
     this.plane.position.set(0, -30, 400);
 
     this.secondPlane = new THREE.Mesh(secondPlaneGeometry, secondPlaneMaterial);
     this.secondPlane.rotation.x = -0.5 * Math.PI;
-    // this.plane.rotation.z =  Math.PI;
-    // this.plane.rotation.x = 0.25 * Math.PI;
+
     this.secondPlane.position.set(0, -180, 0);
 
     this.group.add(this.plane);
     this.group.add(this.secondPlane);
     // adding ambient lighting to the scene
-    this.ambLight = new THREE.AmbientLight(0xaaaaaa, 2);
+    this.ambLight = new THREE.AmbientLight(0xaaaaaa, 1);
     this.scene.add(this.ambLight);
-
-    // adding a spotlight to the scene
-    // const spotLight = new THREE.SpotLight(0xffffff);
-    // spotLight.intensity = 0.9;
-    // spotLight.position.set(-10, 40, 20);
-    // spotLight.castShadow = true;
-    // this.scene.add(spotLight);
 
     const directionalLight = new THREE.DirectionalLight(0xffeedd);
     directionalLight.position.set(0, 0, 1);
     this.scene.add(directionalLight);
 
-    // group.rotation.y += 0.005;
     this.scene.add(this.group);
   }
 
@@ -168,69 +163,93 @@ export class PlaneSceneServiceService {
       this.render();
     });
 
-    this.sceneAnimation();
+    this.spotifyPlayer.player.getCurrentState().then(state => {
+      if (!state) {
+        //console.error('User is not playing music through the Web Playback SDK');
+        //return;
+      }else {
+        this.trackProgress = state.position;
+        this.sceneAnimation();
+        this.renderer.render(this.scene, this.camera);
+      }
+    });
 
-    this.renderer.render(this.scene, this.camera);
+
   }
 
   sceneAnimation = () => {
 
-    this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    const numBins = this.audioService.analyzer.frequencyBinCount;
+    //this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
+    //const numBins = this.audioService.analyzer.frequencyBinCount;
 
-    const lowerHalfFrequncyData = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
-    const lowfrequncyData = this.audioService.dataArray.slice(0, (lowerHalfFrequncyData.length / 3) - 1);
-    const midfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3),
-      (lowerHalfFrequncyData.length / 3) * 2 - 1);
-    const highfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3) * 2, lowerHalfFrequncyData.length);
+    // const lowerHalfFrequncyData = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
+    // const lowfrequncyData = this.audioService.dataArray.slice(0, (lowerHalfFrequncyData.length / 3) - 1);
+    // const midfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3),
+    //   (lowerHalfFrequncyData.length / 3) * 2 - 1);
+    // const highfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3) * 2, lowerHalfFrequncyData.length);
 
     // console.log(lowerHalfFrequncyData.length);
 
 
-    const lowFreqAvg = this.avg(lowfrequncyData);
-    const midFreqAvg = this.avg(midfrequncyData);
-    const highFreqAvg = this.avg(highfrequncyData);
+    // const lowFreqAvg = this.avg(lowfrequncyData);
+    // const midFreqAvg = this.avg(midfrequncyData);
+    // const highFreqAvg = this.avg(highfrequncyData);
+    //
+    // const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
+    // const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
+    // const highFreqDownScaled = highFreqAvg / highfrequncyData.length;
+    //
+    //
+    // const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0, 1, 0, 15);
+    // const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
+    // const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
 
-    const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
-    const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
-    const highFreqDownScaled = highFreqAvg / highfrequncyData.length;
+    const segmentIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
+      * (this.spotifyService.currTrackAnalysisData['segments'].length);
+    const barIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
+      * (this.spotifyService.currTrackAnalysisData['bars'].length);
+    const beatIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
+      * (this.spotifyService.currTrackAnalysisData['beats'].length);
+    const tatumIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
+      * (this.spotifyService.currTrackAnalysisData['tatums'].length);
+    const sectionIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
+      * (this.spotifyService.currTrackAnalysisData['sections'].length);
+    //console.log(sectionIndex);
+    //console.log(this.spotifyService.currTrackAnalysisData['sections']);
 
+    const currBar = this.spotifyService.currTrackAnalysisData['bars'][Math.floor(barIndex)];
+    console.log(currBar);
+    const currSection = this.spotifyService.currTrackAnalysisData['sections'][Math.floor(sectionIndex)];
+    const currBeat = this.spotifyService.currTrackAnalysisData['beats'][Math.floor(beatIndex)];
+    //console.log(currSection);
 
-    const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0, 1, 0, 15);
-    const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
-    const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
+    let pitchAvg = 0;
+    for(let i = 0; i< this.spotifyService.currTrackAnalysisData['segments'][Math.floor(segmentIndex)]['pitches'].length; i++){
+      pitchAvg += this.spotifyService.currTrackAnalysisData['segments'][Math.floor(segmentIndex)]['pitches'][i];
+    }
+    pitchAvg = pitchAvg/this.spotifyService.currTrackAnalysisData['segments'][Math.floor(segmentIndex)]['pitches'].length;
+    const scaledSectionTempo = currSection['tempo']/10;
+    const scaledPitchAvg = this.modulate(pitchAvg, 0, 0.1, 0, 10);
+    const barConfidence = currBar['confidence'];
+    const beatConfidence = currBar['confidence'];
+    const segConfidence = currSection['confidence'];
 
-    const position = this.plane.geometry.attributes.position;
+    const scaledConfidence = this.modulate(barConfidence+ beatConfidence+ segConfidence, 0,3, 15 , 100 );
+    console.log(scaledConfidence);
+    const scaledBeatConfidence = this.modulate(currBeat['confidence'], 0, 1, 15, 100);
+    //console.log(scaledBeatConfidence);
+    const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
+    //console.log(currSection['loudness']);
+    this.wavesBuffer( scaledBeatConfidence, scaledConfidence, scaledPitchAvg);
 
-    // console.log(position);
-    const vector = new THREE.Vector3();
-    this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
-
-    // for (let i = 0,  l = position.count; i < l; i++){
-    //   vector.fromBufferAttribute(position, i);
-      // const time = window.performance.now();
-      // const scalor = this.modulate(lowerHalfFrequncyData[i % 128], 0, 255, 0, 8);
-      // const distance  = -25 * scalor + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
-      // position.setZ(i, distance);
-      // if (i <= ((position.count / 3) - 1)){
-      //   const distance = (lowFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
-      //   position.setZ(i, distance);
-      // }else if (i >= position.count / 3 && i <= (position.count / 3) * 2 - 1){
-      //   const distance = (midFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + midFreqAvg * 0.001);
-      //   position.setZ(i, distance);
-      // }else {
-      //   const distance = (highFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + highFreqAvg * 0.001);
-      //   position.setZ(i, distance);
-      // }
-    // }
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
     this.darkSky.rotation.y += 0.0005;
-    this.secondPlane.position.z += 5;
-    if (this.secondPlane.position.z === 6000){
+    this.secondPlane.position.z += scaledSectionTempo;
+    if (this.secondPlane.position.z >= 6000){
       this.secondPlane.position.z = 0;
     }
-    //console.log(this.secondPlane.position.z);
+    // //console.log(this.secondPlane.position.z);
     this.secondPlane.geometry.attributes.position.needsUpdate = true;
     this.secondPlane.updateMatrix();
 
@@ -245,9 +264,9 @@ export class PlaneSceneServiceService {
     // }
 
 
-    this.plane.geometry.attributes.position.needsUpdate = true;
-    // this.plane.geometry.computeVertexNormals();
-    this.plane.updateMatrix();
+     this.plane.geometry.attributes.position.needsUpdate = true;
+    // // this.plane.geometry.computeVertexNormals();
+     this.plane.updateMatrix();
 
     }
     // for re-use

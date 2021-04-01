@@ -258,7 +258,9 @@ export class VisualizationPageComponent implements AfterViewInit {
     if(this.authService.getSpotifyAuthToken() != ''){
       console.log(this.authService.getSpotifyAuthToken());
       this.spotifyPlaybackService.addSpotifyPlaybackSdk();
+      this.planeScene.createScene(this.rendererCanvas);
+      this.planeScene.animate();
     }
-    this.planeScene.createScene(this.rendererCanvas);
+    //this.planeScene.createScene(this.rendererCanvas);
   }
 }

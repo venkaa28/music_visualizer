@@ -15,12 +15,11 @@ declare global {
   providedIn: 'root'
 })
 export class SpotifyPlaybackSdkService {
-  private player: Spotify.SpotifyPlayer;
+  public player: Spotify.SpotifyPlayer;
   private deviceId: string;
   private state: Spotify.PlaybackState;
   private currTrackID: string;
-  private currTrackAnalysisData: Subscription;
-  private currTrackFeatureData: Subscription;
+
 
   private subjectPlayState = new BehaviorSubject<Spotify.PlaybackState>(null);
   private subjectTrackEnded = new BehaviorSubject<boolean>(false);
@@ -60,8 +59,8 @@ export class SpotifyPlaybackSdkService {
                                                   }) => {
         console.log('Currently Playing', current_track['uri']);
         this.currTrackID = current_track['id'];
-        this.currTrackAnalysisData = this.spotifyService.getTrackAnalysisData(this.currTrackID);
-        this.currTrackFeatureData = this.spotifyService.getTrackFeatureData(this.currTrackID);
+        this.spotifyService.getTrackAnalysisData(this.currTrackID);
+        this.spotifyService.getTrackFeatureData(this.currTrackID);
         console.log('Position in Song', position);
         console.log('Duration of Song', duration);
 
