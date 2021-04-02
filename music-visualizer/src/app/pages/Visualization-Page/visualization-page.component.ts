@@ -14,6 +14,7 @@ import {Music} from '../../classes/music'
 import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
+import {NebulaSceneServiceService} from '../../scenes/nebula-scene-service.service';
 
 
 type Dict = {[key: string]: any};
@@ -47,11 +48,12 @@ export class VisualizationPageComponent implements AfterViewInit {
   private timeout: number; // id of current timeout
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
+    public nebulaScene: NebulaSceneServiceService,
     public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
     // initialize variables
     this.current = new Music();
     this.micUsed = false;
-    this.scene = this.scenesAvailable[0];
+    this.scene = this.nebulaScene;
     this.menuTimeout = 3000;
 
     // TODO: upload menu appear animation
