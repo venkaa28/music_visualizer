@@ -1,9 +1,10 @@
 import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import System from 'three-nebula';
 import * as THREE from 'three';
+import Nebula, { SpriteRenderer } from "three-nebula";
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from "../services/audio.service";
-//import * as scene3 from '../../../assets/nebulaJsons/scene3.json';
+import scene3 from './scene3.json';
 
 @Injectable({
   providedIn: 'root'
@@ -20,9 +21,6 @@ export class NebulaSceneServiceService {
 
   private frameId: number = null;
 
-  private system = new System.fromFILEAsync('../../../assets/nebulaJsons/scene3.json', THREE).then(system => {
-    console.log(system);
-  });
 
   public ngOnDestroy = (): void => {
     if (this.frameId != null) {
@@ -36,11 +34,19 @@ export class NebulaSceneServiceService {
     this.canvas = canvas.nativeElement;
 
 
+    Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
+      console.log(loaded);
+    });
+
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas, // grabs the canvas element
       alpha: true,    // transparent background
       antialias: true // smooth edges
     });
+
+
+    //const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
+
     //sets the background color to black
     this.renderer.setClearColor(0x000000);
 
@@ -101,6 +107,8 @@ export class NebulaSceneServiceService {
 
   sceneAnimation = () => {
     // put code that animates objects in here
+    //Nebula.update();
+
   }
 
   public resize(): void {
