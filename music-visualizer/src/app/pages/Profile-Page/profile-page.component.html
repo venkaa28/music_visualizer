@@ -36,7 +36,16 @@
     <div class="form-group">
       <button class="btn btn-primary btn-block" type="submit">Change name</button>
       <button class="btn btn-primary btn-block" type="submit" (click)="passwordReset()">Change password</button>
-      <button class="btn btn-primary btn-block" type="submit">Link Spotify</button>
+      <div *ngIf="spotifyLinked; else notLinked">
+        <p> Spotify linked! </p>
+      </div>
+      <ng-template #notLinked>
+        <!--button class="btn btn-primary btn-block" type="submit" (click)="this.spotifyLinked=true">Link Spotify</!--button-->
+        <p> Spotify not linked!</p>
+      </ng-template>
+      <div>
+        <p *ngIf="!spotifyLinked">dfs</p>
+      </div>
     </div>
 
     <div style="margin-top: 30%;width: 100%;text-align: center;">
