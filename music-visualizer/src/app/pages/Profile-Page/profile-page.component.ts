@@ -3,6 +3,7 @@ import {Router} from '@angular/router';
 import {User} from '../../classes/user';
 import { CookieService } from 'ngx-cookie-service';
 import { AuthService } from '../../services/auth.service'
+import {NotifierService} from 'angular-notifier';
 
 type Dict = {[key: string]: any};
 
@@ -29,12 +30,25 @@ export class ProfilePageComponent implements OnInit {
     }
   }
 
-  constructor(public router: Router, private authService: AuthService, private cookieService: CookieService) {
+  constructor(public router: Router, private authService: AuthService, private cookieService: CookieService,
+    private readonly notifierService: NotifierService) {
     this.userData = this.authService.getUser();
   }
 
   ngOnInit(): void {
     this.getUserData();
+  }
+
+  async passwordReset(): Promise<void> {
+    // request reset password email
+    try {
+      const res = await this.authService.resetPassword(this.userData.email);
+      console.log(res);
+      this.notifierService.notify('success', 'Email has been sent!');
+    } catch (error) {
+      console.log(error);
+      this.notifierService.notify('error', 'Whoops, looks like something went wrong!');
+    }
   }
 
   async logout() {
