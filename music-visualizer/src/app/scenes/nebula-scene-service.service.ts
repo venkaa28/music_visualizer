@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import Nebula, { SpriteRenderer } from "three-nebula";
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from "../services/audio.service";
-import scene3 from './scene3.json';
+import scene3 from './selfNebula.json';
 
 @Injectable({
   providedIn: 'root'
