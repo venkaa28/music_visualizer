@@ -45,6 +45,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   private scene: any; // current scene to use
   private menuTimeout: number; // timeout in ms of menu
   private timeout: number; // id of current timeout
+  private micStream: MediaStream; // user's microphone data
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
     public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
@@ -52,7 +53,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.current = new Music();
     this.micUsed = false;
     this.scene = this.scenesAvailable[0];
-    this.menuTimeout = 3000;
+    this.menuTimeout = 2000;
 
     // TODO: upload menu appear animation
     // TODO: scroll text on hover
@@ -125,10 +126,13 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.current.source = 'local'; // set source
     this.audioService.pause();
 
-    await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-    .then((stream) => {
-      this.audioService.loadMic(stream); // load the audio into the audio context
-    });
+    if (typeof this.micStream === 'undefined') {
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then((stream) => {
+        //this.micStream = stream;
+        this.audioService.loadMic(stream); // load the audio into the audio context
+      });
+    }
 
     this.micUsed = true;
 
@@ -140,6 +144,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   // handle play or pause
   async togglePlay() {
     await this.audioService.playOrPause();
+    this.toggleMenu();
   }
 
   // load next song from firebase
@@ -165,7 +170,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.scene.cancelAnimation();
     this.scene = this.scenesAvailable[event.value];
     this.scene.createScene(this.rendererCanvas);
-    this.scene.animate();
+    
+    if (this.audioService.fileLoaded()) {
+      this.scene.animate();
+    }
   }
 
   // change fft value based on slider input
@@ -261,6 +269,20 @@ export class VisualizationPageComponent implements AfterViewInit {
     outputTime += secondsTotal;
 
     return outputTime;
+  }
+
+  toggleMenu() {
+    var menu = document.getElementById('menu');
+
+    menu.style.opacity = '1';
+
+    if (typeof this.timeout !== 'undefined') {
+      window.clearTimeout(this.timeout);
+    }
+
+    this.timeout = window.setTimeout(() => {
+      menu.style.opacity = '0';
+    }, this.menuTimeout);
   }
 
   // display or hide control instruction menu
