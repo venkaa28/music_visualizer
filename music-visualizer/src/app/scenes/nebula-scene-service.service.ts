@@ -19,6 +19,8 @@ export class NebulaSceneServiceService {
   private ambLight!: THREE.AmbientLight;
   private noise = new SimplexNoise();
 
+  private nebula!: any;
+
   private frameId: number = null;
 
 
@@ -36,6 +38,8 @@ export class NebulaSceneServiceService {
 
     Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
       console.log(loaded);
+      const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
+      this.nebula = loaded.addRenderer(nebulaRenderer);
     });
 
     this.renderer = new THREE.WebGLRenderer({
@@ -83,10 +87,10 @@ export class NebulaSceneServiceService {
   public animate(): void {
     this.ngZone.runOutsideAngular(() => {
       if (document.readyState !== 'loading') {
-        this.render();
+        this.render(this.nebula);
       } else {
         window.addEventListener('DOMContentLoaded', () => {
-          this.render();
+          this.render(this.nebula);
         });
       }
       window.addEventListener('resize', () => {
@@ -95,20 +99,19 @@ export class NebulaSceneServiceService {
     });
   }
 
-  public render(): void {
+  public render(nebula): void {
     this.frameId = requestAnimationFrame(() => {
-      this.render();
+      this.render(nebula);
     });
 
-    this.sceneAnimation();
+    this.sceneAnimation(nebula);
 
     this.renderer.render(this.scene, this.camera);
   }
 
-  sceneAnimation = () => {
+  sceneAnimation = (nebula) => {
     // put code that animates objects in here
-    //Nebula.update();
-
+    nebula.update();
   }
 
   public resize(): void {
