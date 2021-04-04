@@ -47,7 +47,7 @@ input[type=range] {
   text-align: center;
   height: 10%;
   width: 100%;
-  opacity: 0;
+  opacity: 1;
   position: fixed;
   z-index: 1;
   top: 90%;
@@ -55,12 +55,7 @@ input[type=range] {
   background-color: rgba(0,0,0, 0.4);
   overflow-x: hidden;
   overflow-y: hidden;
-  transition: 0.2s 2s;
-}
-
-.overlay:hover {
-  opacity: 1;
-  transition: 0s;
+  transition: 0.2s;
 }
 
 .overlay-content {
@@ -168,13 +163,14 @@ input[type=range] {
 #edit-menu {
   position: absolute;
   bottom: 12%;
-  right: 0;
+  left: 85%;
   background-color: rgba(255, 255, 255, 0.4);
   text-align: center;
   border-radius: 15px;
   padding: 1%;
-  width: 0%;
   opacity: 0;
+  width: 0%;
+  transition: 0.1s 0.2s;
 }
 
 #song-display {
@@ -224,12 +220,13 @@ input[type=range] {
   top: 20%;
   border-radius: 15px;
   left: 10%;
-  padding: 10%;
+  padding: 5%;
   background-color: rgb(255, 255, 255, 0.5);
   color: black;
   width: 80%;
   height: 50%;
   text-align: center;
+  transition: 0.1s 0.2s;
 }
 
 #song-title {

@@ -36,6 +36,12 @@ export class PlaneSceneServiceService {
     }
   }
 
+  public cancelAnimation() {
+    if (this.frameId != null) {
+      cancelAnimationFrame(this.frameId);
+    }
+  }
+
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     this.canvasRef = canvas;
     this.scene = new THREE.Scene();

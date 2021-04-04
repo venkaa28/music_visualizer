@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
   <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
 </header>
-<body>
+<body (mousemove)="toggleMenu()">
   <audio #audioFile id='audio-file' crossorigin="anonymous">
     <source id="audio-source" origin="http://localhost:4200" type="audio/*" src="../../../assets/music/ILLENIUM, X Ambassadors - In Your Arms (Visualizer).mp3">
   </audio>
@@ -25,25 +25,31 @@
 
   <div id="upload-menu" style="width: 80%;">
     <!--File loader-->
-    <label id="load-label" for="load-file">Browse your computer for an audio file</label><br>
-    <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*">
+    <div style="display: inline-block; width: 20%; margin: 2%;">
+      <p>Browse your computer for an audio file</p>
+      <label id="load-label" for="load-file"><img src="../../../assets/icons/folder.svg"></label><br>
+      <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*">
+    </div>
 
-    <p>OR</p>
-
-    <a id="load-mic" (click)="loadMic()">
-      Use the microphone
-    </a>
+    <div style="display: inline-block; width: 20%; margin: 2%; border-left: 1px solid; border-color: rgb(59, 59, 59);">
+      <p>Use the microphone</p>
+      <a id="load-mic" (click)="loadMic()">
+        <img src="../../../assets/icons/mic.svg">
+      </a>
+  </div>
   </div>
 
   <div id="edit-menu" style="width: 0%; opacity: 0;">
     <!--Slider controls: volume, pan-->
           <div id="slider">
-            <!--Scene slider: broken right now
-              <div id="scene">
-              <label for="scene-slider">Scene </label>
-              <input id="scene-slider" type="range" min="0" max="2" value="0" step="1" (change)="changeScene($event.srcElement)">
+              <p>Settings</p>
+
+            <!--Scene slider: broken right now-->
+            <div id="scene">
+              <p style="display: inline">0</p>
+              <input id="scene-slider" type="range" min="0" max="2" value="0" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
+              <p style="display: inline">2</p>
             </div>
-            -->
             
             <!--FFT slider-->
             <div id="fft">
