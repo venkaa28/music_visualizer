@@ -104,14 +104,14 @@ export class NebulaSceneServiceService {
       this.render(nebula);
     });
 
-    this.sceneAnimation(nebula);
+    this.sceneAnimation();
 
     this.renderer.render(this.scene, this.camera);
   }
 
-  sceneAnimation = (nebula) => {
+  sceneAnimation = () => {
     // put code that animates objects in here
-    nebula.update();
+    this.nebula.update();
   }
 
   public resize(): void {
