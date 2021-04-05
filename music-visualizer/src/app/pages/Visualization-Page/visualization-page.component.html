@@ -23,15 +23,15 @@
     </div>
   </div>
 
-  <div id="upload-menu" style="width: 80%;">
+  <div id="upload-menu" style="width: 60%;">
     <!--File loader-->
-    <div style="display: inline-block; width: 20%; margin: 2%;">
+    <div class="upload-item">
       <p>Browse your computer for an audio file</p>
       <label id="load-label" for="load-file"><img src="../../../assets/icons/folder.svg"></label><br>
-      <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*">
+      <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*" capture>
     </div>
 
-    <div style="display: inline-block; width: 20%; margin: 2%; border-left: 1px solid; border-color: rgb(59, 59, 59);">
+    <div class="upload-item">
       <p>Use the microphone</p>
       <a id="load-mic" (click)="loadMic()">
         <img src="../../../assets/icons/mic.svg">
@@ -93,16 +93,19 @@
   <div id="menu" class="overlay">
     <div class="overlay-content">
       <!--Song controls-->
-      <div class="controls" *ngIf="!micUsed">
+      <div class="controls">
         <!--Song title and album art (if exists)-->
         <div id="song-display">
           
           <!--Song title-->
-          <!--
-          <img id="album" style="display: inline-block" src={{current.album}}>
-          -->
-          <p id="song-title" class="song-text">{{this.current.name}}</p>
-          <p id="song-subtitle" class="song-text">{{this.current.artist}}</p>
+          <div class="song-display-container">
+            <img id="album" src={{current.album}}>
+          </div>
+
+          <div id="song-display-text" class="song-display-container">
+            <p id="song-title" class="song-text">{{this.current.name}}</p>
+            <p id="song-subtitle" class="song-text">{{this.current.artist}}</p>
+          </div>
         </div>
 
 
@@ -126,7 +129,7 @@
 
         <div id="settings">
           <!--Open music chooser menu-->
-          <button class="settings-button" style="display: inline-block;" (click)="toggleSongMenu()">
+          <button class="settings-button" style="display: inline-block;" (click)="toggleUploadMenu()">
             <img class="ui-button" src="../../../assets/icons/upload.svg">
           </button>
 
@@ -142,7 +145,7 @@
         </div>
 
         <!--Progress bar-->
-        <div id="progress-time" *ngIf="!micUsed">
+        <div id="progress-time">
           <p id="progress-timestamp" style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
           <div class="progress" style="display: inline-block;">
             <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);width: 0%;height: 100%;"></div>

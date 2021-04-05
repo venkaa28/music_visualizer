@@ -144,7 +144,7 @@ export class AudioService {
         this.micStream.removeTrack(track);
       })
 
-      this.micStream = this.micStream;
+      this.micTrack.disconnect();
     }
 
     // set nodes here
@@ -179,7 +179,10 @@ export class AudioService {
     if (typeof this.micStream !== 'undefined') {
       this.micStream.getAudioTracks().forEach(track => {
         track.stop();
+        this.micStream.removeTrack(track);
       });
+
+      this.micTrack.disconnect();
     }
 
     // set nodes here
