@@ -9,42 +9,61 @@
 </head>
 
 <body id="page-top">
-<nav class="navbar navbar-light navbar-expand-lg fixed-top" id="mainNav">
-  <div class="container"><a class="navbar-brand js-scroll-trigger" href="#page-top">The Music Visualizer</a><button data-toggle="collapse" data-target="#navbarResponsive" class="navbar-toggler navbar-toggler-right" type="button" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><i class="fa fa-align-justify"></i></button>
-    <div class="collapse navbar-collapse" id="navbarResponsive">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item"><a class="nav-link js-scroll-trigger">About Us</a></li>
-      </ul>
+  <nav class="navbar navbar-light navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container"><a class="navbar-brand js-scroll-trigger" routerLink="../">The Music Visualizer</a><button data-toggle="collapse" data-target="#navbarResponsive" class="navbar-toggler navbar-toggler-right" type="button" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><i class="fa fa-align-justify"></i></button>
+      <div class="collapse navbar-collapse" id="navbarResponsive"></div>
     </div>
-  </div>
-</nav>
-<header class="text-center text-white d-flex masthead" style="background-color: midnightblue">
-  <div class="container my-auto">
-    <div class="row">
-      <div class="col-lg-10 mx-auto">
-        <h1 class="text-uppercase"><strong>Profile Page</strong></h1>
-        <hr />
-      </div>
-    </div>
-    <div class="col-lg-8 mx-auto">
-      <p class="text-faded mb-5">Page still in development as we add more fields to USER class</p>
-    </div>
-    <h1 class="text-uppercase"><strong>Current Stored Data:</strong></h1>
-    <p> {{this.userData.name}} </p>
-    <p> {{this.userData.email}} </p>
-    <div style="margin-top: 30%;width: 100%;text-align: center;">
-      <p>Authorize Spotify Here <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" (click)="authorizeSpotify()">click here.</a></p>
-      <p>To go back to the visualization page <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" (click)="goBackToVisualPage()">click here.</a></p>
-      <p>To logout of your account <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" (click)="logout()">click here.</a></p>
-    </div>
-  </div>
-</header>
+  </nav>
 
-<script src="assets/js/jquery.min.js"></script>
-<script src="assets/bootstrap/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
-<script src="assets/js/creative.js"></script>
+
+  <header class="text-center text-white d-flex masthead" style="background-color: midnightblue">
+    <div class="container my-auto">
+      <div class="row">
+        <div class="col-lg-10 mx-auto">
+          <h1 class="text-uppercase"><strong>Profile Page</strong></h1>
+          <hr />
+        </div>
+      </div>
+      
+      
+
+      <h1 class="text-uppercase"><strong>{{this.userData.name}}</strong></h1>
+      <p> {{this.userData.email}} </p>
+
+      <div style="display: flex; padding: 2%">
+        <button class="btn btn-primary btn-block" type="submit">Change name</button>
+        <p style="margin-left: 2%">　</p> <!-- this is terrible-->
+        <button class="btn btn-primary btn-block" type="submit" (click)="passwordReset()">Change password</button>
+        <p style="margin-left: 2%">　</p>
+        <button class="btn btn-primary btn-block" type="submit"(click)="logout()">Log Out</button>
+      </div>
+
+      <div>
+        <div style="display: inline-block; width: 20%; margin: 2%;">
+          <a (click)="passwordReset()">
+            <img src="../../../assets/icons/spotifyLogo.svg.png" style="width: 70%; height: auto">
+          </a>
+          <p>Link Spotify</p>
+        </div>
+    
+        <div style="display: inline-block; width: 20%; margin: 2%;">
+          <a (click)="this.spotifyLinked = false">
+            <img src="../../../assets/icons/soundcloud-2.svg" style="width: 100%; height: auto">
+          </a>
+          <p>Link Soundcloud</p>
+        </div>
+      </div>
+
+    </div>
+
+  </header>
+
+  <script src="assets/js/jquery.min.js"></script>
+  <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+  <script src="assets/js/creative.js"></script>
+
 </body>
 </html>
 
