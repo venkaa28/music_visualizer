@@ -41,6 +41,12 @@ export class PlaneSceneServiceService {
     }
   }
 
+  public cancelAnimation() {
+    if (this.frameId != null) {
+      cancelAnimationFrame(this.frameId);
+    }
+  }
+
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     this.canvasRef = canvas;
     this.scene = new THREE.Scene();
@@ -264,6 +270,7 @@ export class PlaneSceneServiceService {
     // }
 
 
+
      this.plane.geometry.attributes.position.needsUpdate = true;
     // // this.plane.geometry.computeVertexNormals();
      this.plane.updateMatrix();
@@ -316,7 +323,7 @@ export class PlaneSceneServiceService {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
-    this.renderer.setSize(width, height - 10);
+    this.renderer.setSize(width, height);
     this.createScene(this.canvasRef);
   }
 }
