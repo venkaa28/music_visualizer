@@ -160,3 +160,17 @@ body {
     padding-left: 1%;
     padding-right: 1%;
 }
+
+#upload-menu {
+    float: center;
+    top: 20%;
+    border-radius: 15px;
+    left: 10%;
+    padding: 5%;
+    background-color: rgb(255, 255, 255, 0.5);
+    color: black;
+    width: 80%;
+    height: 50%;
+    text-align: center;
+    transition: 0.1s 0.2s;
+  }

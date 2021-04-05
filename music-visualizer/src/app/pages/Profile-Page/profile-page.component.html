@@ -39,10 +39,21 @@
       </div>
 
       <div>
-
+        <div style="display: inline-block; width: 20%; margin: 2%;">
+          <a (click)="passwordReset()">
+            <img src="../../../assets/icons/spotifyLogo.svg.png" style="width: 70%; height: auto">
+          </a>
+          <p>Link Spotify</p>
+        </div>
+    
+        <div style="display: inline-block; width: 20%; margin: 2%;">
+          <a (click)="this.spotifyLinked = false">
+            <img src="../../../assets/icons/soundcloud-2.svg" style="width: 100%; height: auto">
+          </a>
+          <p>Link Soundcloud</p>
+        </div>
       </div>
 
-      
     </div>
   </header>
 
