@@ -38,13 +38,14 @@ export class ProfilePageComponent implements OnInit {
 
   constructor(public router: Router, private authService: AuthService, private cookieService: CookieService, private spotifyService: SpotifyService, 
              private readonly notifierService: NotifierService) {
+              this.userData = this.authService.getUser();
+            }
 
   getSpotifyLinked(): boolean {
     return false;
   }
 
-    this.userData = this.authService.getUser();
-  }
+    
 
   ngOnInit(): void {
     this.getUserData();
