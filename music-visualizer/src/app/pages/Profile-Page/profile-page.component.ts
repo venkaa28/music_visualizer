@@ -10,7 +10,7 @@ type Dict = {[key: string]: any};
 @Component({
   selector: 'app-profile-page',
   templateUrl: './profile-page.component.html',
-  styleUrls: ['../../../assets/bootstrap/css/bootstrap.min.css']
+  styleUrls: ['./profile-page.component.css']
 })
 export class ProfilePageComponent implements OnInit {
   title = 'Profile test';

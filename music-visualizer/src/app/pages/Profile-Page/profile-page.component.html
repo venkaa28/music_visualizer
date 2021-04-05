@@ -9,57 +9,46 @@
 </head>
 
 <body id="page-top">
-<nav class="navbar navbar-light navbar-expand-lg fixed-top" id="mainNav">
-  <div class="container"><a class="navbar-brand js-scroll-trigger" href="#page-top">The Music Visualizer</a><button data-toggle="collapse" data-target="#navbarResponsive" class="navbar-toggler navbar-toggler-right" type="button" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><i class="fa fa-align-justify"></i></button>
-    <div class="collapse navbar-collapse" id="navbarResponsive">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item"><a class="nav-link js-scroll-trigger">About Us</a></li>
-      </ul>
+  <nav class="navbar navbar-light navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container"><a class="navbar-brand js-scroll-trigger" routerLink="../">The Music Visualizer</a><button data-toggle="collapse" data-target="#navbarResponsive" class="navbar-toggler navbar-toggler-right" type="button" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><i class="fa fa-align-justify"></i></button>
+      <div class="collapse navbar-collapse" id="navbarResponsive"></div>
     </div>
-  </div>
-</nav>
-<header class="text-center text-white d-flex masthead" style="background-color: midnightblue">
-  <div class="container my-auto">
-    <div class="row">
-      <div class="col-lg-10 mx-auto">
-        <h1 class="text-uppercase"><strong>Profile Page</strong></h1>
-        <hr />
+  </nav>
+
+
+  <header class="text-center text-white d-flex masthead" style="background-color: midnightblue">
+    <div class="container my-auto">
+      <div class="row">
+        <div class="col-lg-10 mx-auto">
+          <h1 class="text-uppercase"><strong>Profile Page</strong></h1>
+          <hr />
+        </div>
+      </div>
+      
+      
+
+      <h1 class="text-uppercase"><strong>{{this.userData.name}}</strong></h1>
+      <p>  </p>
+      <p> {{this.userData.email}} </p>
+
+      <div class="form-group">
+        <button class="btn btn-primary btn-block" type="submit">Change name</button>
+        <button class="btn btn-primary btn-block" type="submit" (click)="passwordReset()">Change password</button>
+        <button class="btn btn-primary btn-block" type="submit" (click)="this.spotifyLinked=true">Link Spotify</button>
+      </div>
+
+      <div style="margin-top: 30%;width: 100%;text-align: center;">
+        <p>To go back to the visualization page <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" (click)="goBackToVisualPage()">click here.</a></p>
+        <p>To logout of your account <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" (click)="logout()">click here.</a></p>
       </div>
     </div>
-    <div class="col-lg-8 mx-auto">
-      <p class="text-faded mb-5">Page still in development as we add more fields to USER class</p>
-    </div>
-    <h1 class="text-uppercase"><strong>Current Stored Data:</strong></h1>
-    <p> {{this.userData.name}} </p>
-    <p> {{this.userData.email}} </p>
+  </header>
 
-    <div class="form-group">
-      <button class="btn btn-primary btn-block" type="submit">Change name</button>
-      <button class="btn btn-primary btn-block" type="submit" (click)="passwordReset()">Change password</button>
-      <div *ngIf="spotifyLinked; else notLinked">
-        <p> Spotify linked! </p>
-      </div>
-      <ng-template #notLinked>
-        <!--button class="btn btn-primary btn-block" type="submit" (click)="this.spotifyLinked=true">Link Spotify</!--button-->
-        <p> Spotify not linked!</p>
-      </ng-template>
-      <div>
-        <p *ngIf="!spotifyLinked">dfs</p>
-      </div>
-    </div>
-
-    <div style="margin-top: 30%;width: 100%;text-align: center;">
-      <p>To go back to the visualization page <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" (click)="goBackToVisualPage()">click here.</a></p>
-      <p>To logout of your account <a class="btn btn-primary btn-xl js-scroll-trigger" role="button" (click)="logout()">click here.</a></p>
-    </div>
-  </div>
-</header>
-
-<script src="assets/js/jquery.min.js"></script>
-<script src="assets/bootstrap/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
-<script src="assets/js/creative.js"></script>
+  <script src="assets/js/jquery.min.js"></script>
+  <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+  <script src="assets/js/creative.js"></script>
 </body>
 </html>
 
