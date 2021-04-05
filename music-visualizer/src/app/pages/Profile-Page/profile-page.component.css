@@ -152,4 +152,11 @@ body {
   font-family: Merriweather,Helvetica Neue,Arial,sans-serif;
 }
 
+#userButtonsParent {
+    display: flex;
+}
 
+#userButtons {
+    padding-left: 1%;
+    padding-right: 1%;
+}
