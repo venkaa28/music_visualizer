@@ -1,9 +1,13 @@
 /******************************************************************************
                                 HTML Elements
 ******************************************************************************/
-html {
-  overflow-x: hidden;
-  overflow-y: hidden;
+button {
+  padding: 0px;
+  display: inline-block;
+  outline: none;
+  border: none;
+  color: white;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 H1 {
@@ -13,13 +17,9 @@ H1 {
   color: var(--light);
 }
 
-button {
-  padding: 0px;
-  display: inline-block;
-  outline: none;
-  border: none;
-  color: white;
-  background-color: rgba(0, 0, 0, 0);
+html {
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 input[type=file] {
@@ -38,9 +38,23 @@ input[type=range] {
 /******************************************************************************
                                     Classes
 ******************************************************************************/
-.ui-button {
-  height: 100% !important;
-  width: 100% !important;
+.controls {
+  color: white;
+  position: absolute;
+  margin: 0;
+  width: 100%;
+  top: 0%;
+}
+
+.custom-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.custom-icon-play {
+  width: 50px;
+  height: 50px;
+  margin: 10px;
 }
 
 .overlay {
@@ -64,33 +78,6 @@ input[type=range] {
   left: 0;
 }
 
-.controls {
-  color: white;
-  position: absolute;
-  margin: 0;
-  width: 100%;
-  top: 0%;
-}
-
-.custom-icon {
-  width: 40px;
-  height: 40px;
-}
-
-.custom-icon-play {
-  width: 50px;
-  height: 50px;
-  margin: 10px;
-}
-
-.song-text {
-  margin: 0;
-  text-align: left;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
 .progress {
   display: inline-block;
   width: 80%;
@@ -106,19 +93,82 @@ input[type=range] {
   margin-left: 1%;
 }
 
+.song-display-container {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10%;
+}
+
+.song-text {
+  margin: 0;
+  text-align: left;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+
+.ui-button {
+  height: 100% !important;
+  width: 100% !important;
+}
+
 .upload-blur {
   filter: blur(1px);
+}
+
+.upload-item {
+  display: inline-block;
+  text-align: center;
+  width: 20%;
+  margin: 2%;
+  border-radius: 15px;
+  padding: 1%;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /*******************************************************************************
                                       ID's
 *******************************************************************************/
+#album {
+  width: 200%;
+  height: 200%;
+  position: relative;
+}
+
+#button {
+  float: center;
+}
+
 #canvas-visualizer {
   position: relative;
   margin: 0;
   width: 100%;
   height: 100%;
   padding: 0;
+}
+
+#edit-menu {
+  position: absolute;
+  bottom: 12%;
+  left: 85%;
+  background-color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  border-radius: 15px;
+  padding: 1%;
+  opacity: 0;
+  width: 0%;
+  transition: 0.1s 0.2s;
+}
+
+#load-label {
+  cursor: pointer;
+  margin-bottom: 1%;
+}
+
+#load-mic {
+  cursor: pointer;
+  margin-top: -2%;
 }
 
 #renderCanvas {
@@ -150,53 +200,15 @@ input[type=range] {
   overflow-y: hidden;
 }
 
-#load-label {
-  cursor: pointer;
-  margin-bottom: 1%;
-}
-
-#load-mic {
-  cursor: pointer;
-  margin-top: -2%;
-}
-
-#edit-menu {
-  position: absolute;
-  bottom: 12%;
-  left: 85%;
-  background-color: rgba(255, 255, 255, 0.4);
-  text-align: center;
-  border-radius: 15px;
-  padding: 1%;
-  opacity: 0;
-  width: 0%;
-  transition: 0.1s 0.2s;
-}
-
-#song-display {
-  position: absolute;
-  text-align: left;
-  vertical-align: center;
-  left: 2%;
-  top: 15%;
-  margin: 0;
-  width: 20%;
-}
-
-#button {
-  float: center;
-}
-
-#slider {
-  display: inline-block;
-}
-
-#volume #panner {
-  display: block;
-}
-
 #panner p {
   padding: 1%;
+}
+
+#progress-time {
+  position: absolute;
+  width: 100%;
+  margin: 0;
+  top: 70%;
 }
 
 #settings {
@@ -208,25 +220,23 @@ input[type=range] {
   text-align: right;
 }
 
-#progress-time {
-  position: absolute;
-  width: 100%;
-  margin: 0;
-  top: 70%;
+#slider {
+  display: inline-block;
 }
 
-#upload-menu {
+#song-display {
   position: absolute;
-  top: 20%;
-  border-radius: 15px;
-  left: 10%;
-  padding: 5%;
-  background-color: rgb(255, 255, 255, 0.5);
-  color: black;
-  width: 80%;
-  height: 50%;
-  text-align: center;
-  transition: 0.1s 0.2s;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  left: 2%;
+  top: 15%;
+  margin: 0;
+  width: 20%;
+}
+
+#song-display-text {
+  width: 100%;
 }
 
 #song-title {
@@ -237,8 +247,20 @@ input[type=range] {
   font-size: small;
 }
 
-#album {
-  margin: 2%;
-  width: 25%;
-  height: 25%;
+#upload-menu {
+  position: absolute;
+  top: 20%;
+  border-radius: 15px;
+  left: 20%;
+  padding: 5%;
+  background-color: rgb(255, 255, 255, 0.5);
+  color: black;
+  width: 60%;
+  height: 50%;
+  text-align: center;
+  transition: 0.1s 0.2s;
+}
+
+#volume #panner {
+  display: block;
 }

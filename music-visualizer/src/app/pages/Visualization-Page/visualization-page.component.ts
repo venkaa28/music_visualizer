@@ -117,7 +117,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.micUsed = false;
 
     this.scene.animate();
-    this.toggleSongMenu();
+    this.toggleUploadMenu();
     this.audioService.play();
   }
 
@@ -129,12 +129,12 @@ export class VisualizationPageComponent implements AfterViewInit {
     if (typeof this.micStream === 'undefined') {
       await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
       .then((stream) => {
-        //this.micStream = stream;
         this.audioService.loadMic(stream); // load the audio into the audio context
       });
     }
 
     this.micUsed = true;
+    this.toggleUploadMenu();
 
     this.scene.animate();
   }
@@ -299,15 +299,15 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
   }
 
-  toggleSongMenu() {
+  toggleUploadMenu() {
     var songBox = document.getElementById('upload-menu');
     var canvas = document.getElementById('renderCanvas');
 
     if (songBox.style.width === '0%') {
-      songBox.style.width = '80%';
+      songBox.style.width = '60%';
       canvas.style.filter = "blur(4px)";
       songBox.style.opacity = '1';
-    } else if (songBox.style.width === '80%'){
+    } else if (songBox.style.width === '60%'){
       canvas.style.filter = "blur(0)";
       songBox.style.width = '0%';
       songBox.style.opacity = '0';
