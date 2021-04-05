@@ -102,6 +102,7 @@ export class AuthService {
     this.userData = (cookie.length === 0) ? null : JSON.parse(cookie);
 
     // store in global user object
+
     return this.userData;
   }
 
@@ -109,4 +110,8 @@ export class AuthService {
   getLoggedIn() {
     return (this.getUser() === null) ? false : true;
   }
+  setSpotifyAuthToken = (token: string) => {
+    this.userData.spotifyAPIKey = token;
+  }
+  getSpotifyAuthToken = () => this.userData.spotifyAPIKey;
 }

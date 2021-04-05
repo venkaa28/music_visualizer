@@ -12,6 +12,7 @@ import {Music} from '../../classes/music'
 
 // scenes
 import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
+import {SpotifyPlaybackSdkService} from "../../services/spotify-playback-sdk.service";
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
 
@@ -22,7 +23,7 @@ type Dict = {[key: string]: any};
   selector: 'app-visualization-page',
   templateUrl: './visualization-page.component.html',
   styleUrls: [
-    './visualization-page.component.css', 
+    './visualization-page.component.css',
     '../../../assets/bootstrap/css/bootstrap.min.css',
     '../../../assets/fonts/font-awesome.min.css',
   ],
@@ -48,7 +49,8 @@ export class VisualizationPageComponent implements AfterViewInit {
   private micStream: MediaStream; // user's microphone data
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
-    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
+    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
+             private spotifyPlaybackService: SpotifyPlaybackSdkService) {
     // initialize variables
     this.current = new Music();
     this.micUsed = false;
@@ -66,6 +68,13 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audio = this.audioFile.nativeElement; // grab audio element from html
     
     this.scene.createScene(this.rendererCanvas);
+    
+    if(this.authService.getSpotifyAuthToken() != ''){
+      console.log(this.authService.getSpotifyAuthToken());
+      this.spotifyPlaybackService.addSpotifyPlaybackSdk();
+      this.planeScene.createScene(this.rendererCanvas);
+      this.planeScene.animate();
+    }
 
     setInterval(() => {
       if (!this.micUsed) {
@@ -298,6 +307,8 @@ export class VisualizationPageComponent implements AfterViewInit {
       infoBox.style.opacity = '0';
     }
   }
+
+
 
   toggleUploadMenu() {
     var songBox = document.getElementById('upload-menu');
