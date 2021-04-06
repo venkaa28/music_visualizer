@@ -20,12 +20,9 @@ export class SeaSceneService {
   private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
   private cylinder: THREE.Mesh;
-  private secondPlane!: THREE.Mesh;
   private loader: GLTFLoader;
   private textureLoader: THREE.TextureLoader;
   private darkSky: THREE.Group;
-  private rain: THREE.Points;
-  private canvasRef: ElementRef<HTMLCanvasElement>;
   public frame: number = 0;
 
   private height: any;
@@ -162,20 +159,7 @@ export class SeaSceneService {
 
 
 
-    const planeGeometry = new THREE.PlaneGeometry(1600, 1600, 100, 100);
-    const planeMaterial = new THREE.MeshLambertMaterial({
-      color: 0x25E0EC,
-      side: THREE.DoubleSide,
-      wireframe: true
-    });
 
-    this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    this.plane.rotation.x = -0.5 * Math.PI;
-    // this.plane.rotation.z =  Math.PI;
-    // this.plane.rotation.x = 0.25 * Math.PI;
-    // this.plane.position.set(0, -30, 0);
-
-    this.group.add(this.plane);
 
     // adding ambient lighting to the scene
     this.ambLight = new THREE.AmbientLight(0xaaaaaa, 2);
@@ -248,7 +232,7 @@ export class SeaSceneService {
     const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
     const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
 
-    const position = this.plane.geometry.attributes.position;
+    const position = this.cylinder.geometry.attributes.position;
 
     // console.log(position);
     const vector = new THREE.Vector3();
@@ -274,19 +258,21 @@ export class SeaSceneService {
     // this.group.rotation.y += 0.005;
     // this.cylinderGeometry.rotation.z += 0.005;
     this.cylinder.rotation.z += 0.005;
+    this.cylinder.rotation.x += 0.005;
+    this.cylinder.rotation.y += 0.005;
     this.darkSky.rotation.y += 0.005;
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
-    this.plane.geometry.attributes.position.needsUpdate = true;
+    this.cylinder.geometry.attributes.position.needsUpdate = true;
     // this.plane.geometry.computeVertexNormals();
-    this.plane.updateMatrix();
+    this.cylinder.updateMatrix();
 
   }
   // for re-use
 
-  wavesBuffer( waveSize, magnitude1,  magnitude2) {
+  wavesBuffer(waveSize, magnitude1, magnitude2) {
 
-    const pos = this.plane.geometry.attributes.position;
+    const pos = this.cylinder.geometry.attributes.position;
     const center = new THREE.Vector3(0, 0, 0);
     const vec3 = new THREE.Vector3();
 
