@@ -30,7 +30,7 @@ export class PlaneSceneServiceService {
   private rain: THREE.Points;
   private canvasRef: ElementRef<HTMLCanvasElement>;
   public frame: number = 0;
-  private trackProgress: number = 0;
+  public trackProgress: number = 0;
 
 
   private frameId: number = null;
@@ -183,6 +183,39 @@ export class PlaneSceneServiceService {
 
   }
 
+  /* get the percent we're through the song, use that as the percent through the Spotify data
+   * and round it down to get a usable index. Valid data types are (from small to large):
+   *   - segments
+   *   - beats
+   *   - tatums
+   *   - bars
+   *   - sections
+   */
+  getSpotifyAnalysis(dataType: string) {
+    // get percent of song we're through with current part in song / duration of song
+    var progressPercent = this.trackProgress / this.spotifyService.feature['duration_ms'];
+
+    // get the length of the array of whatever spotify data we're trying to access
+    var dataArrayLength = this.spotifyService.analysis[dataType].length;
+    
+    // generate corrsponding index
+    var dataIndex = Math.floor(progressPercent * dataArrayLength);
+    return dataIndex;
+  }
+
+  // based on x1 + at = x2
+  smoothTransition(val1: number, val2: number, duration: number): number {
+    if (this.frame > duration) {
+      this.frame = 0;
+    } else {
+      this.frame++;
+    }
+
+    var delta = val2 - val1; // the change in values
+    var slope = delta / duration; // scale to duration for smoothing
+    return val1 + slope * this.frame;
+  }
+
   sceneAnimation = () => {
 
     //this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
@@ -210,35 +243,46 @@ export class PlaneSceneServiceService {
     // const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
     // const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
 
-    const segmentIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
-      * (this.spotifyService.currTrackAnalysisData['segments'].length);
-    const barIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
-      * (this.spotifyService.currTrackAnalysisData['bars'].length);
-    const beatIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
-      * (this.spotifyService.currTrackAnalysisData['beats'].length);
-    const tatumIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
-      * (this.spotifyService.currTrackAnalysisData['tatums'].length);
-    const sectionIndex = (this.trackProgress / this.spotifyService.currTrackFeatureData['duration_ms'])
-      * (this.spotifyService.currTrackAnalysisData['sections'].length);
+    const segmentIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
+      * (this.spotifyService.analysis['segments'].length);
+    const barIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
+      * (this.spotifyService.analysis['bars'].length);
+    const beatIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
+      * (this.spotifyService.analysis['beats'].length);
+    const tatumIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
+      * (this.spotifyService.analysis['tatums'].length);
+    const sectionIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
+      * (this.spotifyService.analysis['sections'].length);
     //console.log(sectionIndex);
-    //console.log(this.spotifyService.currTrackAnalysisData['sections']);
+    //console.log(this.spotifyService.analysis['sections']);
 
-    const currBar = this.spotifyService.currTrackAnalysisData['bars'][Math.floor(barIndex)];
+    const currBar = this.spotifyService.analysis['bars'][Math.floor(barIndex)];
     console.log(currBar);
-    const currSection = this.spotifyService.currTrackAnalysisData['sections'][Math.floor(sectionIndex)];
-    const currBeat = this.spotifyService.currTrackAnalysisData['beats'][Math.floor(beatIndex)];
+    const currSection = this.spotifyService.analysis['sections'][Math.floor(sectionIndex)];
+    const currBeat = this.spotifyService.analysis['beats'][Math.floor(beatIndex)];
+    const currSegment = this.spotifyService.analysis['segments'][Math.floor(segmentIndex)];
+    const nextSegment = this.spotifyService.analysis['segments'][Math.floor(segmentIndex) + 1];
     //console.log(currSection);
 
     let pitchAvg = 0;
-    for(let i = 0; i< this.spotifyService.currTrackAnalysisData['segments'][Math.floor(segmentIndex)]['pitches'].length; i++){
-      pitchAvg += this.spotifyService.currTrackAnalysisData['segments'][Math.floor(segmentIndex)]['pitches'][i];
+    for(let i = 0; i< this.spotifyService.analysis['segments'][Math.floor(segmentIndex)]['pitches'].length; i++){
+      pitchAvg += this.spotifyService.analysis['segments'][Math.floor(segmentIndex)]['pitches'][i];
     }
-    pitchAvg = pitchAvg/this.spotifyService.currTrackAnalysisData['segments'][Math.floor(segmentIndex)]['pitches'].length;
+    pitchAvg = pitchAvg/this.spotifyService.analysis['segments'][Math.floor(segmentIndex)]['pitches'].length;
     const scaledSectionTempo = currSection['tempo']/10;
     const scaledPitchAvg = this.modulate(pitchAvg, 0, 0.1, 0, 10);
     const barConfidence = currBar['confidence'];
     const beatConfidence = currBar['confidence'];
-    const segConfidence = currSection['confidence'];
+    const segConfidence = currSegment['confidence'];
+
+    // dummy values that were easy to get three of curr + present, replace with further implementation
+    var lowPitch = this.smoothTransition(this.avg(currSegment['pitches'].slice(0, 3)), this.avg(nextSegment['pitches'].slice(0, 3)), currSegment['duration'] * 10);
+    var medPitch = this.smoothTransition(this.avg(currSegment['pitches'].slice(4, 7)), this.avg(nextSegment['pitches'].slice(4, 7)), currSegment['duration'] * 10);
+    var highPitch = this.smoothTransition(this.avg(currSegment['pitches'].slice(8, 11)), this.avg(nextSegment['pitches'].slice(8, 11)), currSegment['duration'] * 10);
+
+    lowPitch = this.modulate(lowPitch, -3, 3, 15, 100);
+    medPitch = this.modulate(medPitch, -3, 3, 15, 100);
+    highPitch = this.modulate(highPitch, -3, 3, 15, 100);
 
     const scaledConfidence = this.modulate(barConfidence+ beatConfidence+ segConfidence, 0,3, 15 , 100 );
     console.log(scaledConfidence);
@@ -246,7 +290,7 @@ export class PlaneSceneServiceService {
     //console.log(scaledBeatConfidence);
     const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
     //console.log(currSection['loudness']);
-    this.wavesBuffer( scaledBeatConfidence, scaledConfidence, scaledPitchAvg);
+    this.wavesBuffer( lowPitch, medPitch, highPitch);
 
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
@@ -268,8 +312,6 @@ export class PlaneSceneServiceService {
     //     highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 40 : 255
     //   );
     // }
-
-
 
      this.plane.geometry.attributes.position.needsUpdate = true;
     // // this.plane.geometry.computeVertexNormals();

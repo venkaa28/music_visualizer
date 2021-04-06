@@ -10,8 +10,8 @@ import {map} from "rxjs/operators";
 })
 export class SpotifyService {
 
-  public currTrackAnalysisData: {};
-  public currTrackFeatureData: {};
+  public analysis: {};
+  public feature: {};
 
   constructor(public http: HttpClient, private router: Router, private authService: AuthService) { }
 
@@ -30,10 +30,10 @@ export class SpotifyService {
     const headers = new HttpHeaders()
       .set("Accept", 'application/json')
       .set("Content-Type", 'application/json')
-      .set("Authorization", 'Bearer ' + this.authService.getSpotifyAuthToken());
+      .set("Authorization", 'Bearer ' + this.authService.getUser().spotifyAPIKey);
     let analysisData: {} = {};
-    this.http.get(url, {headers}).subscribe((resp) => this.currTrackAnalysisData = resp);
-    console.log(this.currTrackAnalysisData);
+    this.http.get(url, {headers}).subscribe((resp) => this.analysis = resp);
+    console.log(this.analysis);
 
   }
 
@@ -42,8 +42,8 @@ export class SpotifyService {
     const headers = new HttpHeaders()
       .set("Accept", 'application/json')
       .set("Content-Type", 'application/json')
-      .set("Authorization", 'Bearer ' + this.authService.getSpotifyAuthToken());
-    this.http.get(url, {headers}).subscribe((resp) => this.currTrackFeatureData = resp);
-    console.log(this.currTrackFeatureData);
+      .set("Authorization", 'Bearer ' + this.authService.getUser().spotifyAPIKey);
+    this.http.get(url, {headers}).subscribe((resp) => this.feature = resp);
+    console.log(this.feature);
   }
 }

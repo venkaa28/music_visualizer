@@ -31,8 +31,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DoBootstrap } from "@angular/core";
+import { AuthService } from './services/auth.service'
 import { AudioService } from './services/audio.service';
 import { CallbackComponent } from './pages/callback/callback.component';
+import { CookieService } from 'ngx-cookie-service';
 
 @NgModule({
   declarations: [
@@ -66,7 +68,11 @@ import { CallbackComponent } from './pages/callback/callback.component';
     BrowserAnimationsModule,
     ReactiveFormsModule,
   ],
-  providers: [AudioService],
+  providers: [
+    AudioService,
+    AuthService,
+    CookieService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -87,7 +87,7 @@ export class AuthService {
   }
 
   // clear cookies and sign out of auth
-  logOutUser(): Promise<void>{
+  logOutUser(): Promise<void> {
     // clear cookies
     this.cookieService.deleteAll();
     // sign out from fire auth
@@ -95,23 +95,40 @@ export class AuthService {
   }
 
   // get user data from cookie if it exists, allows for persistent log in
-  getUser(){
-    const cookie: string = this.cookieService.get('account'); // get account cookie
+  getUser() {
+    var userCookie: string = null;
+    var spotifyCookie: string = null;
 
-    // make sure cookie exists
-    this.userData = (cookie.length === 0) ? null : JSON.parse(cookie);
+    // get user data if it exists
+    if (this.cookieService.check('account')) {
+      userCookie = this.cookieService.get('account');
+      this.userData = JSON.parse(userCookie);
+    } else {
+      this.userData = null;
+    }
+
+    // get spotify token if it exists
+    if (this.cookieService.check('spotify')) {
+      spotifyCookie = this.cookieService.get('spotify');
+    }
+    
+    this.userData.spotifyAPIKey = spotifyCookie; // initialized to null, so wither get cookie or is null
 
     // store in global user object
-
     return this.userData;
   }
 
   // use cookies to see if user is logged in
   getLoggedIn() {
-    return (this.getUser() === null) ? false : true;
+    return this.cookieService.check('account');
   }
-  setSpotifyAuthToken = (token: string) => {
-    this.userData.spotifyAPIKey = token;
+
+  async setSpotifyAuthToken(token: string) {
+    var expireHours: number = 1; // number of hours to expire
+    var expireDate: Date = new Date; // current + offset in milliseconds
+    expireDate.setHours(expireDate.getHours() + expireHours);
+    console.log(expireDate);
+
+    await this.cookieService.set('spotify', token, {path: '/', sameSite: 'Lax', expires: expireDate}); // set token cookie
   }
-  getSpotifyAuthToken = () => this.userData.spotifyAPIKey;
 }

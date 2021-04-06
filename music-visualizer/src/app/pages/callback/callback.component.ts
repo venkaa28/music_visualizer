@@ -15,8 +15,8 @@ export class CallbackComponent implements OnInit {
     const token = this.route.snapshot.queryParamMap.get('access_token');
     let fragment = this.route.snapshot.fragment;
     let auth_token = fragment.substring(fragment.indexOf('=')+1, fragment.indexOf('&'));
-    this.authService.setSpotifyAuthToken(auth_token);
-    console.log(this.authService.getUser());
+    await this.authService.setSpotifyAuthToken(auth_token);
+    console.log(this.authService.getUser().spotifyAPIKey);
     await this.router.navigate(['../../ProfilePage']);
   }
 

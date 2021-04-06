@@ -47,6 +47,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   private menuTimeout: number; // timeout in ms of menu
   private timeout: number; // id of current timeout
   private micStream: MediaStream; // user's microphone data
+  private spotifyUsed: boolean; // control spotify
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
     public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
@@ -54,27 +55,17 @@ export class VisualizationPageComponent implements AfterViewInit {
     // initialize variables
     this.current = new Music();
     this.micUsed = false;
+    this.spotifyUsed = false;
     this.scene = this.scenesAvailable[0];
     this.menuTimeout = 2000;
 
-    // TODO: upload menu appear animation
     // TODO: scroll text on hover
-    // TODO: get svg icons
-    // TODO: upload menu icon fix up
-    // TODO: Show menu when paused
   }
 
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement; // grab audio element from html
     
     this.scene.createScene(this.rendererCanvas);
-    
-    if(this.authService.getSpotifyAuthToken() != ''){
-      console.log(this.authService.getSpotifyAuthToken());
-      this.spotifyPlaybackService.addSpotifyPlaybackSdk();
-      this.planeScene.createScene(this.rendererCanvas);
-      this.planeScene.animate();
-    }
 
     setInterval(() => {
       if (!this.micUsed) {
@@ -124,6 +115,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audio.src = this.current.filepath; // set source to be the file in the html
     this.audioService.loadSong(this.audio);
     this.micUsed = false;
+    this.spotifyUsed = false;
 
     this.scene.animate();
     this.toggleUploadMenu();
@@ -143,34 +135,60 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
 
     this.micUsed = true;
+    this.spotifyUsed = false;
     this.toggleUploadMenu();
 
     this.scene.animate();
+  }
+
+  async loadSpotify() {
+    // TODO: error handle not token cookie
+    if(this.authService.getUser().spotifyAPIKey == null) {
+      await this.router.navigate(['../ProfilePage']);
+    }
+
+    this.scene.createScene(this.rendererCanvas);
+    await this.spotifyPlaybackService.addSpotifyPlaybackSdk(this.scene);
+    this.spotifyUsed = true;
+    this.toggleUploadMenu();
   }
 
   /**************************************Audio controls**************************************/
 
   // handle play or pause
   async togglePlay() {
-    await this.audioService.playOrPause();
+    if (this.spotifyUsed) {
+      this.spotifyPlaybackService.player.togglePlay();
+    } else {
+      await this.audioService.playOrPause();
+    }
+
     this.toggleMenu();
   }
 
   // load next song from firebase
   async nextSong() {
-    if (this.audioService.getTime() + 10 > this.audioService.getDuration()) {
-      this.audioService.setTime(this.audioService.getDuration());
+    if (this.spotifyUsed) {
+      this.spotifyPlaybackService.player.nextTrack();
     } else {
-      this.audioService.setTime(this.audioService.getTime() + 10);
+      if (this.audioService.getTime() + 10 > this.audioService.getDuration()) {
+        this.audioService.setTime(this.audioService.getDuration());
+      } else {
+        this.audioService.setTime(this.audioService.getTime() + 10);
+      }
     }
   }
 
   // load previous song from firebase
   async rewindSong() {
-    if (this.audioService.getTime() - 10 < 0) {
-      this.audioService.setTime(0);
+    if (this.spotifyUsed) {
+      this.spotifyPlaybackService.player.previousTrack();
     } else {
-      this.audioService.setTime(this.audioService.getTime() - 10);
+      if (this.audioService.getTime() - 10 < 0) {
+        this.audioService.setTime(0);
+      } else {
+        this.audioService.setTime(this.audioService.getTime() - 10);
+      }
     }
   }
 
@@ -239,18 +257,35 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   // displays appropiate play or pause icon based on the state of the audio
   playPauseIcon() {
+    var playIcon: string = '../../../assets/icons/play.svg';
+    var pauseIcon: string = '../../../assets/icons/pause.svg';
+
+    /*if (this.spotifyUsed) {
+      if (this.spotifyPlaybackService.player === null) {
+        return playIcon;
+      }
+
+      this.spotifyPlaybackService.player.getCurrentState().then((state) => {
+        if (!state) {
+          return playIcon;
+        }
+
+        return pauseIcon;
+      });
+    }*/
+
     // audio uninitialized
     if (typeof this.audio === 'undefined') {
-      return '../../../assets/icons/play.svg';
+      return playIcon;
     }
 
     // paused music, show play icon
     if (this.audio.paused) {
-      return '../../../assets/icons/play.svg';
+      return playIcon;
     }
 
     // playing music, show pause icon
-    return '../../../assets/icons/pause.svg';
+    return pauseIcon;
   }
 
   // convert time in seconds to a formatted output string mm:ss
