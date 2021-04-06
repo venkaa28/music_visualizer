@@ -135,7 +135,7 @@ export class SeaSceneService {
       color: '#FFFFFF',
       transparent: true,
       opacity: .3,
-      shading: THREE.FlatShading,
+      // shading: THREE.FlatShading,
     });
     // To create an object in Three.js, we have to create a mesh
     // which is a combination of a geometry and some material

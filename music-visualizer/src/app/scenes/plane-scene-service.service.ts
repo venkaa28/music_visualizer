@@ -9,7 +9,6 @@ import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
   providedIn: 'root'
 })
 export class PlaneSceneServiceService {
-
   constructor(private ngZone: NgZone, public audioService: AudioService) { }
 
   private canvas!: HTMLCanvasElement;
@@ -93,6 +92,7 @@ export class PlaneSceneServiceService {
 
     // sets a perspective camera
     this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
+    console.log(this.camera);
     // lets the camera at position x, y, z
     this.camera.position.set(-10, 425, -1300);
     // set the camera to look at the center of the scene
@@ -237,11 +237,11 @@ export class PlaneSceneServiceService {
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
     if (this.frame++ % 1 === 0) {
-      this.plane.material.color.setRGB(
-        highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 30 : 255,
-        midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 30 : 255,
-        lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 30 : 255
-      );
+      // this.plane.material.color.setRGB(
+      //   highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 30 : 255,
+      //   midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 30 : 255,
+      //   lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 30 : 255
+      // );
     }
 
 
