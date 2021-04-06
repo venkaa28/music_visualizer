@@ -51,7 +51,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, public seaScene: SeaSceneService, private readonly notifierService: NotifierService) {
       this.current = new Music();
       this.micUsed = false;
-      this.scene = this.scenesAvailable[0];
+      this.scene = this.scenesAvailable[3];
       this.menuTimeout = 3000;
     }
 

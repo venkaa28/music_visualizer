@@ -19,10 +19,13 @@ export class SeaSceneService {
   private ambLight!: THREE.AmbientLight;
   private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
+  private secondPlane!: THREE.Mesh;
   private loader: GLTFLoader;
   private textureLoader: THREE.TextureLoader;
   private darkSky: THREE.Group;
   private rain: THREE.Points;
+  private canvasRef: ElementRef<HTMLCanvasElement>;
+  public frame: number = 0;
 
   private height: any;
   private width: any;
@@ -40,10 +43,6 @@ export class SeaSceneService {
   }
   private cylinderGeometry: any;
 
-  public handleWindowResize() {
-    // update height and width of the renderer and the camera
-
-  }
 
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     this.height = window.innerHeight;
@@ -73,22 +72,19 @@ export class SeaSceneService {
     this.canvas = canvas.nativeElement;
     this.loader = new GLTFLoader();
 
-    // Create the renderer
     this.renderer = new THREE.WebGLRenderer({
-      // Allow transparency to show the gradient background
-      // we defined in the CSS
+      canvas: this.canvas,
       alpha: true,
-
-      // Activate the anti-aliasing; this is less performant,
-      // but, as our project is low-poly based, it should be fine
       antialias: true
     });
-// Define the size of the renderer; in this case,
-    // it will fill the entire screen
+    this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
+    // sets the size of the canvas
     this.renderer.setSize(this.width, this.height);
 
     // Enable shadow rendering
     this.renderer.shadowMap.enabled = true;
+    this.textureLoader = new THREE.TextureLoader();
+    // this.renderer.shadowMap.enabled = true;
 
     this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
       this.darkSky = model.scene;
