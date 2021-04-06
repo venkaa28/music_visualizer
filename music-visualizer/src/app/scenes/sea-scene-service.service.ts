@@ -19,6 +19,7 @@ export class SeaSceneService {
   private ambLight!: THREE.AmbientLight;
   private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
+  private cylinder: THREE.Mesh;
   private secondPlane!: THREE.Mesh;
   private loader: GLTFLoader;
   private textureLoader: THREE.TextureLoader;
@@ -119,11 +120,19 @@ export class SeaSceneService {
       console.log(this.darkSky.position);
     });
 
+    // sets a perspective camera
+    this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
+    console.log(this.camera);
+    // lets the camera at position x, y, z
+    this.camera.position.set(-10, 425, -1300);
+    // set the camera to look at the center of the scene
+    // this.camera.lookAt(this.scene.position);
+    this.camera.lookAt(0, 0, 0);
     // adds the camera to the scene
     this.scene.add(this.camera);
 
     // attempt at sea
-    this.cylinderGeometry = new THREE.CylinderGeometry(500, 500, 2800, 32, 34);
+    this.cylinderGeometry = new THREE.CylinderGeometry(500, 500, 800, 5, 5);
     // rotate the geometry on the x axis
     this.cylinderGeometry.applyMatrix(new THREE.Matrix4().makeRotationZ(3.14 / 2));
     // create the material
@@ -135,16 +144,21 @@ export class SeaSceneService {
     });
     // To create an object in Three.js, we have to create a mesh
     // which is a combination of a geometry and some material
-    const mesh = new THREE.Mesh(this.cylinderGeometry, mat);
+    this.cylinder = new THREE.Mesh(this.cylinderGeometry, mat);
+
+    this.cylinder.rotation.x = -0.5 * Math.PI;
+    this.cylinder.rotation.y = -0.5 * Math.PI;
+    // mesh.rotation.z = -0.5 * Math.PI;
 
     // Allow the sea to receive shadows
-    mesh.receiveShadow = true;
+    this.cylinder.receiveShadow = true;
 
     // push it a little bit at the bottom of the scene
-    mesh.position.y = -600;
+    this.cylinder.position.set(0, 0, 0);
 
     // add the mesh of the sea to the scene
-    this.scene.add(mesh);
+    // this.scene.add(mesh);
+    this.group.add(this.cylinder);
 
 
 
@@ -156,12 +170,12 @@ export class SeaSceneService {
     });
 
     this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    // this.plane.rotation.x = -0.5 * Math.PI;
+    this.plane.rotation.x = -0.5 * Math.PI;
     // this.plane.rotation.z =  Math.PI;
     // this.plane.rotation.x = 0.25 * Math.PI;
     // this.plane.position.set(0, -30, 0);
 
-    // this.group.add(this.plane);
+    this.group.add(this.plane);
 
     // adding ambient lighting to the scene
     this.ambLight = new THREE.AmbientLight(0xaaaaaa, 2);
@@ -259,7 +273,7 @@ export class SeaSceneService {
     // }
     // this.group.rotation.y += 0.005;
     // this.cylinderGeometry.rotation.z += 0.005;
-    this.plane.rotation.z += 0.005;
+    this.cylinder.rotation.z += 0.005;
     this.darkSky.rotation.y += 0.005;
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
