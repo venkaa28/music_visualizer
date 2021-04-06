@@ -1,8 +1,9 @@
 import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
-import {AudioService} from '../services/audio.service';
+//import {AudioService} from '../services/audio.service';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import {ToolsService} from '../services/tools.service';
 
 
 @Injectable({
@@ -10,7 +11,7 @@ import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 })
 export class PlaneSceneServiceService {
 
-  constructor(private ngZone: NgZone, public audioService: AudioService) { }
+  constructor(private ngZone: NgZone, public tool: ToolsService) { }
 
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -175,36 +176,13 @@ export class PlaneSceneServiceService {
 
   sceneAnimation = () => {
 
-    this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    const numBins = this.audioService.analyzer.frequencyBinCount;
-
-    const lowerHalfFrequncyData = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
-    const lowfrequncyData = this.audioService.dataArray.slice(0, (lowerHalfFrequncyData.length / 3) - 1);
-    const midfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3),
-      (lowerHalfFrequncyData.length / 3) * 2 - 1);
-    const highfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3) * 2, lowerHalfFrequncyData.length);
-
-    // console.log(lowerHalfFrequncyData.length);
-
-
-    const lowFreqAvg = this.avg(lowfrequncyData);
-    const midFreqAvg = this.avg(midfrequncyData);
-    const highFreqAvg = this.avg(highfrequncyData);
-
-    const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
-    const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
-    const highFreqDownScaled = highFreqAvg / highfrequncyData.length;
-
-
-    const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0, 1, 0, 15);
-    const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
-    const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
+    this.tool.freqSetup();
 
     const position = this.plane.geometry.attributes.position;
 
     // console.log(position);
     const vector = new THREE.Vector3();
-    this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
+    this.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor);
 
     // for (let i = 0,  l = position.count; i < l; i++){
     //   vector.fromBufferAttribute(position, i);
@@ -238,9 +216,9 @@ export class PlaneSceneServiceService {
     // this.group.rotation.z += 0.005;
     if (this.frame++ % 1 === 0) {
       this.plane.material.color.setRGB(
-        highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 30 : 255,
-        midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 30 : 255,
-        lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 30 : 255
+        this.tool.highFreqAvgScalor > 0 ? 1/this.tool.highFreqAvgScalor * 30 : 255,
+        this.tool.midFreqAvgScalor > 0 ? 1/this.tool.midFreqAvgScalor * 30 : 255,
+        this.tool.lowFreqAvgScalor > 0 ?  1/this.tool.lowFreqAvgScalor * 30 : 255
       );
     }
 
@@ -271,24 +249,7 @@ export class PlaneSceneServiceService {
     }
   }
 
-
-  fractionate(val: number, minVal: number, maxVal: number) {
-    return (val - minVal) / (maxVal - minVal);
-  }
-
-  modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number) {
-    const fr = this.fractionate(val, minVal, maxVal);
-    const delta = outMax - outMin;
-    return outMin + (fr * delta);
-  }
-
-  avg = (arr) => {
-    const total = arr.reduce((sum, b) => sum + b);
-    return (total / arr.length);
-  }
-
   max = (arr) => arr.reduce((a, b) => Math.max(a, b));
-
 
   public resize(): void {
     const width = window.innerWidth;
