@@ -25,15 +25,19 @@ export class SpotifyPlaybackSdkService {
   private subjectTrackEnded = new BehaviorSubject<boolean>(false);
   playStatusTimerId: string;
 
-  constructor(private spotifyService: SpotifyService, private zone: NgZone, private authService: AuthService) { }
+  constructor(private spotifyService: SpotifyService, private zone: NgZone, private authService: AuthService) {
+    this.player = null;
+  }
 
-  addSpotifyPlaybackSdk() {
+  async addSpotifyPlaybackSdk(scene: any) {
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
     script.type = 'text/javascript';
+
     script.addEventListener('load', (e) => {
       console.log(e);
     });
+
     document.head.appendChild(script);
     window.onSpotifyWebPlaybackSDKReady = () => {
       console.log('The Web Playback SDK is ready. We have access to Spotify.Player');
@@ -42,11 +46,10 @@ export class SpotifyPlaybackSdkService {
         name: 'MusicVisualizer',
         //volume: +localStorage.getItem('musiple-volume') / 100,
         getOAuthToken: (callback) => {
-          console.log(this.authService.getSpotifyAuthToken());
-          callback(this.authService.getSpotifyAuthToken());
-
+          callback(this.authService.getUser().spotifyAPIKey);
         }
       });
+      
       this.player.addListener('initialization_error', ({ message }) => { console.error(message); });
       this.player.addListener('authentication_error', ({ message }) => { console.error(message); });
       this.player.addListener('account_error', ({ message }) => { console.error(message); });
@@ -63,7 +66,7 @@ export class SpotifyPlaybackSdkService {
         this.spotifyService.getTrackFeatureData(this.currTrackID);
         console.log('Position in Song', position);
         console.log('Duration of Song', duration);
-
+        scene.animate();
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });
 
