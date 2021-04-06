@@ -14,6 +14,7 @@ import {Music} from '../../classes/music'
 import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
+import {SeaSceneService} from '../../scenes/sea-scene-service.service';
 
 
 type Dict = {[key: string]: any};
@@ -22,7 +23,7 @@ type Dict = {[key: string]: any};
   selector: 'app-visualization-page',
   templateUrl: './visualization-page.component.html',
   styleUrls: [
-    './visualization-page.component.css', 
+    './visualization-page.component.css',
     '../../../assets/bootstrap/css/bootstrap.min.css',
     '../../../assets/fonts/font-awesome.min.css',
   ],
@@ -39,24 +40,24 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   public audio: HTMLAudioElement; // audio element of window
   public current: Music; // music object
-  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene, this.seaScene]; // current scene being used
   public micUsed: boolean;
-  
+
   private scene: any; // current scene to use
   private menuTimeout: number; // timeout in ms of menu
   private timeout: number; // id of current timeout
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
-    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
+    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, public seaScene: SeaSceneService, private readonly notifierService: NotifierService) {
       this.current = new Music();
       this.micUsed = false;
-      this.scene = this.scenesAvailable[0];
+      this.scene = this.scenesAvailable[3];
       this.menuTimeout = 3000;
     }
 
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement; // grab audio element from html
-    
+
     this.scene.createScene(this.rendererCanvas);
 
     setInterval(() => {
@@ -69,12 +70,12 @@ export class VisualizationPageComponent implements AfterViewInit {
   // listen to keyboard events, perform actions if certain keys are pressed
   keyListener(event){
     event = event || window.event; //capture the event, and ensure we have an event
-    
+
     switch (event.key) {
       case 'm': // menu
         this.toggleMenu();
         break;
-      
+
       case ' ': // play/pause
         this.togglePlay();
         break;
