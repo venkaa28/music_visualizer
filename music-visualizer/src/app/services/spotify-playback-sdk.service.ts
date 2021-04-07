@@ -66,9 +66,9 @@ export class SpotifyPlaybackSdkService {
           ' please try authenticating again');
       });
       this.player.addListener('playback_error', ({ message }) => {
+        console.error(message);
         throw new Error('Error with spotify playback,' +
           ' please try reloading your browser and authenticating Spotify again');
-        console.error(message);
       });
 
       this.player.addListener('player_state_changed', ({
@@ -85,8 +85,6 @@ export class SpotifyPlaybackSdkService {
           this.notifierService.notify('error', e + ' Please try reloading the application' +
             ' or authenticate spotify again');
         }
-        console.log('Position in Song', position);
-        console.log('Duration of Song', duration);
         scene.animate();
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });

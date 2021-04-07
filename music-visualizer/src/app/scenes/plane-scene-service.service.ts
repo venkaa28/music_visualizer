@@ -94,12 +94,10 @@ export class PlaneSceneServiceService {
 
           }
         });
-        console.log(this.darkSky);
 
       });
 
       this.group.add(this.darkSky);
-      console.log(this.darkSky.position);
     });
 
     // sets a perspective camera
@@ -183,25 +181,6 @@ export class PlaneSceneServiceService {
 
   }
 
-  /* get the percent we're through the song, use that as the percent through the Spotify data
-   * and round it down to get a usable index. Valid data types are (from small to large):
-   *   - segments
-   *   - beats
-   *   - tatums
-   *   - bars
-   *   - sections
-   */
-  getSpotifyAnalysis(dataType: string) {
-    // get percent of song we're through with current part in song / duration of song
-    const progressPercent = this.trackProgress / this.spotifyService.feature['duration_ms'];
-
-    // get the length of the array of whatever spotify data we're trying to access
-    const dataArrayLength = this.spotifyService.analysis[dataType].length;
-
-    // generate corrsponding index
-    return Math.floor(progressPercent * dataArrayLength);
-  }
-
   // based on x1 + at = x2
   smoothTransition(val1: number, val2: number, duration: number): number {
     if (this.frame > duration) {
@@ -244,16 +223,7 @@ export class PlaneSceneServiceService {
 
     const segmentIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
       * (this.spotifyService.analysis['segments'].length);
-    const barIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
-      * (this.spotifyService.analysis['bars'].length);
-    const beatIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
-      * (this.spotifyService.analysis['beats'].length);
-    const tatumIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
-      * (this.spotifyService.analysis['tatums'].length);
-    const sectionIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
-      * (this.spotifyService.analysis['sections'].length);
-    //console.log(sectionIndex);
-    //console.log(this.spotifyService.analysis['sections']);
+
 
     const currBar = this.spotifyService.getBar(this.trackProgress)
     const currSection = this.spotifyService.getSection(this.trackProgress);
@@ -263,13 +233,11 @@ export class PlaneSceneServiceService {
     const nextSegment = this.spotifyService.analysis['segments'][Math.floor(segmentIndex) + 1];
     //console.log(currSection);
 
-    let pitchAvg = 0;
-    for(let i = 0; i < currSegment['pitches'].length; i++){
-      pitchAvg += currSegment['pitches'][i];
-    }
-    pitchAvg = pitchAvg/currSegment['pitches'].length;
+    //const totalAvgPitch = this.spotifyService.trackPitchAvg;
+    const pitchAvg =  this.avg(currSegment['pitches']);
+
     const scaledSectionTempo = currSection['tempo']/10;
-    const scaledPitchAvg = this.modulate(pitchAvg, 0, 0.1, 0, 20);
+    const scaledPitchAvg = this.modulate(pitchAvg, 0, 0.1, 0, 30);
     const barConfidence = currBar['confidence'];
     const beatConfidence = currBar['confidence'];
     const segConfidence = currSegment['confidence'];
@@ -277,12 +245,11 @@ export class PlaneSceneServiceService {
     const tatConfidence = currTatum['confidence'];
 
     let confScalar = 0;
-    confScalar += secConfidence*50;
-    confScalar += barConfidence*10;
-    confScalar += beatConfidence*10;
-    confScalar += tatConfidence*5;
+    confScalar += secConfidence * 100;
+    confScalar += barConfidence * 10;
+    confScalar += beatConfidence * 10;
+    confScalar += tatConfidence * 5;
     confScalar += segConfidence;
-    console.log(confScalar);
 
     //const scaledPitch = this.modulate(pitchAvg, 0, , 0, 25);
     // dummy values that were easy to get three of curr + present, replace with further implementation
@@ -301,7 +268,7 @@ export class PlaneSceneServiceService {
     //const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
     //console.log(currSection['loudness']);
 
-    this.wavesBuffer( confScalar, scaledPitchAvg, 0);
+    this.wavesBuffer( scaledPitchAvg, confScalar, beatConfidence*10);
 
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
