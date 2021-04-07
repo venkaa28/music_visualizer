@@ -22,8 +22,11 @@ export class SeaSceneService {
   private cylinder: THREE.Mesh;
   private loader: GLTFLoader;
   private textureLoader: THREE.TextureLoader;
-  private darkSky: THREE.Group;
-  public frame: number = 0;
+  // private darkSky: THREE.Group;
+  private sea;
+  private airplane;
+  private sky;
+  public frame = 0;
 
   private height: any;
   private width: any;
@@ -33,16 +36,27 @@ export class SeaSceneService {
   private nearPlane: number;
   private farPlane: number;
   private frameId: number = null;
+  private cylinderGeometry: any;
 
   public ngOnDestroy = (): void => {
     if (this.frameId != null) {
       cancelAnimationFrame(this.frameId);
     }
   }
-  private cylinderGeometry: any;
 
 
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
+
+    // define the colors
+    let Colors = {
+      red: 0xf25346,
+      white: 0xd8d0d1,
+      brown: 0x59332e,
+      pink: 0xF5986E,
+      brownDark: 0x23190f,
+      blue: 0x68c3c0,
+    };
+
     this.height = window.innerHeight;
     this.width = window.innerWidth;
     this.scene = new THREE.Scene();
@@ -80,42 +94,42 @@ export class SeaSceneService {
     this.renderer.setSize(this.width, this.height);
 
     // Enable shadow rendering
-    this.renderer.shadowMap.enabled = true;
-    this.textureLoader = new THREE.TextureLoader();
+    // this.renderer.shadowMap.enabled = true;
+    // this.textureLoader = new THREE.TextureLoader();
     // this.renderer.shadowMap.enabled = true;
 
-    this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
-      this.darkSky = model.scene;
-      this.darkSky.scale.set(250, 250, 250);
-      this.darkSky.rotateY(180);
-      this.textureLoader.load( '../../../assets/3d_models/fantasy_sky_background/textures/Material__25__background_JPG_002_emissive.jpg',
-        ( newTexture ) => {
-
-          newTexture.encoding = THREE.sRGBEncoding;
-          newTexture.flipY = false;
-          newTexture.wrapS = THREE.RepeatWrapping;
-          newTexture.wrapT = THREE.RepeatWrapping;
-
-          this.darkSky.traverse(( child ) => {
-
-            if (child instanceof THREE.Mesh) {
-              // create a global var to reference later when changing textures
-              // apply texture
-
-              (child.material as any).map = newTexture;
-              (child.material as any).backside = true;
-              (child.material as any).needsUpdate = true;
-              (child.material as any).map.needsUpdate = true;
-
-            }
-          });
-          console.log(this.darkSky);
-
-        });
-
-      this.group.add(this.darkSky);
-      console.log(this.darkSky.position);
-    });
+    // this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
+    //   this.darkSky = model.scene;
+    //   this.darkSky.scale.set(250, 250, 250);
+    //   this.darkSky.rotateY(180);
+    //   this.textureLoader.load( '../../../assets/3d_models/fantasy_sky_background/textures/Material__25__background_JPG_002_emissive.jpg',
+    //     ( newTexture ) => {
+    //
+    //       newTexture.encoding = THREE.sRGBEncoding;
+    //       newTexture.flipY = false;
+    //       newTexture.wrapS = THREE.RepeatWrapping;
+    //       newTexture.wrapT = THREE.RepeatWrapping;
+    //
+    //       this.darkSky.traverse(( child ) => {
+    //
+    //         if (child instanceof THREE.Mesh) {
+    //           // create a global var to reference later when changing textures
+    //           // apply texture
+    //
+    //           (child.material as any).map = newTexture;
+    //           (child.material as any).backside = true;
+    //           (child.material as any).needsUpdate = true;
+    //           (child.material as any).map.needsUpdate = true;
+    //
+    //         }
+    //       });
+    //       console.log(this.darkSky);
+    //
+    //     });
+    //
+    //   this.group.add(this.darkSky);
+    //   console.log(this.darkSky.position);
+    // });
 
     // sets a perspective camera
     this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
@@ -128,35 +142,233 @@ export class SeaSceneService {
     // adds the camera to the scene
     this.scene.add(this.camera);
 
-    // attempt at sea
-    this.cylinderGeometry = new THREE.CylinderGeometry(500, 500, 800, 5, 5);
-    // rotate the geometry on the x axis
-    this.cylinderGeometry.applyMatrix(new THREE.Matrix4().makeRotationZ(3.14 / 2));
-    // create the material
-    const mat = new THREE.MeshPhongMaterial({
-      color: '#FFFFFF',
-      transparent: true,
-      opacity: .3,
-      // shading: THREE.FlatShading,
-    });
-    // To create an object in Three.js, we have to create a mesh
-    // which is a combination of a geometry and some material
-    this.cylinder = new THREE.Mesh(this.cylinderGeometry, mat);
 
-    this.cylinder.rotation.x = -0.5 * Math.PI;
-    this.cylinder.rotation.y = -0.5 * Math.PI;
-    // mesh.rotation.z = -0.5 * Math.PI;
 
-    // Allow the sea to receive shadows
-    this.cylinder.receiveShadow = true;
 
+
+    // // create the sea(cylinder)
+    // this.cylinderGeometry = new THREE.CylinderGeometry(500, 500, 800, 5, 5);
+    // // rotate the geometry on the x axis
+    // this.cylinderGeometry.applyMatrix(new THREE.Matrix4().makeRotationZ(3.14 / 2));
+    // // create the material
+    // const mat = new THREE.MeshPhongMaterial({
+    //   color: '#FFFFFF',
+    //   transparent: true,
+    //   opacity: .9,
+    //   // shading: THREE.FlatShading,
+    // });
+    // // To create an object in Three.js, we have to create a mesh
+    // // which is a combination of a geometry and some material
+    // this.cylinder = new THREE.Mesh(this.cylinderGeometry, mat);
+    //
+    // this.cylinder.rotation.x = -0.5 * Math.PI;
+    // this.cylinder.rotation.y = -0.5 * Math.PI;
+    // // mesh.rotation.z = -0.5 * Math.PI;
+    //
+    // // Allow the sea to receive shadows
+    // this.cylinder.receiveShadow = true;
+    //
+    // // push it a little bit at the bottom of the scene
+    // this.cylinder.position.set(0, 0, 0);
+    //
+    // // add the mesh of the sea to the scene
+    // // this.scene.add(mesh);
+    // this.group.add(this.cylinder);
+
+
+
+    // the function to create the sea
+    let Sea = function(){
+
+      // create the geometry (shape) of the cylinder;
+      // the parameters are:
+      // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
+      var geom = new THREE.CylinderGeometry(600,600,800,40,10);
+
+      // rotate the geometry on the x axis
+      geom.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI/2));
+
+      // create the material
+      var mat = new THREE.MeshPhongMaterial({
+        color:Colors.blue,
+        transparent:true,
+        opacity:.6,
+      });
+
+      // To create an object in Three.js, we have to create a mesh
+      // which is a combination of a geometry and some material
+      this.mesh = new THREE.Mesh(geom, mat);
+
+      // Allow the sea to receive shadows
+      this.mesh.receiveShadow = true;
+    }
+
+
+    // create the sea
+    this.sea = new Sea();
     // push it a little bit at the bottom of the scene
-    this.cylinder.position.set(0, 0, 0);
-
+    this.sea.mesh.position.y = -600;
     // add the mesh of the sea to the scene
-    // this.scene.add(mesh);
-    this.group.add(this.cylinder);
+    this.scene.add(this.sea.mesh);
 
+
+    // the function to create the cloud
+    let Cloud = function(){
+      // Create an empty container that will hold the different parts of the cloud
+      this.mesh = new THREE.Object3D();
+
+      // create a cube geometry;
+      // this shape will be duplicated to create the cloud
+      var geom = new THREE.BoxGeometry(20,20,20);
+
+      // create a material; a simple white material will do the trick
+      var mat = new THREE.MeshPhongMaterial({
+        color:Colors.white,
+      });
+
+      // duplicate the geometry a random number of times
+      var nBlocs = 3+Math.floor(Math.random()*3);
+      for (var i=0; i<nBlocs; i++ ){
+
+        // create the mesh by cloning the geometry
+        var m = new THREE.Mesh(geom, mat);
+
+        // set the position and the rotation of each cube randomly
+        m.position.x = i*15;
+        m.position.y = Math.random()*10;
+        m.position.z = Math.random()*10;
+        m.rotation.z = Math.random()*Math.PI*2;
+        m.rotation.y = Math.random()*Math.PI*2;
+
+        // set the size of the cube randomly
+        var s = .1 + Math.random()*.9;
+        m.scale.set(s,s,s);
+
+        // allow each cube to cast and to receive shadows
+        m.castShadow = true;
+        m.receiveShadow = true;
+
+        // add the cube to the container we first created
+        this.mesh.add(m);
+      }
+    }
+
+
+
+    // the function to create the sky
+    let Sky = function(){
+      // Create an empty container
+      this.mesh = new THREE.Object3D();
+
+      // choose a number of clouds to be scattered in the sky
+      this.nClouds = 20;
+
+      // To distribute the clouds consistently,
+      // we need to place them according to a uniform angle
+      var stepAngle = Math.PI*2 / this.nClouds;
+
+      // create the clouds
+      for(var i=0; i<this.nClouds; i++){
+        var c = new Cloud();
+
+        // set the rotation and the position of each cloud;
+        // for that we use a bit of trigonometry
+        var a = stepAngle*i; // this is the final angle of the cloud
+        var h = 750 + Math.random()*200; // this is the distance between the center of the axis and the cloud itself
+
+        // Trigonometry!!! I hope you remember what you've learned in Math :)
+        // in case you don't:
+        // we are simply converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
+        c.mesh.position.y = Math.sin(a)*h;
+        c.mesh.position.x = Math.cos(a)*h;
+
+        // rotate the cloud according to its position
+        c.mesh.rotation.z = a + Math.PI/2;
+
+        // for a better result, we position the clouds
+        // at random depths inside of the scene
+        c.mesh.position.z = -400-Math.random()*400;
+
+        // we also set a random scale for each cloud
+        var s = 1+Math.random()*2;
+        c.mesh.scale.set(s,s,s);
+
+        // do not forget to add the mesh of each cloud in the scene
+        this.mesh.add(c.mesh);
+      }
+    }
+
+    // create the sky
+    this.sky = new Sky();
+    this.sky.mesh.position.y = -600;
+    this.scene.add(this.sky.mesh);
+
+
+    // function to create the plane
+    let AirPlane = function() {
+
+      this.mesh = new THREE.Object3D();
+
+      // Create the cabin
+      let geomCockpit = new THREE.BoxGeometry(60, 50, 50, 1, 1, 1);
+      let matCockpit = new THREE.MeshPhongMaterial({color: Colors.red});
+      let cockpit = new THREE.Mesh(geomCockpit, matCockpit);
+      cockpit.castShadow = true;
+      cockpit.receiveShadow = true;
+      this.mesh.add(cockpit);
+
+      // Create the engine
+      let geomEngine = new THREE.BoxGeometry(20, 50, 50, 1, 1, 1);
+      let matEngine = new THREE.MeshPhongMaterial({color: Colors.white});
+      let engine = new THREE.Mesh(geomEngine, matEngine);
+      engine.position.x = 40;
+      engine.castShadow = true;
+      engine.receiveShadow = true;
+      this.mesh.add(engine);
+
+      // Create the tail
+      let geomTailPlane = new THREE.BoxGeometry(15, 20, 5, 1, 1, 1);
+      let matTailPlane = new THREE.MeshPhongMaterial({color: Colors.red});
+      let tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
+      tailPlane.position.set(-35, 25, 0);
+      tailPlane.castShadow = true;
+      tailPlane.receiveShadow = true;
+      this.mesh.add(tailPlane);
+
+      // Create the wing
+      let geomSideWing = new THREE.BoxGeometry(40, 8, 150, 1, 1, 1);
+      let matSideWing = new THREE.MeshPhongMaterial({color: Colors.red});
+      let sideWing = new THREE.Mesh(geomSideWing, matSideWing);
+      sideWing.castShadow = true;
+      sideWing.receiveShadow = true;
+      this.mesh.add(sideWing);
+
+      // propeller
+      let geomPropeller = new THREE.BoxGeometry(20, 10, 10, 1, 1, 1);
+      let matPropeller = new THREE.MeshPhongMaterial({color: Colors.brown});
+      this.propeller = new THREE.Mesh(geomPropeller, matPropeller);
+      this.propeller.castShadow = true;
+      this.propeller.receiveShadow = true;
+
+      // blades
+      let geomBlade = new THREE.BoxGeometry(1, 100, 20, 1, 1, 1);
+      let matBlade = new THREE.MeshPhongMaterial({color: Colors.brownDark});
+
+      let blade = new THREE.Mesh(geomBlade, matBlade);
+      blade.position.set(8, 0, 0);
+      blade.castShadow = true;
+      blade.receiveShadow = true;
+      this.propeller.add(blade);
+      this.propeller.position.set(50, 0, 0);
+      this.mesh.add(this.propeller);
+    };
+
+
+    // create the plane
+    this.airplane = new AirPlane();
+    this.airplane.mesh.scale.set(.25,.25,.25);
+    this.airplane.mesh.position.y = 100;
+    this.scene.add(this.airplane.mesh);
 
 
 
@@ -232,7 +444,7 @@ export class SeaSceneService {
     const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
     const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
 
-    const position = this.cylinder.geometry.attributes.position;
+    // const position = this.cylinder.geometry.attributes.position;
 
     // console.log(position);
     const vector = new THREE.Vector3();
@@ -257,36 +469,42 @@ export class SeaSceneService {
     // }
     // this.group.rotation.y += 0.005;
     // this.cylinderGeometry.rotation.z += 0.005;
-    this.cylinder.rotation.z += 0.005;
-    this.cylinder.rotation.x += 0.005;
-    this.cylinder.rotation.y += 0.005;
-    this.darkSky.rotation.y += 0.005;
+    // this.cylinder.rotation.z += 0.005;
+    // this.cylinder.rotation.x += 0.005;
+    // this.cylinder.rotation.y += 0.005;
+    // this.darkSky.rotation.y += 0.005;
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
-    this.cylinder.geometry.attributes.position.needsUpdate = true;
+    // this.cylinder.geometry.attributes.position.needsUpdate = true;
     // this.plane.geometry.computeVertexNormals();
-    this.cylinder.updateMatrix();
+    // this.cylinder.updateMatrix();
+
+    this.airplane.propeller.rotation.x += 0.3;
+    this.sea.mesh.rotation.z += .005;
+    this.sky.mesh.rotation.z += .01;
 
   }
   // for re-use
 
   wavesBuffer(waveSize, magnitude1, magnitude2) {
 
-    const pos = this.cylinder.geometry.attributes.position;
+    // const pos = this.cylinder.geometry.attributes.position;
     const center = new THREE.Vector3(0, 0, 0);
     const vec3 = new THREE.Vector3();
 
     const time = window.performance.now() * .001;
-    for (let i = 0, l = pos.count; i < l; i++) {
-
-      vec3.fromBufferAttribute(pos, i);
-      vec3.sub(center);
-
-      const sampleNoise = this.noise.noise3d((vec3.x + time * 0.00001), (vec3.y + time * 0.00001), (vec3.z + time * 0.00001));
-      const z = Math.sin(vec3.length() / -(waveSize) + (time)) * (magnitude1 + (sampleNoise * magnitude1 / 2.5)) - (magnitude2);
-      pos.setZ(i, z);
-
-    }
+    // for (let i = 0, l = pos.count; i < l; i++) {
+    //
+    //   vec3.fromBufferAttribute(pos, i);
+    //   vec3.sub(center);
+    //
+    //   const sampleNoise = this.noise.noise3d((vec3.x + time * 0.00001), (vec3.y + time * 0.00001), (vec3.z + time * 0.00001));
+    //   const z = Math.sin(vec3.length() / -(waveSize) + (time)) * (magnitude1 + (sampleNoise * magnitude1 / 2.5)) - (magnitude2);
+    //   pos.setZ(i, z);
+    //
+    // }
+    // this.cylinder.geometry.scale(waveSize, magnitude1, magnitude2);
+    // this.cylinder.translateX(10);
   }
 
   fractionate(val: number, minVal: number, maxVal: number) {
