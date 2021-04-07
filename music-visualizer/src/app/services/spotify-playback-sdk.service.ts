@@ -1,8 +1,9 @@
 import {Injectable, NgZone} from '@angular/core';
 import {SpotifyService} from "./spotify.service";
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
-import {AuthService} from "./auth.service";
-//import '@types/spotify-web-playback-sdk/index.d.ts';
+import {AuthService} from './auth.service';
+import {NotifierService} from 'angular-notifier';
+// import '@types/spotify-web-playback-sdk/index.d.ts';
 
 declare global {
   interface window {
@@ -23,9 +24,9 @@ export class SpotifyPlaybackSdkService {
 
   private subjectPlayState = new BehaviorSubject<Spotify.PlaybackState>(null);
   private subjectTrackEnded = new BehaviorSubject<boolean>(false);
-  playStatusTimerId: string;
 
-  constructor(private spotifyService: SpotifyService, private zone: NgZone, private authService: AuthService) {
+  constructor(private spotifyService: SpotifyService, private zone: NgZone, private authService: AuthService,
+              private notifierService: NotifierService) {
     this.player = null;
   }
 
@@ -44,34 +45,55 @@ export class SpotifyPlaybackSdkService {
       // console.log(window.Spotify.Player);
       this.player = new Spotify.Player({
         name: 'MusicVisualizer',
-        //volume: +localStorage.getItem('musiple-volume') / 100,
+        // volume: +localStorage.getItem('musiple-volume') / 100,
         getOAuthToken: (callback) => {
           callback(this.authService.getUser().spotifyAPIKey);
         }
       });
-      
-      this.player.addListener('initialization_error', ({ message }) => { console.error(message); });
-      this.player.addListener('authentication_error', ({ message }) => { console.error(message); });
-      this.player.addListener('account_error', ({ message }) => { console.error(message); });
-      this.player.addListener('playback_error', ({ message }) => { console.error(message); });
+      this.player.addListener('initialization_error', ({ message }) => {
+        console.error(message);
+        throw new Error('Error with spotify player initialization,' +
+          ' please try reloading your browser and authenticating Spotify again');
+      });
+      this.player.addListener('authentication_error', ({ message }) => {
+        console.error(message);
+        throw new Error('Error with spotify authentication,' +
+          ' please try authenticating again');
+      });
+      this.player.addListener('account_error', ({ message }) => {
+        console.error(message);
+        throw new Error('Error with spotify account,' +
+          ' please try authenticating again');
+      });
+      this.player.addListener('playback_error', ({ message }) => {
+        throw new Error('Error with spotify playback,' +
+          ' please try reloading your browser and authenticating Spotify again');
+        console.error(message);
+      });
 
       this.player.addListener('player_state_changed', ({
                                                     position,
                                                     duration,
                                                     track_window: { current_track },
                                                   }) => {
-        console.log('Currently Playing', current_track['uri']);
-        this.currTrackID = current_track['id'];
-        this.spotifyService.getTrackAnalysisData(this.currTrackID);
-        this.spotifyService.getTrackFeatureData(this.currTrackID);
+        console.log('Currently Playing', current_track.uri);
+        this.currTrackID = current_track.id;
+        try {
+          this.spotifyService.getTrackAnalysisData(this.currTrackID);
+          this.spotifyService.getTrackFeatureData(this.currTrackID);
+        } catch (e) {
+          this.notifierService.notify('error', e + ' Please try reloading the application' +
+            ' or authenticate spotify again');
+        }
         console.log('Position in Song', position);
         console.log('Duration of Song', duration);
         scene.animate();
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });
-
+      // player is ready
       this.player.addListener('ready', ({ device_id }) => {
         console.log('Ready with Device ID', device_id);
+        this.notifierService.notify('success', 'Please connect to MusicVisualizer from Spotify using Spotify Connect');
       });
 
       // Not Ready
@@ -82,27 +104,6 @@ export class SpotifyPlaybackSdkService {
       this.player.connect().then((res) => {
         console.log(res);
       });
-
-      // Ready
-      // this.player.on('ready', (data) => {
-      //   console.log('Ready with Device ID', data.device_id);
-      //   this.deviceId = data.device_id;
-      //   //this.spotifyService.deviceId = this.deviceId;
-      // });
-      //
-      // this.player.addListener('player_state_changed', (state) => {
-      //   console.log(state);
-      //   // if (
-      //   //   this.state &&
-      //   //   state.track_window.previous_tracks.find((x) => x.id === state.track_window.current_track.id) &&
-      //   //   !this.state.paused &&
-      //   //   state.paused
-      //   // ) {
-      //   //   console.log('Track ended');
-      //   //   this.zone.run(x => this.setTrackEnd(true));
-      //   // }
-      //   this.state = state;
-      // });
     };
   }
   setPlayState(state: Spotify.PlaybackState) {
@@ -111,9 +112,6 @@ export class SpotifyPlaybackSdkService {
   }
   getPlayStatus(): Observable<Spotify.PlaybackState> {
     return this.subjectPlayState.asObservable();
-  }
-  setTrackEnd(trackEnd: boolean) {
-    this.subjectTrackEnded.next(trackEnd);
   }
   getTrackEnd(): Observable<boolean> {
     return this.subjectTrackEnded.asObservable();

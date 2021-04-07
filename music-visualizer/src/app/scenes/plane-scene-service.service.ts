@@ -1,8 +1,8 @@
-import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
+import {ElementRef, Injectable, NgZone} from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
-import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {SpotifyService} from "../services/spotify.service";
 import {SpotifyPlaybackSdkService} from "../services/spotify-playback-sdk.service";
 
@@ -193,14 +193,13 @@ export class PlaneSceneServiceService {
    */
   getSpotifyAnalysis(dataType: string) {
     // get percent of song we're through with current part in song / duration of song
-    var progressPercent = this.trackProgress / this.spotifyService.feature['duration_ms'];
+    const progressPercent = this.trackProgress / this.spotifyService.feature['duration_ms'];
 
     // get the length of the array of whatever spotify data we're trying to access
-    var dataArrayLength = this.spotifyService.analysis[dataType].length;
-    
+    const dataArrayLength = this.spotifyService.analysis[dataType].length;
+
     // generate corrsponding index
-    var dataIndex = Math.floor(progressPercent * dataArrayLength);
-    return dataIndex;
+    return Math.floor(progressPercent * dataArrayLength);
   }
 
   // based on x1 + at = x2
@@ -256,41 +255,53 @@ export class PlaneSceneServiceService {
     //console.log(sectionIndex);
     //console.log(this.spotifyService.analysis['sections']);
 
-    const currBar = this.spotifyService.analysis['bars'][Math.floor(barIndex)];
-    console.log(currBar);
-    const currSection = this.spotifyService.analysis['sections'][Math.floor(sectionIndex)];
-    const currBeat = this.spotifyService.analysis['beats'][Math.floor(beatIndex)];
-    const currSegment = this.spotifyService.analysis['segments'][Math.floor(segmentIndex)];
+    const currBar = this.spotifyService.getBar(this.trackProgress)
+    const currSection = this.spotifyService.getSection(this.trackProgress);
+    const currBeat = this.spotifyService.getBeat(this.trackProgress)
+    const currSegment = this.spotifyService.getSegment(this.trackProgress);
+    const currTatum = this.spotifyService.getTatum(this.trackProgress);
     const nextSegment = this.spotifyService.analysis['segments'][Math.floor(segmentIndex) + 1];
     //console.log(currSection);
 
     let pitchAvg = 0;
-    for(let i = 0; i< this.spotifyService.analysis['segments'][Math.floor(segmentIndex)]['pitches'].length; i++){
-      pitchAvg += this.spotifyService.analysis['segments'][Math.floor(segmentIndex)]['pitches'][i];
+    for(let i = 0; i < currSegment['pitches'].length; i++){
+      pitchAvg += currSegment['pitches'][i];
     }
-    pitchAvg = pitchAvg/this.spotifyService.analysis['segments'][Math.floor(segmentIndex)]['pitches'].length;
+    pitchAvg = pitchAvg/currSegment['pitches'].length;
     const scaledSectionTempo = currSection['tempo']/10;
-    const scaledPitchAvg = this.modulate(pitchAvg, 0, 0.1, 0, 10);
+    const scaledPitchAvg = this.modulate(pitchAvg, 0, 0.1, 0, 20);
     const barConfidence = currBar['confidence'];
     const beatConfidence = currBar['confidence'];
     const segConfidence = currSegment['confidence'];
+    const secConfidence = currSection['confidence'];
+    const tatConfidence = currTatum['confidence'];
 
+    let confScalar = 0;
+    confScalar += secConfidence*50;
+    confScalar += barConfidence*10;
+    confScalar += beatConfidence*10;
+    confScalar += tatConfidence*5;
+    confScalar += segConfidence;
+    console.log(confScalar);
+
+    //const scaledPitch = this.modulate(pitchAvg, 0, , 0, 25);
     // dummy values that were easy to get three of curr + present, replace with further implementation
-    var lowPitch = this.smoothTransition(this.avg(currSegment['pitches'].slice(0, 3)), this.avg(nextSegment['pitches'].slice(0, 3)), currSegment['duration'] * 10);
-    var medPitch = this.smoothTransition(this.avg(currSegment['pitches'].slice(4, 7)), this.avg(nextSegment['pitches'].slice(4, 7)), currSegment['duration'] * 10);
-    var highPitch = this.smoothTransition(this.avg(currSegment['pitches'].slice(8, 11)), this.avg(nextSegment['pitches'].slice(8, 11)), currSegment['duration'] * 10);
+    // var lowPitch = this.modulate(this.avg(currSegment['pitches'].slice(0, 3)), 0, 3, 1, 20);
+    // var medPitch = this.modulate(this.avg(currSegment['pitches'].slice(4, 7)), 0, 3, 0, 25);
+    // var highPitch = this.modulate(this.avg(currSegment['pitches'].slice(8, 11)), 0, 3, 1, 30);
+    //
+    // lowPitch = this.modulate(lowPitch, -3, 3, 15, 100);
+    // medPitch = this.modulate(medPitch, -3, 3, 15, 100);
+    // highPitch = this.modulate(highPitch, -3, 3, 15, 100);
 
-    lowPitch = this.modulate(lowPitch, -3, 3, 15, 100);
-    medPitch = this.modulate(medPitch, -3, 3, 15, 100);
-    highPitch = this.modulate(highPitch, -3, 3, 15, 100);
-
-    const scaledConfidence = this.modulate(barConfidence+ beatConfidence+ segConfidence, 0,3, 15 , 100 );
-    console.log(scaledConfidence);
-    const scaledBeatConfidence = this.modulate(currBeat['confidence'], 0, 1, 15, 100);
+    //const scaledConfidence = this.modulate(barConfidence+ beatConfidence+ segConfidence, 0,3, 15 , 100 );
+    //console.log(scaledConfidence);
+    //const scaledBeatConfidence = this.modulate(currBeat['confidence'], 0, 1, 15, 100);
     //console.log(scaledBeatConfidence);
-    const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
+    //const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
     //console.log(currSection['loudness']);
-    this.wavesBuffer( lowPitch, medPitch, highPitch);
+
+    this.wavesBuffer( confScalar, scaledPitchAvg, 0);
 
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
@@ -314,7 +325,6 @@ export class PlaneSceneServiceService {
     // }
 
      this.plane.geometry.attributes.position.needsUpdate = true;
-    // // this.plane.geometry.computeVertexNormals();
      this.plane.updateMatrix();
 
     }
