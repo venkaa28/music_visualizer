@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import {ActivatedRoute, Router} from "@angular/router";
-import {AuthService} from "../../services/auth.service";
+import {ActivatedRoute, Router} from '@angular/router';
+import {AuthService} from '../../services/auth.service';
+import {NotifierService} from 'angular-notifier';
 
 @Component({
   selector: 'app-callback',
@@ -9,15 +10,20 @@ import {AuthService} from "../../services/auth.service";
 })
 export class CallbackComponent implements OnInit {
 
-  constructor(private router: Router, private route: ActivatedRoute, private authService: AuthService) { }
+  constructor(private router: Router, private route: ActivatedRoute, private authService: AuthService,
+              private notifierService: NotifierService) { }
 
   async ngOnInit(): Promise<void> {
-    const token = this.route.snapshot.queryParamMap.get('access_token');
-    let fragment = this.route.snapshot.fragment;
-    let auth_token = fragment.substring(fragment.indexOf('=')+1, fragment.indexOf('&'));
-    await this.authService.setSpotifyAuthToken(auth_token);
-    console.log(this.authService.getUser().spotifyAPIKey);
-    await this.router.navigate(['../../ProfilePage']);
+    try {
+      const token = this.route.snapshot.queryParamMap.get('access_token');
+      const fragment = this.route.snapshot.fragment;
+      const auth_token = fragment.substring(fragment.indexOf('=') + 1, fragment.indexOf('&'));
+      await this.authService.setSpotifyAuthToken(auth_token);
+      this.notifierService.notify('success', 'Succesfully authenticated Spotify');
+      await this.router.navigate(['../../ProfilePage']);
+    }catch (e) {
+      this.notifierService.notify('error', 'Unsuccessful Spotify Authentication');
+    }
   }
 
 }
