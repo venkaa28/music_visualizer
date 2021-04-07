@@ -15,14 +15,12 @@ export class SeaSceneService {
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
   private scene!: THREE.Scene;
-  private group!: THREE.Group;
   private ambLight!: THREE.AmbientLight;
   private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
   private cylinder: THREE.Mesh;
   private loader: GLTFLoader;
   private textureLoader: THREE.TextureLoader;
-  // private darkSky: THREE.Group;
   private sea;
   private airplane;
   private sky;
@@ -57,22 +55,34 @@ export class SeaSceneService {
       blue: 0x68c3c0,
     };
 
-    this.height = window.innerHeight;
-    this.width = window.innerWidth;
+    this.canvas = canvas.nativeElement;
+
+
+    // create the scene
+    var fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH, container;
+    // Get the width and the height of the screen,
+    // use them to set up the aspect ratio of the camera
+    // and the size of the renderer.
+    HEIGHT = window.innerHeight;
+    WIDTH = window.innerWidth;
+
+    // Create the scene
     this.scene = new THREE.Scene();
+
     // Add a fog effect to the scene; same color as the
     // background color used in the style sheet
-    this.scene.fog = new THREE.Fog(this.c1, 100, 950);
+    this.scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
+
     // Create the camera
-    this.aspectRatio = this.width / this.height;
-    this.fieldOfView = 60;
-    this.nearPlane = 1;
-    this.farPlane = 10000;
+    aspectRatio = WIDTH / HEIGHT;
+    fieldOfView = 60;
+    nearPlane = 1;
+    farPlane = 10000;
     this.camera = new THREE.PerspectiveCamera(
-      this.fieldOfView,
-      this.aspectRatio,
-      this.nearPlane,
-      this.farPlane
+      fieldOfView,
+      aspectRatio,
+      nearPlane,
+      farPlane
     );
 
     // Set the position of the camera
@@ -80,69 +90,79 @@ export class SeaSceneService {
     this.camera.position.z = 200;
     this.camera.position.y = 100;
 
-    this.group = new THREE.Group();
-    this.canvas = canvas.nativeElement;
-    this.loader = new GLTFLoader();
-
+    // Create the renderer
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
+      // Allow transparency to show the gradient background
+      // we defined in the CSS
       alpha: true,
+
+      // Activate the anti-aliasing; this is less performant,
+      // but, as our project is low-poly based, it should be fine :)
       antialias: true
     });
-    this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
-    // sets the size of the canvas
-    this.renderer.setSize(this.width, this.height);
+
+    // Define the size of the renderer; in this case,
+    // it will fill the entire screen
+    this.renderer.setSize(WIDTH, HEIGHT);
 
     // Enable shadow rendering
-    // this.renderer.shadowMap.enabled = true;
-    // this.textureLoader = new THREE.TextureLoader();
-    // this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = true;
 
-    // this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
-    //   this.darkSky = model.scene;
-    //   this.darkSky.scale.set(250, 250, 250);
-    //   this.darkSky.rotateY(180);
-    //   this.textureLoader.load( '../../../assets/3d_models/fantasy_sky_background/textures/Material__25__background_JPG_002_emissive.jpg',
-    //     ( newTexture ) => {
-    //
-    //       newTexture.encoding = THREE.sRGBEncoding;
-    //       newTexture.flipY = false;
-    //       newTexture.wrapS = THREE.RepeatWrapping;
-    //       newTexture.wrapT = THREE.RepeatWrapping;
-    //
-    //       this.darkSky.traverse(( child ) => {
-    //
-    //         if (child instanceof THREE.Mesh) {
-    //           // create a global var to reference later when changing textures
-    //           // apply texture
-    //
-    //           (child.material as any).map = newTexture;
-    //           (child.material as any).backside = true;
-    //           (child.material as any).needsUpdate = true;
-    //           (child.material as any).map.needsUpdate = true;
-    //
-    //         }
-    //       });
-    //       console.log(this.darkSky);
-    //
-    //     });
-    //
-    //   this.group.add(this.darkSky);
-    //   console.log(this.darkSky.position);
-    // });
-
-    // sets a perspective camera
-    this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
-    console.log(this.camera);
-    // lets the camera at position x, y, z
-    this.camera.position.set(-10, 425, -1300);
-    // set the camera to look at the center of the scene
-    // this.camera.lookAt(this.scene.position);
-    this.camera.lookAt(0, 0, 0);
-    // adds the camera to the scene
-    this.scene.add(this.camera);
+    // Add the DOM element of the renderer to the
+    // container we created in the HTML
+    // container = document.getElementById('world');
+    // container.appendChild(this.renderer.domElement);
 
 
+
+
+    // Listen to the screen: if the user resizes it
+    // we have to update the camera and the renderer size
+    window.addEventListener('resize', handleWindowResize, false);
+
+    function handleWindowResize() {
+      // update height and width of the renderer and the camera
+      HEIGHT = window.innerHeight;
+      WIDTH = window.innerWidth;
+      this.renderer.setSize(WIDTH, HEIGHT);
+      this.camera.aspect = WIDTH / HEIGHT;
+      this.camera.updateProjectionMatrix();
+    }
+
+
+    var hemisphereLight, shadowLight;
+    // A hemisphere light is a gradient colored light;
+    // the first parameter is the sky color, the second parameter is the ground color,
+    // the third parameter is the intensity of the light
+    hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, .9)
+
+    // A directional light shines from a specific direction.
+    // It acts like the sun, that means that all the rays produced are parallel.
+    shadowLight = new THREE.DirectionalLight(0xffffff, .9);
+
+    // Set the direction of the light
+    shadowLight.position.set(150, 350, 350);
+
+    // Allow shadow casting
+    shadowLight.castShadow = true;
+
+    // define the visible area of the projected shadow
+    shadowLight.shadow.camera.left = -400;
+    shadowLight.shadow.camera.right = 400;
+    shadowLight.shadow.camera.top = 400;
+    shadowLight.shadow.camera.bottom = -400;
+    shadowLight.shadow.camera.near = 1;
+    shadowLight.shadow.camera.far = 1000;
+
+    // define the resolution of the shadow; the higher the better,
+    // but also the more expensive and less performant
+    shadowLight.shadow.mapSize.width = 2048;
+    shadowLight.shadow.mapSize.height = 2048;
+
+    // to activate the lights, just add them to the scene
+    this.scene.add(hemisphereLight);
+    this.scene.add(shadowLight);
 
 
 
@@ -388,8 +408,6 @@ export class SeaSceneService {
     directionalLight.position.set(0, 0, 1);
     this.scene.add(directionalLight);
 
-    // group.rotation.y += 0.005;
-    this.scene.add(this.group);
   }
 
   public animate(): void {
