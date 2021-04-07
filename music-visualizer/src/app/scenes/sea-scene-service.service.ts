@@ -464,6 +464,7 @@ export class SeaSceneService {
         this.angleHairs += 0.16;
       }
       this.pilot = new Pilot();
+      this.pilot.mesh.position.set(-10,27,0);
       this.mesh.add(this.pilot.mesh);
     };
 
@@ -567,35 +568,7 @@ export class SeaSceneService {
     // console.log(position);
     const vector = new THREE.Vector3();
     this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
-
-    // for (let i = 0,  l = position.count; i < l; i++){
-    //   vector.fromBufferAttribute(position, i);
-    // const time = window.performance.now();
-    // const scalor = this.modulate(lowerHalfFrequncyData[i % 128], 0, 255, 0, 8);
-    // const distance  = -25 * scalor + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
-    // position.setZ(i, distance);
-    // if (i <= ((position.count / 3) - 1)){
-    //   const distance = (lowFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
-    //   position.setZ(i, distance);
-    // }else if (i >= position.count / 3 && i <= (position.count / 3) * 2 - 1){
-    //   const distance = (midFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + midFreqAvg * 0.001);
-    //   position.setZ(i, distance);
-    // }else {
-    //   const distance = (highFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + highFreqAvg * 0.001);
-    //   position.setZ(i, distance);
-    // }
-    // }
-    // this.group.rotation.y += 0.005;
-    // this.cylinderGeometry.rotation.z += 0.005;
-    // this.cylinder.rotation.z += 0.005;
-    // this.cylinder.rotation.x += 0.005;
-    // this.cylinder.rotation.y += 0.005;
-    // this.darkSky.rotation.y += 0.005;
-    // this.group.rotation.x += 0.005;
-    // this.group.rotation.z += 0.005;
-    // this.cylinder.geometry.attributes.position.needsUpdate = true;
-    // this.plane.geometry.computeVertexNormals();
-    // this.cylinder.updateMatrix();
+    
 
     this.airplane.propeller.rotation.x += 0.3;
     this.sea.mesh.rotation.z += .005;
