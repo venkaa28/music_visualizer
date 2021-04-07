@@ -15,7 +15,8 @@ export class SeaSceneService {
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
   private scene!: THREE.Scene;
-  private ambLight!: THREE.AmbientLight;
+  private hemisphereLight;
+  private shadowLight;
   private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
   private cylinder: THREE.Mesh;
@@ -46,16 +47,19 @@ export class SeaSceneService {
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
 
     // define the colors
-    let Colors = {
-      red: 0xf25346,
-      white: 0xd8d0d1,
-      brown: 0x59332e,
-      pink: 0xF5986E,
-      brownDark: 0x23190f,
-      blue: 0x68c3c0,
+    var Colors = {
+      red:0xf25346,
+      white:0xd8d0d1,
+      brown:0x59332e,
+      pink:0xF5986E,
+      brownDark:0x23190f,
+      blue:0x68c3c0,
     };
 
     this.canvas = canvas.nativeElement;
+
+    // background color
+    this.canvas.style.backgroundColor = '#add8e6';
 
 
     // create the scene
@@ -165,35 +169,6 @@ export class SeaSceneService {
     this.scene.add(shadowLight);
 
 
-
-    // // create the sea(cylinder)
-    // this.cylinderGeometry = new THREE.CylinderGeometry(500, 500, 800, 5, 5);
-    // // rotate the geometry on the x axis
-    // this.cylinderGeometry.applyMatrix(new THREE.Matrix4().makeRotationZ(3.14 / 2));
-    // // create the material
-    // const mat = new THREE.MeshPhongMaterial({
-    //   color: '#FFFFFF',
-    //   transparent: true,
-    //   opacity: .9,
-    //   // shading: THREE.FlatShading,
-    // });
-    // // To create an object in Three.js, we have to create a mesh
-    // // which is a combination of a geometry and some material
-    // this.cylinder = new THREE.Mesh(this.cylinderGeometry, mat);
-    //
-    // this.cylinder.rotation.x = -0.5 * Math.PI;
-    // this.cylinder.rotation.y = -0.5 * Math.PI;
-    // // mesh.rotation.z = -0.5 * Math.PI;
-    //
-    // // Allow the sea to receive shadows
-    // this.cylinder.receiveShadow = true;
-    //
-    // // push it a little bit at the bottom of the scene
-    // this.cylinder.position.set(0, 0, 0);
-    //
-    // // add the mesh of the sea to the scene
-    // // this.scene.add(mesh);
-    // this.group.add(this.cylinder);
 
 
 
@@ -381,6 +356,115 @@ export class SeaSceneService {
       this.propeller.add(blade);
       this.propeller.position.set(50, 0, 0);
       this.mesh.add(this.propeller);
+
+
+      // function to create the pilot
+      var Pilot = function(){
+        this.mesh = new THREE.Object3D();
+        this.mesh.name = "pilot";
+
+        // angleHairs is a property used to animate the hair later
+        this.angleHairs=0;
+
+        // Body of the pilot
+        var bodyGeom = new THREE.BoxGeometry(15,15,15);
+        var bodyMat = new THREE.MeshPhongMaterial({color:Colors.brown});
+        var body = new THREE.Mesh(bodyGeom, bodyMat);
+        body.position.set(2,-12,0);
+        this.mesh.add(body);
+
+        // Face of the pilot
+        var faceGeom = new THREE.BoxGeometry(10,10,10);
+        var faceMat = new THREE.MeshLambertMaterial({color:Colors.pink});
+        var face = new THREE.Mesh(faceGeom, faceMat);
+        this.mesh.add(face);
+
+        // Hair element
+        var hairGeom = new THREE.BoxGeometry(4,4,4);
+        var hairMat = new THREE.MeshLambertMaterial({color:Colors.brown});
+        var hair = new THREE.Mesh(hairGeom, hairMat);
+        // Align the shape of the hair to its bottom boundary, that will make it easier to scale.
+        hair.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0,2,0));
+
+        // create a container for the hair
+        var hairs = new THREE.Object3D();
+
+        // create a container for the hairs at the top
+        // of the head (the ones that will be animated)
+        this.hairsTop = new THREE.Object3D();
+
+        // create the hairs at the top of the head
+        // and position them on a 3 x 4 grid
+        for (var i=0; i<12; i++){
+          var h = hair.clone();
+          var col = i%3;
+          var row = Math.floor(i/3);
+          var startPosZ = -4;
+          var startPosX = -4;
+          h.position.set(startPosX + row*4, 0, startPosZ + col*4);
+          this.hairsTop.add(h);
+        }
+        hairs.add(this.hairsTop);
+
+        // create the hairs at the side of the face
+        var hairSideGeom = new THREE.BoxGeometry(12,4,2);
+        hairSideGeom.applyMatrix4(new THREE.Matrix4().makeTranslation(-6,0,0));
+        var hairSideR = new THREE.Mesh(hairSideGeom, hairMat);
+        var hairSideL = hairSideR.clone();
+        hairSideR.position.set(8,-2,6);
+        hairSideL.position.set(8,-2,-6);
+        hairs.add(hairSideR);
+        hairs.add(hairSideL);
+
+        // create the hairs at the back of the head
+        var hairBackGeom = new THREE.BoxGeometry(2,8,10);
+        var hairBack = new THREE.Mesh(hairBackGeom, hairMat);
+        hairBack.position.set(-1,-4,0)
+        hairs.add(hairBack);
+        hairs.position.set(-5,5,0);
+
+        this.mesh.add(hairs);
+
+        var glassGeom = new THREE.BoxGeometry(5,5,5);
+        var glassMat = new THREE.MeshLambertMaterial({color:Colors.brown});
+        var glassR = new THREE.Mesh(glassGeom,glassMat);
+        glassR.position.set(6,0,3);
+        var glassL = glassR.clone();
+        glassL.position.z = -glassR.position.z
+
+        var glassAGeom = new THREE.BoxGeometry(11,1,11);
+        var glassA = new THREE.Mesh(glassAGeom, glassMat);
+        this.mesh.add(glassR);
+        this.mesh.add(glassL);
+        this.mesh.add(glassA);
+
+        var earGeom = new THREE.BoxGeometry(2,3,2);
+        var earL = new THREE.Mesh(earGeom,faceMat);
+        earL.position.set(0,0,-6);
+        var earR = earL.clone();
+        earR.position.set(0,0,6);
+        this.mesh.add(earL);
+        this.mesh.add(earR);
+      }
+
+      // function to move the hair
+      Pilot.prototype.updateHairs = function(){
+
+        // get the hair
+        var hairs = this.hairsTop.children;
+
+        // update them according to the angle angleHairs
+        var l = hairs.length;
+        for (var i=0; i<l; i++){
+          var h = hairs[i];
+          // each hair element will scale on cyclical basis between 75% and 100% of its original size
+          h.scale.y = .75 + Math.cos(this.angleHairs+i/3)*.25;
+        }
+        // increment the angle for the next frame
+        this.angleHairs += 0.16;
+      }
+      this.pilot = new Pilot();
+      this.mesh.add(this.pilot.mesh);
     };
 
 
@@ -391,22 +475,38 @@ export class SeaSceneService {
     this.scene.add(this.airplane.mesh);
 
 
+    // create the lights
+    // A hemisphere light is a gradient colored light;
+    // the first parameter is the sky color, the second parameter is the ground color,
+    // the third parameter is the intensity of the light
+    this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, .9)
 
+    // A directional light shines from a specific direction.
+    // It acts like the sun, that means that all the rays produced are parallel.
+    this.shadowLight = new THREE.DirectionalLight(0xffffff, .9);
 
-    // adding ambient lighting to the scene
-    this.ambLight = new THREE.AmbientLight(0xaaaaaa, 2);
-    this.scene.add(this.ambLight);
+    // Set the direction of the light
+    this.shadowLight.position.set(150, 350, 350);
 
-    // adding a spotlight to the scene
-    // const spotLight = new THREE.SpotLight(0xffffff);
-    // spotLight.intensity = 0.9;
-    // spotLight.position.set(-10, 40, 20);
-    // spotLight.castShadow = true;
-    // this.scene.add(spotLight);
+    // Allow shadow casting
+    this.shadowLight.castShadow = true;
 
-    const directionalLight = new THREE.DirectionalLight(0xffeedd);
-    directionalLight.position.set(0, 0, 1);
-    this.scene.add(directionalLight);
+    // define the visible area of the projected shadow
+    this.shadowLight.shadow.camera.left = -400;
+    this.shadowLight.shadow.camera.right = 400;
+    this.shadowLight.shadow.camera.top = 400;
+    this.shadowLight.shadow.camera.bottom = -400;
+    this.shadowLight.shadow.camera.near = 1;
+    this.shadowLight.shadow.camera.far = 1000;
+
+    // define the resolution of the shadow; the higher the better,
+    // but also the more expensive and less performant
+    this.shadowLight.shadow.mapSize.width = 2048;
+    this.shadowLight.shadow.mapSize.height = 2048;
+
+    // to activate the lights, just add them to the scene
+    this.scene.add(hemisphereLight);
+    this.scene.add(shadowLight);
 
   }
 
@@ -500,6 +600,7 @@ export class SeaSceneService {
     this.airplane.propeller.rotation.x += 0.3;
     this.sea.mesh.rotation.z += .005;
     this.sky.mesh.rotation.z += .01;
+    this.airplane.pilot.updateHairs();
 
   }
   // for re-use
