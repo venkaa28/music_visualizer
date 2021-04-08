@@ -1,12 +1,20 @@
-import {AfterContentInit, AfterViewInit, Component, ContentChild, ElementRef, OnInit, ViewChild} from '@angular/core';
+// angular
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
-import {AudioServiceService} from '../../services/audio-service.service';
-import {TestParticlesService} from '../../scenes/test-particles.service';
-import {Music} from '../../classes/music'
-import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
 import { NotifierService } from 'angular-notifier';
+
+// firebase
+// general libs
+// local lib
+import { AuthService } from '../../services/auth.service';
+import {AudioService} from '../../services/audio.service';
+import {Music} from '../../classes/music'
+
+// scenes
+import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
+import {TestParticlesService} from '../../scenes/test-particles.service';
+import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
+
 
 type Dict = {[key: string]: any};
 
@@ -29,156 +37,219 @@ export class VisualizationPageComponent implements AfterViewInit {
   @ViewChild('audioFile', {read: ElementRef})
   public audioFile!: ElementRef<HTMLMediaElement>;
 
-  public audio: HTMLAudioElement;
+  public audio: HTMLAudioElement; // audio element of window
+  public current: Music; // music object
+  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene]; // current scene being used
+  public micUsed: boolean;
+  
+  private scene: any; // current scene to use
+  private menuTimeout: number; // timeout in ms of menu
+  private timeout: number; // id of current timeout
+  private micStream: MediaStream; // user's microphone data
 
-  private currentSong: string = '16162754104549215';
-  public current: Music = new Music();
-  private songList: Dict;
+  constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
+    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
+    // initialize variables
+    this.current = new Music();
+    this.micUsed = false;
+    this.scene = this.scenesAvailable[0];
+    this.menuTimeout = 2000;
 
-  async upload(event: any) {
-    var file = event as HTMLInputElement;
-    this.audioService.upload(file.files[0]);
+    // TODO: upload menu appear animation
+    // TODO: scroll text on hover
+    // TODO: get svg icons
+    // TODO: upload menu icon fix up
+    // TODO: Show menu when paused
   }
 
-  async loadList() {
-    this.songList = await this.audioService.getSongList();
-    console.log(this.songList);
+  ngAfterViewInit(): void {
+    this.audio = this.audioFile.nativeElement; // grab audio element from html
+    
+    this.scene.createScene(this.rendererCanvas);
+
+    setInterval(() => {
+      if (!this.micUsed) {
+        this.progress();
+      }
+    }, 10);
   }
 
-  async loadSong(): Promise<string> {
-    this.current = await this.audioService.getRemoteSong(this.currentSong);
-    this.audio.src = this.current.filepath;
-    this.audio.crossOrigin = 'anonymous';
-    this.audioService.loadSong(this.audio);
-    return this.current.filepath;
+  // listen to keyboard events, perform actions if certain keys are pressed
+  keyListener(event){
+    event = event || window.event; //capture the event, and ensure we have an event
+    
+    switch (event.key) {
+      case ' ': // play/pause
+        this.togglePlay();
+        break;
+
+      case 'd': // fast forward
+        this.nextSong();
+        break;
+
+      case 'a': // rewind
+        this.rewindSong();
+        break;
+    }
+
   }
 
+
+  /**************************************Loading functions**************************************/
+
+  // load song from local file
   loadFilePath(event: any) {
-    var file = event as HTMLInputElement;
+    var element = event as HTMLInputElement; // get filelist from html
+    var file = element.files[0];
 
-    this.current = new Music();
-    this.current.filepath = URL.createObjectURL(file.files[0]);;
-    this.current.isPublic = true;
-    this.current.name = file.files[0].name;
-    this.current.source = 'local';
-    this.current.uploadEmail = this.authService.getUser().email;
+    if (typeof file === 'undefined') {
+      return;
+    }
 
-    this.audio.src = this.current.filepath;
+    this.current = new Music(); // init new music
+    this.current.filepath = URL.createObjectURL(file); // get filepath from html input
+    this.current.name = file.name; // user uploaded one mp3 files, so access first file in list
+    this.current.source = 'local'; // set source
+    this.current.artist = 'Local File';
+
+    this.audio.src = this.current.filepath; // set source to be the file in the html
     this.audioService.loadSong(this.audio);
+    this.micUsed = false;
 
-    return this.current.filepath;
+    this.scene.animate();
+    this.toggleUploadMenu();
+    this.audioService.play();
   }
 
-  loadYoutube() {
-    this.current = new Music();
-    this.current.filepath = 'https://www.youtube.com/get_video_info?video_id=Iu37OXZ6cHk';
-    this.current.isPublic = true;
-    this.current.name = 'test';
-    this.current.source = 'youtube';
-    this.audio.crossOrigin = 'anonymous';
-    this.current.uploadEmail = this.authService.getUser().email;
+  async loadMic() {
+    this.current = new Music(); // init new music
+    this.current.source = 'local'; // set source
+    this.audioService.pause();
 
-    this.audio.src = this.current.filepath;
-    this.audioService.gainNode.gain.value = 0;
-    this.audioService.loadSong(this.audio);
+    if (typeof this.micStream === 'undefined') {
+      await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then((stream) => {
+        this.audioService.loadMic(stream); // load the audio into the audio context
+      });
+    }
 
-    return this.current.filepath;
+    this.micUsed = true;
+    this.toggleUploadMenu();
+
+    this.scene.animate();
   }
 
+  /**************************************Audio controls**************************************/
+
+  // handle play or pause
+  async togglePlay() {
+    await this.audioService.playOrPause();
+    this.toggleMenu();
+  }
+
+  // load next song from firebase
   async nextSong() {
-    const keys = Object.keys(this.songList);
-    const values = Object.values(this.songList);
-
-    let nextIndex = values.indexOf(this.currentSong) + 1;
-
-    if (nextIndex === keys.length) {
-      nextIndex = 0;
+    if (this.audioService.getTime() + 10 > this.audioService.getDuration()) {
+      this.audioService.setTime(this.audioService.getDuration());
+    } else {
+      this.audioService.setTime(this.audioService.getTime() + 10);
     }
-
-    this.currentSong = this.songList[keys[nextIndex]];
-    await this.loadSong().then(() => this.audioService.play());
   }
 
+  // load previous song from firebase
   async rewindSong() {
-    const keys = Object.keys(this.songList);
-    const values = Object.values(this.songList);
-
-    let nextIndex = values.indexOf(this.currentSong) - 1;
-
-    if (nextIndex === -1) {
-      nextIndex = keys.length - 1;
+    if (this.audioService.getTime() - 10 < 0) {
+      this.audioService.setTime(0);
+    } else {
+      this.audioService.setTime(this.audioService.getTime() - 10);
     }
-
-    this.currentSong = this.songList[keys[nextIndex]];
-    await this.loadSong().then(() => this.audioService.play());
   }
 
+  // change the current visualization scene
+  changeScene(event: any) {
+    this.scene.cancelAnimation();
+    this.scene = this.scenesAvailable[event.value];
+    this.scene.createScene(this.rendererCanvas);
+    
+    if (this.audioService.fileLoaded()) {
+      this.scene.animate();
+    }
+  }
+
+  // change fft value based on slider input
+  changeFFT(event: any) {
+    this.audioService.setFFT(Math.pow(2, event.value));
+  }
+
+  // change the smoothing constant
+  changeSC(event: any) {
+    this.audioService.setSC(event.value);
+  }
+
+  // change volume based on slider input
+  changeVolume(event: any) {
+    this.audioService.setGain(event.value);
+  }
+
+  // change pan based on slider input
+  changePan(event: any) {
+    this.audioService.setPan(event.value);
+  }
+
+  // get the duration of the current song
+  duration() {
+    return Math.floor(this.audioService.getDuration());
+  }
+
+  // get the current time in the song, and update progress bar
+  progress() {
+    // get the progress bar div on the html page
+    var progress = document.getElementById("progress-bar");
+    // set width as percent song complete
+    progress.style.width = Math.floor(this.audioService.getTime() / this.audioService.getDuration() * 100) + '%';
+
+    // check if song is done
+    if (this.audioService.isOver()) {
+      // notify
+      this.notifierService.notify('warning', 'The current song has ended. Please open a new upload mp3 file to continue the visualization.');
+      // stop playback
+      this.audioService.pause();
+      // reset song
+      this.audioService.setTime(0);
+    }
+
+    return Math.floor(this.audioService.getTime());
+  }
+
+  setTime(event: any) {
+    this.audioService.setTime(event.value);
+  }
+
+
+  /**************************************Visuals**************************************/
+
+  // displays appropiate play or pause icon based on the state of the audio
   playPauseIcon() {
+    // audio uninitialized
     if (typeof this.audio === 'undefined') {
       return '../../../assets/icons/play.svg';
     }
 
+    // paused music, show play icon
     if (this.audio.paused) {
       return '../../../assets/icons/play.svg';
     }
 
+    // playing music, show pause icon
     return '../../../assets/icons/pause.svg';
   }
 
-  changeVolume(input) {
-    this.audioService.gainNode.gain.value = input.value;
-  }
-
-  changeSmooth(input) {
-    var time = this.audioService.audioElement.currentTime;
-    this.audioService.smoothConstant = input.value;
-    this.audioService.reloadSong();
-    this.audioService.audioElement.currentTime = time;
-  }
-
-  changeFFT(input) {
-    var time = this.audioService.audioElement.currentTime;
-    this.audioService.fftSize = Math.pow(2, input.value);
-    console.log(Math.pow(2, input.value));
-    this.audioService.reloadSong();
-    this.audioService.audioElement.currentTime = time;
-  }
-
-  duration() {
-    if (typeof this.audioService.audioElement === "undefined") {
-      return 0;
-    }
-
-    return Math.floor(this.audioService.audioElement.duration);
-  }
-
-  progress() {
-    if (typeof this.audioService.audioElement === "undefined") {
-      return 0;
-    }
-
-    var progress = document.getElementById("progress-bar");
-    progress.style.width = Math.floor(this.audioService.audioElement.currentTime / this.audioService.audioElement.duration * 100) + '%';
-
-    if (this.audioService.audioElement.currentTime >= this.audioService.audioElement.duration) {
-      this.notifierService.notify('warning', 'The current song has ended. Please open a new upload mp3 file to continue the visualization.');
-      this.audioService.pause();
-      this.audioService.audioElement.currentTime = 0;
-    }
-
-    return Math.floor(this.audioService.audioElement.currentTime);
-  }
-
-
-
+  // convert time in seconds to a formatted output string mm:ss
   timeString(time: number) {
-    if (typeof this.audioService.audioElement === "undefined") {
-      return 'NaN';
-    }
+    var secondsTotal = time; // raw seconds of current place in song
+    var outputTime: string = ""; // string used for output
 
-    var secondsTotal = time;
-    var outputTime: string = "";
-
+    // convert minutes to string
     if (secondsTotal > 60) {
       outputTime += Math.floor(secondsTotal/60);
       secondsTotal = secondsTotal % 60;
@@ -186,35 +257,39 @@ export class VisualizationPageComponent implements AfterViewInit {
       outputTime += '0';
     }
 
+    // add seperator
     outputTime += ':';
 
+    // add leading 0 if needed
     if (secondsTotal < 10) {
       outputTime += '0';
     }
 
+    // add formatted seconds to output
     outputTime += secondsTotal;
 
     return outputTime;
   }
 
-  changeTime(input) {
-    this.audioService.audioElement.currentTime = input.value;
-    console.log("Fire");
-  }
-
   toggleMenu() {
-    var overlay = document.getElementById('menu');
+    var menu = document.getElementById('menu');
 
-    if (overlay.style.width === '0%') {
-      overlay.style.width = '100%';
-    } else if (overlay.style.width === '100%'){
-      overlay.style.width = '0%';
+    menu.style.opacity = '1';
+
+    if (typeof this.timeout !== 'undefined') {
+      window.clearTimeout(this.timeout);
     }
+
+    this.timeout = window.setTimeout(() => {
+      menu.style.opacity = '0';
+    }, this.menuTimeout);
   }
 
+  // display or hide control instruction menu
   toggleInfo() {
-    var infoBox = document.getElementById('info-menu');
+    var infoBox = document.getElementById('info-menu'); // info box element on html
 
+    // hide or show by changing width and opacity
     if (infoBox.style.width === '0%') {
       infoBox.style.width = '20%';
       infoBox.style.opacity = '1';
@@ -224,49 +299,30 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
   }
 
-  keyListener(event){
-    event = event || window.event; //capture the event, and ensure we have an event
-    console.log(event.key);
-    switch (event.key) {
-      case 'm':
-        this.toggleMenu();
-        break;
-      
-      case ' ':
-        this.audioService.playOrPause();
-        break;
+  toggleUploadMenu() {
+    var songBox = document.getElementById('upload-menu');
+    var canvas = document.getElementById('renderCanvas');
 
-      case 'd':
-        this.nextSong();
-        break;
-
-      case 'a':
-        this.rewindSong();
-        break;
+    if (songBox.style.width === '0%') {
+      songBox.style.width = '60%';
+      canvas.style.filter = "blur(4px)";
+      songBox.style.opacity = '1';
+    } else if (songBox.style.width === '60%'){
+      canvas.style.filter = "blur(0)";
+      songBox.style.width = '0%';
+      songBox.style.opacity = '0';
     }
-
   }
 
-  constructor(private authService: AuthService, private router: Router, public audioService: AudioServiceService, public demoScene: DemoSceneServiceService,
-      public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService) {
-    this.loadList();
-    this.loadSong();
-  }
-
-  ngAfterViewInit(): void {
-    this.audio = this.audioFile.nativeElement;
-    //this.audio.src = 'music-visualizer/src/assets/music/juice.mp3';
-    // this.engServ.createScene(this.rendererCanvas);
-    //     this.engServ.animate();
-
-    this.audioService.loadSong(this.audio);
-    // this.demoScene.createScene(this.rendererCanvas);r
-    // this.demoScene.animate();
-    //this.testParticles.createScene(this.rendererCanvas);
-    //this.testParticles.animate();
-    this.planeScene.createScene(this.rendererCanvas);
-    this.planeScene.animate();
-
-
+  toggleEditMenu() {
+    var editBox = document.getElementById('edit-menu');
+    
+    if (editBox.style.opacity === '0') {
+      editBox.style.width = '15%';
+      editBox.style.opacity = '1';
+    } else if (editBox.style.opacity === '1'){
+      editBox.style.width = '0%';
+      editBox.style.opacity = '0';
+    }
   }
 }

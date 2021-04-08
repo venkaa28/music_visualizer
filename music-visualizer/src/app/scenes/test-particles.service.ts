@@ -1,7 +1,7 @@
 import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
-import {AudioServiceService} from '../services/audio-service.service';
+import {AudioService} from '../services/audio.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +24,12 @@ export class TestParticlesService {
   private frameId: number = null;
 
   public ngOnDestroy = (): void => {
+    if (this.frameId != null) {
+      cancelAnimationFrame(this.frameId);
+    }
+  }
+
+  public cancelAnimation() {
     if (this.frameId != null) {
       cancelAnimationFrame(this.frameId);
     }
@@ -145,8 +151,12 @@ export class TestParticlesService {
     this.particles.rotation.y += 0.005;
     this.particles.rotation.z += 0.005;
 
-
-}
+    this.particles.material.color.setRGB(
+        upperAvg > 0 ?  1/upperAvg * 30 : 255,
+        overallAvg > 0 ? 1/overallAvg * 30 : 255,
+        lowerAvg > 0 ? 1/lowerAvg * 30 : 255
+      );
+  }
 
 
   makeRoughBall = (mesh: any, bassFr: any, treFr: any) => {
@@ -236,8 +246,8 @@ export class TestParticlesService {
 
 
   public resize(): void {
-    const width = window.innerWidth - 50;
-    const height = window.innerHeight - 50;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
@@ -245,6 +255,6 @@ export class TestParticlesService {
     this.renderer.setSize(width, height);
   }
 
-  constructor(private ngZone: NgZone, public audioService: AudioServiceService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService) { }
 
 }

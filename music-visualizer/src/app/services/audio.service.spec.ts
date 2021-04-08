@@ -1,14 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AudioServiceService } from './audio-service.service';
+import { AudioService } from './audio.service';
 import {RouterTestingModule} from "@angular/router/testing";
 import {ReactiveFormsModule} from "@angular/forms";
 import {AngularFireModule} from "@angular/fire";
 import {firebaseConfig} from "../firebase";
 import {NotifierModule} from "angular-notifier";
 
-describe('AudioServiceService', () => {
-  let service: AudioServiceService;
+describe('AudioService', () => {
+  let service: AudioService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,7 +23,7 @@ describe('AudioServiceService', () => {
         NotifierModule
       ],
     });
-    service = TestBed.inject(AudioServiceService);
+    service = TestBed.inject(AudioService);
   });
 
   it('should be created', () => {
@@ -74,7 +74,6 @@ describe('AudioServiceService', () => {
     var mockAudio = new Audio('../../../assets/music/tripleT.mp3');
     service.loadSong(mockAudio);
     // service.play();
-    service.rewind();
     // todo: expect
     expect(service.audioElement.currentTime).toBe(0);
   });

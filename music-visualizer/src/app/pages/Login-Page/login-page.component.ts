@@ -17,14 +17,9 @@ import { NotifierService } from 'angular-notifier';
   styleUrls: ['./login-page.component.css']
 })
 export class LoginPageComponent implements OnInit {
-  // html form validator/input for user email
-  // public email : FormControl = new FormControl('', [Validators.required, Validators.email]);
-  //
-  // // html form validator/input for user password
-  // public pwd : FormControl = new FormControl('', [Validators.required, Validators.minLength(5)]);
+  public minLength: number = 6; // minimum password length, firebase requires min of 6 char
 
-  public minLength: number = 6;
-
+  // The form group used for form validation
   public loginForm: FormGroup = this.formBuilder.group({
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', [Validators.required, Validators.minLength(this.minLength)])
@@ -33,23 +28,23 @@ export class LoginPageComponent implements OnInit {
   // prints error msg if email invalid, nothing if valid
   getEmailMessage() {
     return this.loginForm.get('email')?.hasError ? 'Not a valid email' : '';
-    // return this.email.hasError('email') ? 'Not a valid email' : '';
   }
 
   // prints error msg if password invalid, nothing if valid
   getPasswordMessage() {
     return this.loginForm.get('password')?.hasError('minlength') ? `Passwords must be at least ${this.minLength} characters long` : '';
-    // return this.pwd.hasError('minlength') ? 'Passwords must be at least 5 characters long' : '';
   }
 
   // called when submit button is clicked, authenticates user on firebase and routes to next page
   // if valid user
   async login() {
+    // login user with provided email and password
     this.authService.loginUser(this.loginForm.get('email')?.value, this.loginForm.get('password')?.value)
     .then(async () => {
-      console.log('skip');
+      // navigate to Visualization Page
       await this.router.navigate(['../../VisualizationPage']);
     }).catch((error) => {
+      // some firebase issue has occurred (most likely bad account, password) so notify user
       this.notifierService.notify('error', error);
     });
   }

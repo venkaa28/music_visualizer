@@ -1,7 +1,7 @@
 import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
-import {AudioServiceService} from '../services/audio-service.service';
+import {AudioService} from '../services/audio.service';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 
 
@@ -10,7 +10,7 @@ import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 })
 export class PlaneSceneServiceService {
 
-  constructor(private ngZone: NgZone, public audioService: AudioServiceService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService) { }
 
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -25,6 +25,8 @@ export class PlaneSceneServiceService {
   private textureLoader: THREE.TextureLoader;
   private darkSky: THREE.Group;
   private rain: THREE.Points;
+  private canvasRef: ElementRef<HTMLCanvasElement>;
+  public frame: number = 0;
 
   private frameId: number = null;
 
@@ -34,7 +36,14 @@ export class PlaneSceneServiceService {
     }
   }
 
+  public cancelAnimation() {
+    if (this.frameId != null) {
+      cancelAnimationFrame(this.frameId);
+    }
+  }
+
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
+    this.canvasRef = canvas;
     this.scene = new THREE.Scene();
     this.group = new THREE.Group();
     this.canvas = canvas.nativeElement;
@@ -233,6 +242,15 @@ export class PlaneSceneServiceService {
 
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
+    if (this.frame++ % 1 === 0) {
+      this.plane.material.color.setRGB(
+        highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 30 : 255,
+        midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 30 : 255,
+        lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 30 : 255
+      );
+    }
+
+
     this.plane.geometry.attributes.position.needsUpdate = true;
     // this.plane.geometry.computeVertexNormals();
     this.plane.updateMatrix();
@@ -279,12 +297,13 @@ export class PlaneSceneServiceService {
 
 
   public resize(): void {
-    const width = window.innerWidth - 50;
-    const height = window.innerHeight - 50;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
+    this.createScene(this.canvasRef);
   }
 }
