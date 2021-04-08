@@ -15,6 +15,7 @@ import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service
 import {SpotifyPlaybackSdkService} from "../../services/spotify-playback-sdk.service";
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
+import {NebulaSceneServiceService} from '../../scenes/nebula-scene-service.service';
 
 
 type Dict = {[key: string]: any};
@@ -40,7 +41,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   public audio: HTMLAudioElement; // audio element of window
   public current: Music; // music object
-  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene, this.nebulaScene]; // current scene being used
   public micUsed: boolean;
   
   private scene: any; // current scene to use
@@ -50,14 +51,16 @@ export class VisualizationPageComponent implements AfterViewInit {
   private spotifyUsed: boolean; // control spotify
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
+
     public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
-             private spotifyPlaybackService: SpotifyPlaybackSdkService) {
+             private spotifyPlaybackService: SpotifyPlaybackSdkService, public nebulaScene: NebulaSceneServiceService) {
     // initialize variables
     this.current = new Music();
     this.micUsed = false;
     this.spotifyUsed = false;
     this.scene = this.scenesAvailable[0];
     this.menuTimeout = 2000;
+
 
     // TODO: scroll text on hover
   }
