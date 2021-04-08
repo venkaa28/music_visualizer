@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import {AudioService} from '../services/audio.service';
+// threejs
+import * as THREE from 'three';
+import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 
 @Injectable({
   providedIn: 'root'
@@ -38,6 +41,25 @@ export class ToolsService {
     this.highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
   }
 
+  wavesBuffer( waveSize, magnitude1,  magnitude2, plane) {
+
+    const pos = plane.geometry.attributes.position;
+    const center = new THREE.Vector3(0, 0, 0);
+    const vec3 = new THREE.Vector3();
+
+    const time = window.performance.now() * .001;
+    for (let i = 0, l = pos.count; i < l; i++) {
+
+      vec3.fromBufferAttribute(pos, i);
+      vec3.sub(center);
+
+      const sampleNoise = this.noise.noise3d((vec3.x + time * 0.00001), (vec3.y + time * 0.00001), (vec3.z + time * 0.00001));
+      const z = Math.sin(vec3.length() / -(waveSize) + (time)) * (magnitude1 + (sampleNoise * magnitude1 / 2.5)) - (magnitude2);
+      pos.setZ(i, z);
+
+    }
+  }
+
   // Helper methods
   avg = (arr) => {
     const total = arr.reduce((sum, b) => sum + b);
@@ -54,5 +76,5 @@ export class ToolsService {
     return (val - minVal) / (maxVal - minVal);
   }
 
-  constructor(public audioService: AudioService) {}
+  constructor(public audioService: AudioService, private noise: SimplexNoise) {}
 }
