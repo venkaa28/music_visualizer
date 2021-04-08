@@ -221,35 +221,13 @@ export class PlaneSceneServiceService {
     // const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
     // const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
 
-    const segmentIndex = (this.trackProgress / this.spotifyService.feature['duration_ms'])
-      * (this.spotifyService.analysis['segments'].length);
-
-
-    const currBar = this.spotifyService.getBar(this.trackProgress)
-    const currSection = this.spotifyService.getSection(this.trackProgress);
-    const currBeat = this.spotifyService.getBeat(this.trackProgress)
     const currSegment = this.spotifyService.getSegment(this.trackProgress);
-    const currTatum = this.spotifyService.getTatum(this.trackProgress);
-    const nextSegment = this.spotifyService.analysis['segments'][Math.floor(segmentIndex) + 1];
+
     //console.log(currSection);
 
     //const totalAvgPitch = this.spotifyService.trackPitchAvg;
     const pitchAvg =  this.avg(currSegment['pitches']);
-
-    const scaledSectionTempo = currSection['tempo']/10;
     const scaledPitchAvg = this.modulate(pitchAvg, 0, 0.1, 0, 30);
-    const barConfidence = currBar['confidence'];
-    const beatConfidence = currBar['confidence'];
-    const segConfidence = currSegment['confidence'];
-    const secConfidence = currSection['confidence'];
-    const tatConfidence = currTatum['confidence'];
-
-    let confScalar = 0;
-    confScalar += secConfidence * 100;
-    confScalar += barConfidence * 10;
-    confScalar += beatConfidence * 10;
-    confScalar += tatConfidence * 5;
-    confScalar += segConfidence;
 
     //const scaledPitch = this.modulate(pitchAvg, 0, , 0, 25);
     // dummy values that were easy to get three of curr + present, replace with further implementation
@@ -268,12 +246,12 @@ export class PlaneSceneServiceService {
     //const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
     //console.log(currSection['loudness']);
 
-    this.wavesBuffer( scaledPitchAvg, confScalar, beatConfidence*10);
+    this.wavesBuffer( scaledPitchAvg, scaledPitchAvg, scaledPitchAvg);
 
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
     this.darkSky.rotation.y += 0.0005;
-    this.secondPlane.position.z += scaledSectionTempo;
+    
     if (this.secondPlane.position.z >= 6000){
       this.secondPlane.position.z = 0;
     }

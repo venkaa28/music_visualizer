@@ -85,6 +85,8 @@ export class SpotifyPlaybackSdkService {
           this.notifierService.notify('error', e + ' Please try reloading the application' +
             ' or authenticate spotify again');
         }
+
+        this.spotifyService.segmentEnd = 0;
         scene.animate();
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });
