@@ -47,13 +47,13 @@ export class SeaSceneService {
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
 
     // define the colors
-    var Colors = {
-      red:0xf25346,
-      white:0xd8d0d1,
-      brown:0x59332e,
-      pink:0xF5986E,
-      brownDark:0x23190f,
-      blue:0x68c3c0,
+    const Colors = {
+      red: 0xf25346,
+      white: 0xd8d0d1,
+      brown: 0x59332e,
+      pink: 0xF5986E,
+      brownDark: 0x23190f,
+      blue: 0x68c3c0,
     };
 
     this.canvas = canvas.nativeElement;
@@ -63,7 +63,7 @@ export class SeaSceneService {
 
 
     // create the scene
-    var fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH, container;
+    var fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH;
     // Get the width and the height of the screen,
     // use them to set up the aspect ratio of the camera
     // and the size of the renderer.
@@ -173,30 +173,52 @@ export class SeaSceneService {
 
 
     // the function to create the sea
-    let Sea = function(){
+    const Sea = function(){
+      const geom = new THREE.CylinderGeometry(600, 600, 800, 40, 10);
+      geom.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
 
-      // create the geometry (shape) of the cylinder;
-      // the parameters are:
-      // radius top, radius bottom, height, number of segments on the radius, number of segments vertically
-      var geom = new THREE.CylinderGeometry(600,600,800,40,10);
+      const position = geom.attributes.position;
+      const l = position.count;
+      const v = new THREE.Vector3();
 
-      // rotate the geometry on the x axis
-      geom.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI/2));
+      this.waves = [];
 
-      // create the material
-      var mat = new THREE.MeshPhongMaterial({
-        color:Colors.blue,
-        transparent:true,
-        opacity:.6,
+      for (let i = 0; i < l; i++){
+        // var v = geom.vertices[i];
+        v.fromBufferAttribute(position, i);
+
+        this.waves.push({y: v.y,
+          x: v.x,
+          z: v.z,
+          ang: Math.random() * Math.PI * 2,
+          amp: 5 + Math.random() * 15,
+          speed: 0.016 + Math.random() * 0.032
+        });
+      };
+      const mat = new THREE.MeshPhongMaterial({
+        color: Colors.blue,
+        transparent: true,
+        opacity: .8,
       });
 
-      // To create an object in Three.js, we have to create a mesh
-      // which is a combination of a geometry and some material
       this.mesh = new THREE.Mesh(geom, mat);
-
-      // Allow the sea to receive shadows
       this.mesh.receiveShadow = true;
+
     }
+
+    Sea.prototype.moveWaves = function (){
+      const position = this.mesh.geometry.attributes.position;
+      const l = position.count;
+
+      for (let i = 0; i < l; i++){
+        const vprops = this.waves[i];
+        position.setX(i, vprops.x + Math.cos(vprops.ang) * vprops.amp);
+        position.setY(i, vprops.y + Math.sin(vprops.ang) * vprops.amp);
+        vprops.ang += vprops.speed;
+      }
+      this.mesh.geometry.verticesNeedUpdate = true;
+      this.mesh.rotation.z += .005;
+    };
 
 
     // create the sea
@@ -208,36 +230,36 @@ export class SeaSceneService {
 
 
     // the function to create the cloud
-    let Cloud = function(){
+    const Cloud = function(){
       // Create an empty container that will hold the different parts of the cloud
       this.mesh = new THREE.Object3D();
 
       // create a cube geometry;
       // this shape will be duplicated to create the cloud
-      var geom = new THREE.BoxGeometry(20,20,20);
+      const geom = new THREE.BoxGeometry(20,20,20);
 
       // create a material; a simple white material will do the trick
-      var mat = new THREE.MeshPhongMaterial({
-        color:Colors.white,
+      const mat = new THREE.MeshPhongMaterial({
+        color: Colors.white,
       });
 
       // duplicate the geometry a random number of times
-      var nBlocs = 3+Math.floor(Math.random()*3);
-      for (var i=0; i<nBlocs; i++ ){
+      const nBlocs = 3 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < nBlocs; i++ ){
 
         // create the mesh by cloning the geometry
-        var m = new THREE.Mesh(geom, mat);
+        const m = new THREE.Mesh(geom, mat);
 
         // set the position and the rotation of each cube randomly
-        m.position.x = i*15;
-        m.position.y = Math.random()*10;
-        m.position.z = Math.random()*10;
-        m.rotation.z = Math.random()*Math.PI*2;
-        m.rotation.y = Math.random()*Math.PI*2;
+        m.position.x = i * 15;
+        m.position.y = Math.random() * 10;
+        m.position.z = Math.random() * 10;
+        m.rotation.z = Math.random() * Math.PI * 2;
+        m.rotation.y = Math.random() * Math.PI * 2;
 
         // set the size of the cube randomly
-        var s = .1 + Math.random()*.9;
-        m.scale.set(s,s,s);
+        const s = .1 + Math.random() * .9;
+        m.scale.set(s, s, s);
 
         // allow each cube to cast and to receive shadows
         m.castShadow = true;
@@ -251,7 +273,7 @@ export class SeaSceneService {
 
 
     // the function to create the sky
-    let Sky = function(){
+    const Sky = function(){
       // Create an empty container
       this.mesh = new THREE.Object3D();
 
@@ -260,33 +282,33 @@ export class SeaSceneService {
 
       // To distribute the clouds consistently,
       // we need to place them according to a uniform angle
-      var stepAngle = Math.PI*2 / this.nClouds;
+      const stepAngle = Math.PI * 2 / this.nClouds;
 
       // create the clouds
-      for(var i=0; i<this.nClouds; i++){
-        var c = new Cloud();
+      for(let i = 0; i < this.nClouds; i++){
+        const c = new Cloud();
 
         // set the rotation and the position of each cloud;
         // for that we use a bit of trigonometry
-        var a = stepAngle*i; // this is the final angle of the cloud
-        var h = 750 + Math.random()*200; // this is the distance between the center of the axis and the cloud itself
+        const a = stepAngle * i; // this is the final angle of the cloud
+        const h = 750 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
 
         // Trigonometry!!! I hope you remember what you've learned in Math :)
         // in case you don't:
         // we are simply converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
-        c.mesh.position.y = Math.sin(a)*h;
-        c.mesh.position.x = Math.cos(a)*h;
+        c.mesh.position.y = Math.sin(a) * h;
+        c.mesh.position.x = Math.cos(a) * h;
 
         // rotate the cloud according to its position
-        c.mesh.rotation.z = a + Math.PI/2;
+        c.mesh.rotation.z = a + Math.PI / 2;
 
         // for a better result, we position the clouds
         // at random depths inside of the scene
-        c.mesh.position.z = -400-Math.random()*400;
+        c.mesh.position.z = -400 - Math.random() * 400;
 
         // we also set a random scale for each cloud
-        var s = 1+Math.random()*2;
-        c.mesh.scale.set(s,s,s);
+        const s = 1 + Math.random() * 2;
+        c.mesh.scale.set(s, s, s);
 
         // do not forget to add the mesh of each cloud in the scene
         this.mesh.add(c.mesh);
@@ -300,56 +322,56 @@ export class SeaSceneService {
 
 
     // function to create the plane
-    let AirPlane = function() {
+    const AirPlane = function() {
 
       this.mesh = new THREE.Object3D();
 
       // Create the cabin
-      let geomCockpit = new THREE.BoxGeometry(60, 50, 50, 1, 1, 1);
-      let matCockpit = new THREE.MeshPhongMaterial({color: Colors.red});
-      let cockpit = new THREE.Mesh(geomCockpit, matCockpit);
+      const geomCockpit = new THREE.BoxGeometry(60, 50, 50, 1, 1, 1);
+      const matCockpit = new THREE.MeshPhongMaterial({color: Colors.red});
+      const cockpit = new THREE.Mesh(geomCockpit, matCockpit);
       cockpit.castShadow = true;
       cockpit.receiveShadow = true;
       this.mesh.add(cockpit);
 
       // Create the engine
-      let geomEngine = new THREE.BoxGeometry(20, 50, 50, 1, 1, 1);
-      let matEngine = new THREE.MeshPhongMaterial({color: Colors.white});
-      let engine = new THREE.Mesh(geomEngine, matEngine);
+      const geomEngine = new THREE.BoxGeometry(20, 50, 50, 1, 1, 1);
+      const matEngine = new THREE.MeshPhongMaterial({color: Colors.white});
+      const engine = new THREE.Mesh(geomEngine, matEngine);
       engine.position.x = 40;
       engine.castShadow = true;
       engine.receiveShadow = true;
       this.mesh.add(engine);
 
       // Create the tail
-      let geomTailPlane = new THREE.BoxGeometry(15, 20, 5, 1, 1, 1);
-      let matTailPlane = new THREE.MeshPhongMaterial({color: Colors.red});
-      let tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
+      const geomTailPlane = new THREE.BoxGeometry(15, 20, 5, 1, 1, 1);
+      const matTailPlane = new THREE.MeshPhongMaterial({color: Colors.red});
+      const tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
       tailPlane.position.set(-35, 25, 0);
       tailPlane.castShadow = true;
       tailPlane.receiveShadow = true;
       this.mesh.add(tailPlane);
 
       // Create the wing
-      let geomSideWing = new THREE.BoxGeometry(40, 8, 150, 1, 1, 1);
-      let matSideWing = new THREE.MeshPhongMaterial({color: Colors.red});
-      let sideWing = new THREE.Mesh(geomSideWing, matSideWing);
+      const geomSideWing = new THREE.BoxGeometry(40, 8, 150, 1, 1, 1);
+      const matSideWing = new THREE.MeshPhongMaterial({color: Colors.red});
+      const sideWing = new THREE.Mesh(geomSideWing, matSideWing);
       sideWing.castShadow = true;
       sideWing.receiveShadow = true;
       this.mesh.add(sideWing);
 
       // propeller
-      let geomPropeller = new THREE.BoxGeometry(20, 10, 10, 1, 1, 1);
-      let matPropeller = new THREE.MeshPhongMaterial({color: Colors.brown});
+      const geomPropeller = new THREE.BoxGeometry(20, 10, 10, 1, 1, 1);
+      const matPropeller = new THREE.MeshPhongMaterial({color: Colors.brown});
       this.propeller = new THREE.Mesh(geomPropeller, matPropeller);
       this.propeller.castShadow = true;
       this.propeller.receiveShadow = true;
 
       // blades
-      let geomBlade = new THREE.BoxGeometry(1, 100, 20, 1, 1, 1);
-      let matBlade = new THREE.MeshPhongMaterial({color: Colors.brownDark});
+      const geomBlade = new THREE.BoxGeometry(1, 100, 20, 1, 1, 1);
+      const matBlade = new THREE.MeshPhongMaterial({color: Colors.brownDark});
 
-      let blade = new THREE.Mesh(geomBlade, matBlade);
+      const blade = new THREE.Mesh(geomBlade, matBlade);
       blade.position.set(8, 0, 0);
       blade.castShadow = true;
       blade.receiveShadow = true;
@@ -359,35 +381,35 @@ export class SeaSceneService {
 
 
       // function to create the pilot
-      var Pilot = function(){
+      const Pilot = function(){
         this.mesh = new THREE.Object3D();
-        this.mesh.name = "pilot";
+        this.mesh.name = 'pilot';
 
         // angleHairs is a property used to animate the hair later
-        this.angleHairs=0;
+        this.angleHairs = 0;
 
         // Body of the pilot
-        var bodyGeom = new THREE.BoxGeometry(15,15,15);
-        var bodyMat = new THREE.MeshPhongMaterial({color:Colors.brown});
-        var body = new THREE.Mesh(bodyGeom, bodyMat);
-        body.position.set(2,-12,0);
+        const bodyGeom = new THREE.BoxGeometry(15, 15, 15);
+        const bodyMat = new THREE.MeshPhongMaterial({color: Colors.brown});
+        const body = new THREE.Mesh(bodyGeom, bodyMat);
+        body.position.set(2, -12, 0);
         this.mesh.add(body);
 
         // Face of the pilot
-        var faceGeom = new THREE.BoxGeometry(10,10,10);
-        var faceMat = new THREE.MeshLambertMaterial({color:Colors.pink});
-        var face = new THREE.Mesh(faceGeom, faceMat);
+        const faceGeom = new THREE.BoxGeometry(10, 10, 10);
+        const faceMat = new THREE.MeshLambertMaterial({color: Colors.pink});
+        const face = new THREE.Mesh(faceGeom, faceMat);
         this.mesh.add(face);
 
         // Hair element
-        var hairGeom = new THREE.BoxGeometry(4,4,4);
-        var hairMat = new THREE.MeshLambertMaterial({color:Colors.brown});
-        var hair = new THREE.Mesh(hairGeom, hairMat);
+        const hairGeom = new THREE.BoxGeometry(4, 4, 4);
+        const hairMat = new THREE.MeshLambertMaterial({color: Colors.brown});
+        const hair = new THREE.Mesh(hairGeom, hairMat);
         // Align the shape of the hair to its bottom boundary, that will make it easier to scale.
-        hair.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0,2,0));
+        hair.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 2, 0));
 
         // create a container for the hair
-        var hairs = new THREE.Object3D();
+        const hairs = new THREE.Object3D();
 
         // create a container for the hairs at the top
         // of the head (the ones that will be animated)
@@ -395,31 +417,31 @@ export class SeaSceneService {
 
         // create the hairs at the top of the head
         // and position them on a 3 x 4 grid
-        for (var i=0; i<12; i++){
-          var h = hair.clone();
-          var col = i%3;
-          var row = Math.floor(i/3);
-          var startPosZ = -4;
-          var startPosX = -4;
-          h.position.set(startPosX + row*4, 0, startPosZ + col*4);
+        for (var i = 0; i < 12; i++){
+          const h = hair.clone();
+          const col = i%3;
+          const row = Math.floor(i / 3);
+          const startPosZ = -4;
+          const startPosX = -4;
+          h.position.set(startPosX + row * 4, 0, startPosZ + col * 4);
           this.hairsTop.add(h);
         }
         hairs.add(this.hairsTop);
 
         // create the hairs at the side of the face
-        var hairSideGeom = new THREE.BoxGeometry(12,4,2);
+        const hairSideGeom = new THREE.BoxGeometry(12,4,2);
         hairSideGeom.applyMatrix4(new THREE.Matrix4().makeTranslation(-6,0,0));
-        var hairSideR = new THREE.Mesh(hairSideGeom, hairMat);
-        var hairSideL = hairSideR.clone();
-        hairSideR.position.set(8,-2,6);
-        hairSideL.position.set(8,-2,-6);
+        const hairSideR = new THREE.Mesh(hairSideGeom, hairMat);
+        const hairSideL = hairSideR.clone();
+        hairSideR.position.set(8, -2, 6);
+        hairSideL.position.set(8, -2, -6);
         hairs.add(hairSideR);
         hairs.add(hairSideL);
 
         // create the hairs at the back of the head
-        var hairBackGeom = new THREE.BoxGeometry(2,8,10);
-        var hairBack = new THREE.Mesh(hairBackGeom, hairMat);
-        hairBack.position.set(-1,-4,0)
+        const hairBackGeom = new THREE.BoxGeometry(2, 8, 10);
+        const hairBack = new THREE.Mesh(hairBackGeom, hairMat);
+        hairBack.position.set(-1, -4, 0)
         hairs.add(hairBack);
         hairs.position.set(-5,5,0);
 
@@ -464,6 +486,7 @@ export class SeaSceneService {
         this.angleHairs += 0.16;
       }
       this.pilot = new Pilot();
+      this.pilot.mesh.position.set(-10,27,0);
       this.mesh.add(this.pilot.mesh);
     };
 
@@ -568,39 +591,12 @@ export class SeaSceneService {
     const vector = new THREE.Vector3();
     this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
 
-    // for (let i = 0,  l = position.count; i < l; i++){
-    //   vector.fromBufferAttribute(position, i);
-    // const time = window.performance.now();
-    // const scalor = this.modulate(lowerHalfFrequncyData[i % 128], 0, 255, 0, 8);
-    // const distance  = -25 * scalor + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
-    // position.setZ(i, distance);
-    // if (i <= ((position.count / 3) - 1)){
-    //   const distance = (lowFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
-    //   position.setZ(i, distance);
-    // }else if (i >= position.count / 3 && i <= (position.count / 3) * 2 - 1){
-    //   const distance = (midFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + midFreqAvg * 0.001);
-    //   position.setZ(i, distance);
-    // }else {
-    //   const distance = (highFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + highFreqAvg * 0.001);
-    //   position.setZ(i, distance);
-    // }
-    // }
-    // this.group.rotation.y += 0.005;
-    // this.cylinderGeometry.rotation.z += 0.005;
-    // this.cylinder.rotation.z += 0.005;
-    // this.cylinder.rotation.x += 0.005;
-    // this.cylinder.rotation.y += 0.005;
-    // this.darkSky.rotation.y += 0.005;
-    // this.group.rotation.x += 0.005;
-    // this.group.rotation.z += 0.005;
-    // this.cylinder.geometry.attributes.position.needsUpdate = true;
-    // this.plane.geometry.computeVertexNormals();
-    // this.cylinder.updateMatrix();
 
     this.airplane.propeller.rotation.x += 0.3;
     this.sea.mesh.rotation.z += .005;
     this.sky.mesh.rotation.z += .01;
     this.airplane.pilot.updateHairs();
+    this.sea.moveWaves();
 
   }
   // for re-use
