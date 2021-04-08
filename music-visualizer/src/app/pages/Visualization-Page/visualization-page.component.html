@@ -7,23 +7,14 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
   <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
-  <!--
-  <link rel="stylesheet" href="./assets/css/Login-Form-Dark.css">
-  -->
 </header>
-<body>
-  <!--
-  <label for="uploadFile">Choose a .mp3 file to upload:</label>
-  <br>
-  <input type="file" id="uploadFile" name="uploadFile" (change)="upload($event.target)" accept=".mp3">
-  -->
-
-  <audio #audioFile id='audio_file' crossorigin="anonymous">
-    <source src="../../../assets/music/tripleT.mp3" origin="http://localhost:4200" id="audio_source" type="audio/mp3">
+<body (mousemove)="toggleMenu()">
+  <audio #audioFile id='audio-file' crossorigin="anonymous">
+    <source id="audio-source" origin="http://localhost:4200" type="audio/*" src="../../../assets/music/ILLENIUM, X Ambassadors - In Your Arms (Visualizer).mp3">
   </audio>
-<!--  <audio id= "audio_file" src="../../../songs/RickFlair.mp3" crossorigin="anonymous" ></audio>-->
+  
   <div id="canvas-visualizer">
-    <canvas #rendererCanvas id="renderCanvas" height="100%" width="100%"></canvas>
+    <canvas #rendererCanvas id="renderCanvas"></canvas>
 
     <div id="info-button">
       <button (click)="toggleInfo()">
@@ -32,8 +23,66 @@
     </div>
   </div>
 
+  <div id="upload-menu" style="width: 60%;">
+    <!--File loader-->
+    <div class="upload-item">
+      <p>Browse your computer for an audio file</p>
+      <label id="load-label" for="load-file"><img src="../../../assets/icons/folder.svg"></label><br>
+      <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*" capture>
+    </div>
+
+    <div class="upload-item">
+      <p>Use the microphone</p>
+      <a id="load-mic" (click)="loadMic()">
+        <img src="../../../assets/icons/mic.svg">
+      </a>
+  </div>
+  </div>
+
+  <div id="edit-menu" style="width: 0%; opacity: 0;">
+    <!--Slider controls: volume, pan-->
+          <div id="slider">
+              <p>Settings</p>
+
+            <!--Scene slider: broken right now-->
+            <div id="scene">
+              <p style="display: inline">0</p>
+              <input id="scene-slider" type="range" min="0" max="2" value="0" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
+              <p style="display: inline">2</p>
+            </div>
+            
+            <!--FFT slider-->
+            <div id="fft">
+              <p style="display: inline">0</p>
+              <input id="fft-slider" type="range" min="5" max="15" value="4" step="1" (change)="changeFFT($event.srcElement)">
+              <p style="display: inline">9</p>
+            </div>
+
+            <!--Smoothing time constant slider-->
+            <div id="sc">
+              <p style="display: inline">0</p>
+              <input id="sc-slider" type="range" min="0" max="0.99" value="0.74" step="0.01" (change)="changeSC($event.srcElement)">
+              <p style="display: inline">1</p>
+            </div>
+
+            <!--Volume slider-->
+            <div id="volume">
+              <img src="../../../assets/icons/volumedown.svg">
+              <input id= "volume-slider" type="range" min="0" max="1" value="1" step="0.1" (input)="changeVolume($event.srcElement)">
+              <img src="../../../assets/icons/volumeup.svg">
+            </div>
+            
+            <!--Pan slider-->
+            <div id="panner">
+              <p style="display: inline;">L</p>
+              <input id="panner-slider" type="range" style="display: inline;" min="-1" max="1" value="0" step="0.01" (input)="changePan($event.srcElement)">
+              <p style="display: inline;">R</p>
+            </div>
+          </div>
+  </div>
+
   <!--Control info menu listed when info button is pressed-->
-  <div id="info-menu" style="width: 0%; opacity: 0;">
+  <div id="info-menu" style="width: 0%;">
     <h2>Controls:</h2>
     <p>m     : toggle the menu<br>
        d     : play the previous song<br>
@@ -41,66 +90,68 @@
        space : play/pause the music</p>
   </div>
 
-  <div id="menu" class="overlay" style="width: 0%;">
+  <div id="menu" class="overlay">
     <div class="overlay-content">
-      <!--Profile Page Button-->
-      <button routerLink="../ProfilePage" style="position: absolute;left: 1%;top: 1%;">
-        <img class="ui-button" src="../../../assets/icons/settings.svg">
-      </button>
-
-      <!--Song title-->
-      <h1>{{this.current.name}}</h1>
-      <br>
-
-      <!--File loader-->
-      <label id="file-label" for="upload-file">Choose a file to visualize</label><br>
-      <input type="file" id="upload-file" name="upload-file" (change)="loadFilePath($event.target)" accept=".mp3">
-
       <!--Song controls-->
       <div class="controls">
+        <!--Song title and album art (if exists)-->
+        <div id="song-display">
+          
+          <!--Song title-->
+          <div class="song-display-container">
+            <img id="album" src={{current.album}}>
+          </div>
+
+          <div id="song-display-text" class="song-display-container">
+            <p id="song-title" class="song-text">{{this.current.name}}</p>
+            <p id="song-subtitle" class="song-text">{{this.current.artist}}</p>
+          </div>
+        </div>
+
+
         <!--Button controls: rewind, play/pause, skip-->
-        <div id="button" style="display: inline;">
+        <div id="button" style="display: inline-block;">
           <!--Rewind button-->
           <button (click)="rewindSong()">
-            <img class="custom_icon" src="../../../assets/icons/rewind.svg">
+            <img class="custom-icon" src="../../../assets/icons/rewind.svg">
           </button>
 
           <!--Play/Pause button-->
-          <button (click)="this.audioService.playOrPause()">
-            <img class="custom_icon" src={{playPauseIcon()}}>
+          <button (click)="togglePlay()">
+            <img class="custom-icon-play" src={{playPauseIcon()}}>
           </button>
 
           <!--Skip button-->
           <button (click)="nextSong()">
-            <img class="custom_icon" src="../../../assets/icons/forward.svg">
+            <img class="custom-icon" src="../../../assets/icons/forward.svg">
           </button>
         </div>
 
-        <!--Slider controls: volume, pan-->
-        <div id="silder" style="display: inline">
-          <!--Volume slider-->
-          <img src="../../../assets/icons/volumedown.svg">
-          <input id= "volume_button" type="range" min="0" max="1" value="0.5" step="0.01" (input)="changeVolume($event.srcElement)">
-          <img src="../../../assets/icons/volumeup.svg">
+        <div id="settings">
+          <!--Open music chooser menu-->
+          <button class="settings-button" style="display: inline-block;" (click)="toggleUploadMenu()">
+            <img class="ui-button" src="../../../assets/icons/upload.svg">
+          </button>
 
-          <!--Pan slider-->
-          <input type="range" id="panner" class="control-panner slider" list="pan-vals" min="-1" max="1" value="0" step="0.01" data-action="panner"/>
-              <datalist id="pan-vals">
-                <option value="-1" label="left">
-                <option value="1" label="right">
-              </datalist>
-              <label for="panner">PAN</label>
-            <br>
+          <!--Profile Page Button-->
+          <button class="settings-button" style="display: inline-block;" routerLink="../ProfilePage">
+            <img class="ui-button" src="../../../assets/icons/profile.svg">
+          </button>
+
+          <!--Visualization settings button-->
+          <button class="settings-button" style="display: inline-block;" (click)="toggleEditMenu()">
+            <img class="ui-button" src="../../../assets/icons/settings.svg">
+          </button>
         </div>
 
         <!--Progress bar-->
-      <div>
-        <p style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
-        <div class="progress" style="display: inline-block;">
-          <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);width: 0%;height: 100%;"></div>
+        <div id="progress-time">
+          <p id="progress-timestamp" style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
+          <div class="progress" style="display: inline-block;">
+            <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);width: 0%;height: 100%;"></div>
+          </div>
+          <p id="duration-timestamp" style="display: inline-block;padding: 10px;">{{timeString(duration())}}</p>
         </div>
-        <p style="display: inline-block;padding: 10px;">{{timeString(duration())}}</p>
-      </div>
     </div>
   </div>
 </div>

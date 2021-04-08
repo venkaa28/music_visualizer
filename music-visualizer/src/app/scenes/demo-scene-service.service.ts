@@ -1,7 +1,7 @@
 import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
-import {AudioServiceService} from "../services/audio-service.service";
+import {AudioService} from "../services/audio.service";
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +27,12 @@ export class DemoSceneServiceService implements OnDestroy{
     }
   }
 
+  public cancelAnimation() {
+    if (this.frameId != null) {
+      cancelAnimationFrame(this.frameId);
+    }
+  }
+
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
 
     this.scene = new THREE.Scene();
@@ -40,10 +46,10 @@ export class DemoSceneServiceService implements OnDestroy{
     });
     this.renderer.setClearColor(0x000000);
 
-    this.renderer.setSize(window.innerWidth - 50, window.innerHeight - 50);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
     // renderer.shadowMap.enabled = true;
 
-    this.camera = new THREE.PerspectiveCamera(45, (window.innerWidth - 50) / (window.innerHeight - 50), 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(45, (window.innerWidth) / (window.innerHeight), 0.1, 1000);
     this.camera.position.set(0, 0, 100);
     this.camera.lookAt(this.scene.position);
     this.scene.add(this.camera);
@@ -148,8 +154,8 @@ export class DemoSceneServiceService implements OnDestroy{
   }
 
   public resize(): void {
-    const width = window.innerWidth - 50;
-    const height = window.innerHeight - 50;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
@@ -232,7 +238,7 @@ export class DemoSceneServiceService implements OnDestroy{
 
 
 
-  constructor(private ngZone: NgZone, public audioService: AudioServiceService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService) { }
 
   // some helper functions here
 
