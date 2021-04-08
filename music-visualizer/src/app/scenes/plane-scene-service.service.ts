@@ -222,12 +222,21 @@ export class PlaneSceneServiceService {
     // const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
 
     const currSegment = this.spotifyService.getSegment(this.trackProgress);
+    const currSection = this.spotifyService.getSection(this.trackProgress);
 
     //console.log(currSection);
 
     //const totalAvgPitch = this.spotifyService.trackPitchAvg;
     const pitchAvg =  this.avg(currSegment['pitches']);
-    const scaledPitchAvg = this.modulate(pitchAvg, 0, 0.1, 0, 30);
+    const scaledAvgPitch = this.modulate(pitchAvg, this.min(currSegment['pitches']), this.max(currSegment['pitches']), 0, 180);
+    const timbreAvg = this.avg(currSegment['timbre']);
+
+    const sectionLoudness = Math.abs(currSection['loudness']);
+    const segmentLoudness = Math.abs(currSegment['loudness_max']);
+
+    const loudness = sectionLoudness + segmentLoudness;
+
+    //const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
 
     //const scaledPitch = this.modulate(pitchAvg, 0, , 0, 25);
     // dummy values that were easy to get three of curr + present, replace with further implementation
@@ -246,7 +255,9 @@ export class PlaneSceneServiceService {
     //const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
     //console.log(currSection['loudness']);
 
-    this.wavesBuffer( scaledPitchAvg, scaledPitchAvg, scaledPitchAvg);
+    
+
+    this.wavesBuffer( timbreAvg * 2, scaledAvgPitch, loudness);
 
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
@@ -281,7 +292,7 @@ export class PlaneSceneServiceService {
     const center = new THREE.Vector3(0, 0, 0);
     const vec3 = new THREE.Vector3();
 
-    const time = window.performance.now() * .001;
+    const time = window.performance.now() * .005;
     for (let i = 0, l = pos.count; i < l; i++) {
 
       vec3.fromBufferAttribute(pos, i);
@@ -306,11 +317,13 @@ export class PlaneSceneServiceService {
   }
 
   avg = (arr) => {
-    const total = arr.reduce((sum, b) => sum + b);
+    const total = arr.reduce((sum, b) => sum + Math.abs(b));
     return (total / arr.length);
   }
 
   max = (arr) => arr.reduce((a, b) => Math.max(a, b));
+
+  min = (arr) => arr.reduce((a, b) => Math.min(a, b));
 
 
   public resize(): void {

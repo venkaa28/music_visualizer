@@ -87,6 +87,7 @@ export class SpotifyPlaybackSdkService {
         }
 
         this.spotifyService.segmentEnd = 0;
+        this.spotifyService.sectionEnd = 0;
         scene.animate();
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });
