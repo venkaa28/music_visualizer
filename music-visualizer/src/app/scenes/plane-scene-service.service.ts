@@ -182,7 +182,7 @@ export class PlaneSceneServiceService {
 
     // console.log(position);
     const vector = new THREE.Vector3();
-    this.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor);
+    this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, this.plane);
 
     // for (let i = 0,  l = position.count; i < l; i++){
     //   vector.fromBufferAttribute(position, i);
@@ -227,26 +227,6 @@ export class PlaneSceneServiceService {
     // this.plane.geometry.computeVertexNormals();
     this.plane.updateMatrix();
 
-    }
-    // for re-use
-
-  wavesBuffer( waveSize, magnitude1,  magnitude2) {
-
-    const pos = this.plane.geometry.attributes.position;
-    const center = new THREE.Vector3(0, 0, 0);
-    const vec3 = new THREE.Vector3();
-
-    const time = window.performance.now() * .001;
-    for (let i = 0, l = pos.count; i < l; i++) {
-
-      vec3.fromBufferAttribute(pos, i);
-      vec3.sub(center);
-
-      const sampleNoise = this.noise.noise3d((vec3.x + time * 0.00001), (vec3.y + time * 0.00001), (vec3.z + time * 0.00001));
-      const z = Math.sin(vec3.length() / -(waveSize) + (time)) * (magnitude1 + (sampleNoise * magnitude1 / 2.5)) - (magnitude2);
-      pos.setZ(i, z);
-
-    }
   }
 
   max = (arr) => arr.reduce((a, b) => Math.max(a, b));
