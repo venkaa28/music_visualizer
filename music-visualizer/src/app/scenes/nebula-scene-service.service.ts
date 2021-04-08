@@ -1,6 +1,6 @@
 import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
-//import Rate from 'three-nebula/src/initializer/Rate.js'
-//import {DEFAULT_EMITTER_RATE} from 'three-nebula/src/emitter/constants.js';
+// import Rate from 'three-nebula/src/initializer/Rate.js'
+// import {DEFAULT_EMITTER_RATE} from 'three-nebula/src/emitter/constants.js';
 import System from 'three-nebula';
 import * as THREE from 'three';
 import Nebula, { SpriteRenderer } from 'three-nebula';
@@ -77,7 +77,7 @@ export class NebulaSceneServiceService {
     // sets the size of the canvas
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     // sets a perspective camera
-    this.camera = new THREE.PerspectiveCamera(50, (window.innerWidth) / (window.innerHeight), 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(65, (window.innerWidth) / (window.innerHeight), 0.1, 1000);
     // lets the camera at position x, y, z
     this.camera.position.set(0, 0, 100);
     // set the camera to look at the center of the scene
@@ -158,17 +158,26 @@ export class NebulaSceneServiceService {
 
     // console.log(this.nebula);
     // console.log(this.nebula.emitters[0]);
-    /*
+
+    /* messing with number of particles emitted as another dynamic change to the scene
     this.particleEmission(this.nebula.emitters[0], lowFreqDownScaled);
     this.particleEmission(this.nebula.emitters[1], midFreqDownScaled);
     this.particleEmission(this.nebula.emitters[2], highFreqDownScaled);
     */
-    //this.nebula.emitters[1].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
-    //this.nebula.emitters[1].setPosition(new THREE.Vector3(0 , midFreqAvgScalor , highFreqAvgScalor));
-    this.nebula.emitters[2].setPosition(new THREE.Vector3(-40 , midFreqAvgScalor , highFreqAvgScalor));
+
+    // the one particle furthest left
+    this.nebula.emitters[2].setPosition(new THREE.Vector3(-40 , lowFreqAvgScalor , midFreqAvgScalor));
     this.nebula.emitters[2].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
-    this.nebula.emitters[0].setPosition(new THREE.Vector3(40 , midFreqAvgScalor , highFreqAvgScalor));
+
+    // the particle in the middle
+    this.nebula.emitters[1].setPosition(new THREE.Vector3(0, midFreqAvgScalor, highFreqAvgScalor));
+    this.nebula.emitters[1].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
+
+    // the particle furthest right
+    this.nebula.emitters[0].setPosition(new THREE.Vector3(40 , highFreqAvgScalor , lowFreqAvgScalor));
     this.nebula.emitters[0].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
+
+
     this.nebula.update();
   }
 
