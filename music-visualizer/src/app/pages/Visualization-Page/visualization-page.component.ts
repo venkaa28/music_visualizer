@@ -98,12 +98,19 @@ export class VisualizationPageComponent implements AfterViewInit {
   /**************************************Loading functions**************************************/
 
   // load song from local file
-  loadFilePath(event: any) {
+  async loadFilePath(event: any) {
     var element = event as HTMLInputElement; // get filelist from html
     var file = element.files[0];
 
     if (typeof file === 'undefined') {
       return;
+    }
+
+    if (this.spotifyUsed) {
+      await this.spotifyPlaybackService.player.removeListener('player_state_changed');
+      await this.spotifyPlaybackService.player.removeListener('ready');
+      
+      this.spotifyPlaybackService.player.disconnect();
     }
 
     this.current = new Music(); // init new music
@@ -116,6 +123,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.loadSong(this.audio);
     this.micUsed = false;
     this.spotifyUsed = false;
+    this.planeScene.spotifyBool = false;
 
     this.scene.animate();
     this.toggleUploadMenu();
@@ -149,6 +157,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.scene.createScene(this.rendererCanvas);
     await this.spotifyPlaybackService.addSpotifyPlaybackSdk(this.scene);
     this.spotifyUsed = true;
+    this.planeScene.spotifyBool = true;
 
     this.toggleUploadMenu();
   }
