@@ -27,6 +27,12 @@ export class DemoSceneServiceService implements OnDestroy{
     }
   }
 
+  public cancelAnimation() {
+    if (this.frameId != null) {
+      cancelAnimationFrame(this.frameId);
+    }
+  }
+
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
 
     this.scene = new THREE.Scene();
