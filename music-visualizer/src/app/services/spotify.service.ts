@@ -21,8 +21,6 @@ export class SpotifyService {
   public sectionEnd: number;
 
   constructor(public http: HttpClient, private router: Router, private authService: AuthService) {
-    this.analysis = {};
-    this.feature = {};
     this.segmentIndex = 0;
     this.segmentEnd = 0;
     this.sectionIndex = 0;

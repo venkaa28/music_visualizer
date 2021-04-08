@@ -31,6 +31,8 @@ export class PlaneSceneServiceService {
   private canvasRef: ElementRef<HTMLCanvasElement>;
   public frame: number = 0;
   public trackProgress: number = 0;
+  private prevSegment: [];
+  private timreIndex: number = 0;
 
 
   private frameId: number = null;
@@ -221,43 +223,54 @@ export class PlaneSceneServiceService {
     // const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
     // const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
 
-    const currSegment = this.spotifyService.getSegment(this.trackProgress);
-    const currSection = this.spotifyService.getSection(this.trackProgress);
+    if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
 
-    //console.log(currSection);
+      const currSegment = this.spotifyService.getSegment(this.trackProgress);
 
-    //const totalAvgPitch = this.spotifyService.trackPitchAvg;
-    const pitchAvg =  this.avg(currSegment['pitches']);
-    const scaledAvgPitch = this.modulate(pitchAvg, this.min(currSegment['pitches']), this.max(currSegment['pitches']), 0, 180);
-    const timbreAvg = this.avg(currSegment['timbre']);
+      if (currSegment === this.prevSegment) {
+        this.timreIndex++;
+        this.timreIndex = this.timreIndex % 12;
+      } else {
+        this.prevSegment = currSegment;
+        this.timreIndex = 0;
+      }
 
-    const sectionLoudness = Math.abs(currSection['loudness']);
-    const segmentLoudness = Math.abs(currSegment['loudness_max']);
+      const currSection = this.spotifyService.getSection(this.trackProgress);
 
-    const loudness = segmentLoudness;
+      //console.log(currSection);
 
-    //const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+      //const totalAvgPitch = this.spotifyService.trackPitchAvg;
+      const pitchAvg =  this.avg(currSegment['pitches']);
+      const scaledAvgPitch = this.modulate(pitchAvg, this.min(currSegment['pitches']), this.max(currSegment['pitches']), 0, 180);
+      const timbre = currSegment['timbre'];
 
-    //const scaledPitch = this.modulate(pitchAvg, 0, , 0, 25);
-    // dummy values that were easy to get three of curr + present, replace with further implementation
-    // var lowPitch = this.modulate(this.avg(currSegment['pitches'].slice(0, 3)), 0, 3, 1, 20);
-    // var medPitch = this.modulate(this.avg(currSegment['pitches'].slice(4, 7)), 0, 3, 0, 25);
-    // var highPitch = this.modulate(this.avg(currSegment['pitches'].slice(8, 11)), 0, 3, 1, 30);
-    //
-    // lowPitch = this.modulate(lowPitch, -3, 3, 15, 100);
-    // medPitch = this.modulate(medPitch, -3, 3, 15, 100);
-    // highPitch = this.modulate(highPitch, -3, 3, 15, 100);
+      const sectionLoudness = Math.abs(currSection['loudness']);
+      const segmentLoudness = Math.abs(currSegment['loudness_max']);
 
-    //const scaledConfidence = this.modulate(barConfidence+ beatConfidence+ segConfidence, 0,3, 15 , 100 );
-    //console.log(scaledConfidence);
-    //const scaledBeatConfidence = this.modulate(currBeat['confidence'], 0, 1, 15, 100);
-    //console.log(scaledBeatConfidence);
-    //const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
-    //console.log(currSection['loudness']);
+      const loudness = segmentLoudness;
+
+      //const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+
+      //const scaledPitch = this.modulate(pitchAvg, 0, , 0, 25);
+      // dummy values that were easy to get three of curr + present, replace with further implementation
+      // var lowPitch = this.modulate(this.avg(currSegment['pitches'].slice(0, 3)), 0, 3, 1, 20);
+      // var medPitch = this.modulate(this.avg(currSegment['pitches'].slice(4, 7)), 0, 3, 0, 25);
+      // var highPitch = this.modulate(this.avg(currSegment['pitches'].slice(8, 11)), 0, 3, 1, 30);
+      //
+      // lowPitch = this.modulate(lowPitch, -3, 3, 15, 100);
+      // medPitch = this.modulate(medPitch, -3, 3, 15, 100);
+      // highPitch = this.modulate(highPitch, -3, 3, 15, 100);
+
+      //const scaledConfidence = this.modulate(barConfidence+ beatConfidence+ segConfidence, 0,3, 15 , 100 );
+      //console.log(scaledConfidence);
+      //const scaledBeatConfidence = this.modulate(currBeat['confidence'], 0, 1, 15, 100);
+      //console.log(scaledBeatConfidence);
+      //const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
+      //console.log(currSection['loudness']);
 
 
-
-    this.wavesBuffer( timbreAvg * 2, scaledAvgPitch, loudness);
+      this.wavesBuffer( scaledAvgPitch, Math.abs(timbre[this.timreIndex]), loudness);
+    }
 
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
@@ -280,11 +293,10 @@ export class PlaneSceneServiceService {
     //   );
     // }
 
-     this.plane.geometry.attributes.position.needsUpdate = true;
-     this.plane.updateMatrix();
-
-    }
-    // for re-use
+    this.plane.geometry.attributes.position.needsUpdate = true;
+    this.plane.updateMatrix();
+  }
+  // for re-use
 
   wavesBuffer( waveSize, magnitude1,  magnitude2) {
 
