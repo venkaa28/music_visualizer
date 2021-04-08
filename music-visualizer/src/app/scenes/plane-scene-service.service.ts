@@ -234,7 +234,7 @@ export class PlaneSceneServiceService {
     const sectionLoudness = Math.abs(currSection['loudness']);
     const segmentLoudness = Math.abs(currSegment['loudness_max']);
 
-    const loudness = sectionLoudness + segmentLoudness;
+    const loudness = segmentLoudness;
 
     //const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
 
@@ -255,14 +255,14 @@ export class PlaneSceneServiceService {
     //const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
     //console.log(currSection['loudness']);
 
-    
+
 
     this.wavesBuffer( timbreAvg * 2, scaledAvgPitch, loudness);
 
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
     this.darkSky.rotation.y += 0.0005;
-    
+
     if (this.secondPlane.position.z >= 6000){
       this.secondPlane.position.z = 0;
     }

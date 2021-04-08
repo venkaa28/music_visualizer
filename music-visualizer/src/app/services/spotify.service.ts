@@ -12,6 +12,8 @@ export class SpotifyService {
 
   public analysis: {};
   public feature: {};
+  public trackName: string;
+  public artistName: string;
 
   public segmentIndex: number;
   public segmentEnd: number;
@@ -64,6 +66,20 @@ export class SpotifyService {
       throw new Error('Error retrieving track feature data from spotify ');
     }
   }
+  //
+  // getTrackData(trackID: string){
+  //   try {
+  //     let url = 'https://api.spotify.com/v1/tracks/' + trackID;
+  //     const headers = new HttpHeaders()
+  //       .set("Accept", 'application/json')
+  //       .set("Content-Type", 'application/json')
+  //       .set("Authorization", 'Bearer ' + this.authService.getUser().spotifyAPIKey);
+  //     this.http.get(url, {headers}).subscribe((resp) => this.feature = resp);
+  //   } catch (e) {
+  //     console.log('Error with HTTP Request to spotify for track analysis data: ' + e);
+  //     throw new Error('Error retrieving track feature data from spotify ');
+  //   }
+  // }
 
   getSegment(trackProgress){
     if (this.segmentEnd === 0) {

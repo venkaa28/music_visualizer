@@ -76,6 +76,14 @@ export class SpotifyPlaybackSdkService {
                                                     duration,
                                                     track_window: { current_track },
                                                   }) => {
+        console.log(current_track);
+        this.spotifyService.trackName = current_track.name;
+        this.spotifyService.artistName = '';
+        current_track.artists.forEach((value) => {
+          this.spotifyService.artistName += value.name + ' ';
+        });
+        console.log(this.spotifyService.artistName);
+        console.log(this.spotifyService.trackName);
         console.log('Currently Playing', current_track.uri);
         this.currTrackID = current_track.id;
         try {
