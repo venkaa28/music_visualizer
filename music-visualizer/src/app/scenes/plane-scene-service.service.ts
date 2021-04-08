@@ -3,9 +3,9 @@ import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {ToolsService} from '../services/tools.service';
 import {AudioService} from '../services/audio.service';
-import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
-import {SpotifyService} from "../services/spotify.service";
-import {SpotifyPlaybackSdkService} from "../services/spotify-playback-sdk.service";
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import {SpotifyService} from '../services/spotify.service';
+import {SpotifyPlaybackSdkService} from '../services/spotify-playback-sdk.service';
 
 
 @Injectable({
@@ -16,7 +16,9 @@ export class PlaneSceneServiceService {
 
   constructor(private ngZone: NgZone, public audioService: AudioService,
               private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService,
-             public tool: ToolsService) { }
+              public tool: ToolsService) {
+    this.spotifyBool = true;
+  }
 
 
   private canvas!: HTMLCanvasElement;
@@ -31,12 +33,12 @@ export class PlaneSceneServiceService {
   private loader: GLTFLoader;
   private textureLoader: THREE.TextureLoader;
   private darkSky: THREE.Group;
-  private rain: THREE.Points;
   private canvasRef: ElementRef<HTMLCanvasElement>;
-  public frame: number = 0;
-  public trackProgress: number = 0;
+  public frame = 0;
+  public trackProgress = 0;
   private prevSegment: [];
-  private timreIndex: number = 0;
+  private timreIndex = 0;
+  public spotifyBool: boolean;
 
 
   private frameId: number = null;
@@ -175,8 +177,8 @@ export class PlaneSceneServiceService {
 
     this.spotifyPlayer.player.getCurrentState().then(state => {
       if (!state) {
-        //console.error('User is not playing music through the Web Playback SDK');
-        //return;
+        // console.error('User is not playing music through the Web Playback SDK');
+        // return;
       }else {
         this.trackProgress = state.position;
         this.sceneAnimation();
@@ -195,44 +197,44 @@ export class PlaneSceneServiceService {
       this.frame++;
     }
 
-    var delta = val2 - val1; // the change in values
-    var slope = delta / duration; // scale to duration for smoothing
+    const delta = val2 - val1; // the change in values
+    const slope = delta / duration; // scale to duration for smoothing
     return val1 + slope * this.frame;
   }
 
   sceneAnimation = () => {
 
+    if (!this.spotifyBool){
+      this.tool.freqSetup();
 
-    this.tool.freqSetup();
+      const position = this.plane.geometry.attributes.position;
 
-    const position = this.plane.geometry.attributes.position;
+      // console.log(position);
+      const vector = new THREE.Vector3();
+      this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
+    }else {
+      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
 
-    // console.log(position);
-    const vector = new THREE.Vector3();
+        const currSegment = this.spotifyService.getSegment(this.trackProgress);
+        const currSection = this.spotifyService.getSection(this.trackProgress);
+        // const avgSegDuration = this.spotifyService.getAvgSegmentDuration();
+        const segDuration = currSegment.duration;
+        const timeScalar = (1 - segDuration) / 100; // (1 - avgSegDuration) / 100;
 
-    if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+        // console.log(currSection);
 
-      const currSegment = this.spotifyService.getSegment(this.trackProgress);
-      const currSection = this.spotifyService.getSection(this.trackProgress);
-      //const avgSegDuration = this.spotifyService.getAvgSegmentDuration();
-      const segDuration = currSegment['duration'];
-      const timeScalar = (1 - segDuration) / 100; //(1 - avgSegDuration) / 100;
+        // const totalAvgPitch = this.spotifyService.trackPitchAvg;
+        const pitchAvg = this.tool.absAvg(currSegment.pitches);
+        const scaledAvgPitch = this.tool.modulate(pitchAvg, this.tool.min(currSegment.pitches), this.tool.max(currSegment.pitches), 0, 180);
+        const timbreAvg = this.tool.absAvg(currSegment.timbre);
 
-      //console.log(currSection);
-
-      //const totalAvgPitch = this.spotifyService.trackPitchAvg;
-      const pitchAvg = this.avg(currSegment['pitches']);
-      const scaledAvgPitch = this.modulate(pitchAvg, this.min(currSegment['pitches']), this.max(currSegment['pitches']), 0, 180);
-      const timbreAvg = this.avg(currSegment['timbre']);
-
-      const sectionLoudness = Math.abs(currSection['loudness']);
-      const segmentLoudness = Math.abs(currSegment['loudness_max']);
+        const sectionLoudness = Math.abs(currSection.loudness);
+        const segmentLoudness = Math.abs(currSegment.loudness_max);
 
 
-      //const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
-
-      //this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, this.plane);
-      this.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar);
+        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+        this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
+      }
     }
 
     // this.group.rotation.y += 0.005;
@@ -248,59 +250,19 @@ export class PlaneSceneServiceService {
 
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
-    if (this.frame++ % 1 === 0) {
-      this.plane.material.color.setRGB(
-        this.tool.highFreqAvgScalor > 0 ? 1/this.tool.highFreqAvgScalor * 30 : 255,
-        this.tool.midFreqAvgScalor > 0 ? 1/this.tool.midFreqAvgScalor * 30 : 255,
-        this.tool.lowFreqAvgScalor > 0 ?  1/this.tool.lowFreqAvgScalor * 30 : 255
-      );
-    }
+    // if (this.frame++ % 1 === 0) {
+    //   this.plane.material.color.setRGB(
+    //     this.tool.highFreqAvgScalor > 0 ? 1 / this.tool.highFreqAvgScalor * 30 : 255,
+    //     this.tool.midFreqAvgScalor > 0 ? 1 / this.tool.midFreqAvgScalor * 30 : 255,
+    //     this.tool.lowFreqAvgScalor > 0 ?  1 / this.tool.lowFreqAvgScalor * 30 : 255
+    //   );
+    // }
 
 
     this.plane.geometry.attributes.position.needsUpdate = true;
     this.plane.updateMatrix();
   }
-  // for re-use
 
-
-  wavesBuffer( waveSize, magnitude1,  magnitude2, timeScalar) {
-
-    const pos = this.plane.geometry.attributes.position;
-    const center = new THREE.Vector3(0, 0, 0);
-    const vec3 = new THREE.Vector3();
-
-    const time = window.performance.now() * timeScalar;
-    for (let i = 0, l = pos.count; i < l; i++) {
-
-      vec3.fromBufferAttribute(pos, i);
-      vec3.sub(center);
-
-      const sampleNoise = this.noise.noise3d((vec3.x + time * 0.00001), (vec3.y + time * 0.00001), (vec3.z + time * 0.00001));
-      const z = Math.sin(vec3.length() / -(waveSize) + (time)) * (magnitude1 + (sampleNoise * magnitude1 / 2.5)) - (magnitude2);
-      pos.setZ(i, z);
-
-    }
-  }
-
-
-  fractionate(val: number, minVal: number, maxVal: number) {
-    return (val - minVal) / (maxVal - minVal);
-  }
-
-  modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number) {
-    const fr = this.fractionate(val, minVal, maxVal);
-    const delta = outMax - outMin;
-    return outMin + (fr * delta);
-  }
-
-  avg = (arr) => {
-    const total = arr.reduce((sum, b) => sum + Math.abs(b));
-    return (total / arr.length);
-  }
-
-  max = (arr) => arr.reduce((a, b) => Math.max(a, b));
-
-  min = (arr) => arr.reduce((a, b) => Math.min(a, b));
 
   public resize(): void {
     const width = window.innerWidth;
