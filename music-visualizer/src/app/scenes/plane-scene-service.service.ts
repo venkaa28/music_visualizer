@@ -215,22 +215,11 @@ export class PlaneSceneServiceService {
     }else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
 
-        const currSegment = this.spotifyService.getSegment(this.trackProgress);
-        const currSection = this.spotifyService.getSection(this.trackProgress);
-        // const avgSegDuration = this.spotifyService.getAvgSegmentDuration();
-        const segDuration = currSegment.duration;
-        const timeScalar = (1 - segDuration) / 100; // (1 - avgSegDuration) / 100;
-
-        // console.log(currSection);
-
-        // const totalAvgPitch = this.spotifyService.trackPitchAvg;
-        const pitchAvg = this.tool.absAvg(currSegment.pitches);
-        const scaledAvgPitch = this.tool.modulate(pitchAvg, this.tool.min(currSegment.pitches), this.tool.max(currSegment.pitches), 0, 180);
-        const timbreAvg = this.tool.absAvg(currSegment.timbre);
-
-        const sectionLoudness = Math.abs(currSection.loudness);
-        const segmentLoudness = Math.abs(currSegment.loudness_max);
-
+        //const pitchAvg = this.tool.absAvg(currSegment.pitches);
+        const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+        const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
+        const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+        const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
 
         // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
         this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
