@@ -1,5 +1,5 @@
 // angular
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import {AfterContentInit, AfterViewInit, Component, ContentChild, ElementRef, OnInit, ViewChild} from '@angular/core';
 import { Router } from '@angular/router';
 import { NotifierService } from 'angular-notifier';
 
@@ -8,14 +8,13 @@ import { NotifierService } from 'angular-notifier';
 // local lib
 import { AuthService } from '../../services/auth.service';
 import {AudioService} from '../../services/audio.service';
-import {Music} from '../../classes/music';
+import {Music} from '../../classes/music'
 
 // scenes
-import {PlaneSceneServiceService} from '../../scenes/plane-scene-service.service';
-import {SpotifyPlaybackSdkService} from '../../services/spotify-playback-sdk.service';
+import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service";
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
-import {NebulaSceneServiceService} from '../../scenes/nebula-scene-service.service';
+import {SeaSceneService} from '../../scenes/sea-scene-service.service';
 
 
 type Dict = {[key: string]: any};
@@ -41,29 +40,20 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   public audio: HTMLAudioElement; // audio element of window
   public current: Music; // music object
-  public readonly scenesAvailable = [this.planeScene, this.nebulaScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene, this.seaScene]; // current scene being used
   public micUsed: boolean;
 
   private scene: any; // current scene to use
   private menuTimeout: number; // timeout in ms of menu
   private timeout: number; // id of current timeout
-  private micStream: MediaStream; // user's microphone data
-  private spotifyUsed: boolean; // control spotify
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
-
-              public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
-              private spotifyPlaybackService: SpotifyPlaybackSdkService, public nebulaScene: NebulaSceneServiceService) {
-    // initialize variables
-    this.current = new Music();
-    this.micUsed = false;
-    this.spotifyUsed = false;
-    this.scene = this.scenesAvailable[0];
-    this.menuTimeout = 2000;
-
-
-    // TODO: scroll text on hover
-  }
+    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, public seaScene: SeaSceneService, private readonly notifierService: NotifierService) {
+      this.current = new Music();
+      this.micUsed = false;
+      this.scene = this.scenesAvailable[3];
+      this.menuTimeout = 3000;
+    }
 
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement; // grab audio element from html
@@ -78,20 +68,24 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   // listen to keyboard events, perform actions if certain keys are pressed
-  async keyListener(event) {
-    event = event || window.event; // capture the event, and ensure we have an event
+  keyListener(event){
+    event = event || window.event; //capture the event, and ensure we have an event
 
     switch (event.key) {
+      case 'm': // menu
+        this.toggleMenu();
+        break;
+
       case ' ': // play/pause
-        await this.togglePlay();
+        this.togglePlay();
         break;
 
       case 'd': // fast forward
-        await this.nextSong();
+        this.nextSong();
         break;
 
       case 'a': // rewind
-        await this.rewindSong();
+        this.rewindSong();
         break;
     }
 
@@ -101,162 +95,94 @@ export class VisualizationPageComponent implements AfterViewInit {
   /**************************************Loading functions**************************************/
 
   // load song from local file
-  async loadFilePath(event: any) {
-    let element = event as HTMLInputElement; // get filelist from html
-    let file = element.files[0];
-
-    if (typeof file === 'undefined') {
-      return;
-    }
-
-    if (this.spotifyUsed) {
-      this.spotifyPlaybackService.player.pause().then(() => {
-        this.spotifyUsed = false;
-        this.scenesAvailable.forEach((scene) => {
-          scene.spotifyBool = false;
-        });
-      });
-      await this.spotifyPlaybackService.player.removeListener('player_state_changed');
-      await this.spotifyPlaybackService.player.removeListener('ready');
-      this.spotifyPlaybackService.player.disconnect();
-    }
+  loadFilePath(event: any) {
+    var file = event as HTMLInputElement; // get filelist from html
 
     this.current = new Music(); // init new music
-    this.current.filepath = URL.createObjectURL(file); // get filepath from html input
-    this.current.name = file.name; // user uploaded one mp3 files, so access first file in list
+    this.current.filepath = URL.createObjectURL(file.files[0]); // get filepath from html input
+    this.current.name = file.files[0].name; // user uploaded one mp3 files, so access first file in list
     this.current.source = 'local'; // set source
-    this.current.artist = 'Local File';
+
     this.audio.src = this.current.filepath; // set source to be the file in the html
     this.audioService.loadSong(this.audio);
     this.micUsed = false;
 
-    document.getElementById('song-title').textContent = this.current.name;
-    document.getElementById('song-subtitle').textContent = this.current.artist;
-    let htmlAlbum = (document.getElementById('album') as HTMLMediaElement);
-    htmlAlbum.src = '../../../assets/icons/disc.svg';
-
     this.scene.animate();
-    this.toggleUploadMenu();
-    await this.audioService.play();
   }
 
   async loadMic() {
     this.current = new Music(); // init new music
     this.current.source = 'local'; // set source
-    await this.audioService.pause();
+    this.audioService.pause();
 
-    if (this.spotifyUsed) {
-      this.spotifyPlaybackService.player.pause().then(() => {
-        this.spotifyUsed = false;
-        this.scenesAvailable.forEach((scene) => {
-          scene.spotifyBool = false;
-        });
-      });
-      await this.spotifyPlaybackService.player.removeListener('player_state_changed');
-      await this.spotifyPlaybackService.player.removeListener('ready');
-      this.spotifyPlaybackService.player.disconnect();
-    }
-
-    if (typeof this.micStream === 'undefined') {
-      await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      .then((stream) => {
-        this.audioService.loadMic(stream); // load the audio into the audio context
-      });
-    }
+    await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then((stream) => {
+      this.audioService.loadMic(stream); // load the audio into the audio context
+    });
 
     this.micUsed = true;
-    this.spotifyUsed = false;
-    this.toggleUploadMenu();
 
     this.scene.animate();
-  }
-
-  async loadSpotify() {
-    // TODO: error handle not token cookie
-    await this.audioService.pause();
-    if (this.authService.getUser().spotifyAPIKey == null) {
-      await this.router.navigate(['../ProfilePage']);
-    }
-    this.scene.createScene(this.rendererCanvas);
-    this.spotifyPlaybackService.addSpotifyPlaybackSdk(this.scene).then(() => {
-      this.scenesAvailable.forEach((scene) => {
-        scene.spotifyBool = true;
-      });
-      }
-    );
-
-    this.spotifyUsed = true;
-
-    this.toggleUploadMenu();
   }
 
   /**************************************Audio controls**************************************/
 
   // handle play or pause
   async togglePlay() {
-    if (this.spotifyUsed) {
-      this.spotifyPlaybackService.player.togglePlay();
-    } else {
-      await this.audioService.playOrPause();
-    }
-
-    this.toggleMenu();
+    await this.audioService.playOrPause().then(() => this.resetMenuTimeout());
   }
 
   // load next song from firebase
   async nextSong() {
-    if (this.spotifyUsed) {
-      this.spotifyPlaybackService.player.nextTrack();
+    if (this.audioService.getTime() + 10 > this.audioService.getDuration()) {
+      this.audioService.setTime(this.audioService.getDuration());
     } else {
-      if (this.audioService.getTime() + 10 > this.audioService.getDuration()) {
-        this.audioService.setTime(this.audioService.getDuration());
-      } else {
-        this.audioService.setTime(this.audioService.getTime() + 10);
-      }
+      this.audioService.setTime(this.audioService.getTime() + 10);
     }
+
+    this.resetMenuTimeout();
   }
 
   // load previous song from firebase
   async rewindSong() {
-    if (this.spotifyUsed) {
-      this.spotifyPlaybackService.player.previousTrack();
+    if (this.audioService.getTime() - 10 < 0) {
+      this.audioService.setTime(0);
     } else {
-      if (this.audioService.getTime() - 10 < 0) {
-        this.audioService.setTime(0);
-      } else {
-        this.audioService.setTime(this.audioService.getTime() - 10);
-      }
+      this.audioService.setTime(this.audioService.getTime() - 10);
     }
+
+    this.resetMenuTimeout();
   }
 
   // change the current visualization scene
-  async changeScene(event: any) {
-    this.scene.cancelAnimation();
-
+  changeScene(event: any) {
     this.scene = this.scenesAvailable[event.value];
-    await this.scene.createScene(this.rendererCanvas);
-
+    this.scene.createScene(this.rendererCanvas);
     this.scene.animate();
   }
 
   // change fft value based on slider input
   changeFFT(event: any) {
     this.audioService.setFFT(Math.pow(2, event.value));
+    this.resetMenuTimeout();
   }
 
   // change the smoothing constant
   changeSC(event: any) {
     this.audioService.setSC(event.value);
+    this.resetMenuTimeout();
   }
 
   // change volume based on slider input
   changeVolume(event: any) {
     this.audioService.setGain(event.value);
+    this.resetMenuTimeout();
   }
 
   // change pan based on slider input
   changePan(event: any) {
     this.audioService.setPan(event.value);
+    this.resetMenuTimeout();
   }
 
   // get the duration of the current song
@@ -267,7 +193,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   // get the current time in the song, and update progress bar
   progress() {
     // get the progress bar div on the html page
-    let progress = document.getElementById('progress-bar');
+    var progress = document.getElementById("progress-bar");
     // set width as percent song complete
     progress.style.width = Math.floor(this.audioService.getTime() / this.audioService.getDuration() * 100) + '%';
 
@@ -286,51 +212,58 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   setTime(event: any) {
     this.audioService.setTime(event.value);
+    this.resetMenuTimeout();
   }
+
 
   /**************************************Visuals**************************************/
 
+  // close menu on interaction timeout
+  resetMenuTimeout() {
+    var menu = document.getElementById('menu'); // menu element
+
+    window.clearTimeout(this.timeout); // clear previous timeout
+
+    // choose action base on if song is paused or not
+    if (this.micUsed) {
+      // set menu to close in menuTimeout ms
+      this.timeout = window.setTimeout(() => {
+        menu.style.width = "0%"; // close menu
+      }, this.menuTimeout);
+    } else if (this.audioService.paused() === true) {
+      menu.style.width = '100%'; // open menu
+    } else {
+      // set menu to close in menuTimeout ms
+      this.timeout = window.setTimeout(() => {
+        menu.style.width = "0%"; // close menu
+      }, this.menuTimeout);
+    }
+  }
+
   // displays appropiate play or pause icon based on the state of the audio
   playPauseIcon() {
-    let playIcon = '../../../assets/icons/play.svg';
-    let pauseIcon = '../../../assets/icons/pause.svg';
-
-    /*if (this.spotifyUsed) {
-      if (this.spotifyPlaybackService.player === null) {
-        return playIcon;
-      }
-
-      this.spotifyPlaybackService.player.getCurrentState().then((state) => {
-        if (!state) {
-          return playIcon;
-        }
-
-        return pauseIcon;
-      });
-    }*/
-
     // audio uninitialized
     if (typeof this.audio === 'undefined') {
-      return playIcon;
+      return '../../../assets/icons/play.svg';
     }
 
     // paused music, show play icon
     if (this.audio.paused) {
-      return playIcon;
+      return '../../../assets/icons/play.svg';
     }
 
     // playing music, show pause icon
-    return pauseIcon;
+    return '../../../assets/icons/pause.svg';
   }
 
   // convert time in seconds to a formatted output string mm:ss
   timeString(time: number) {
-    let secondsTotal = time; // raw seconds of current place in song
-    let outputTime = ''; // string used for output
+    var secondsTotal = time; // raw seconds of current place in song
+    var outputTime: string = ""; // string used for output
 
     // convert minutes to string
     if (secondsTotal > 60) {
-      outputTime += Math.floor(secondsTotal / 60);
+      outputTime += Math.floor(secondsTotal/60);
       secondsTotal = secondsTotal % 60;
     } else {
       outputTime += '0';
@@ -350,23 +283,22 @@ export class VisualizationPageComponent implements AfterViewInit {
     return outputTime;
   }
 
+  // display or hide menu
   toggleMenu() {
-    let menu = document.getElementById('menu');
+    var overlay = document.getElementById('menu'); // menu element on html
 
-    menu.style.opacity = '1';
-
-    if (typeof this.timeout !== 'undefined') {
-      window.clearTimeout(this.timeout);
+    // change width to display or hide
+    if (overlay.style.width === '0%') {
+      overlay.style.width = '100%';
+      this.resetMenuTimeout();
+    } else if (overlay.style.width === '100%'){
+      overlay.style.width = '0%';
     }
-
-    this.timeout = window.setTimeout(() => {
-      menu.style.opacity = '0';
-    }, this.menuTimeout);
   }
 
   // display or hide control instruction menu
   toggleInfo() {
-    let infoBox = document.getElementById('info-menu'); // info box element on html
+    var infoBox = document.getElementById('info-menu'); // info box element on html
 
     // hide or show by changing width and opacity
     if (infoBox.style.width === '0%') {
@@ -375,33 +307,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     } else if (infoBox.style.width === '20%'){
       infoBox.style.width = '0%';
       infoBox.style.opacity = '0';
-    }
-  }
-
-
-
-  toggleUploadMenu() {
-    let songBox = document.getElementById('upload-menu');
-    let canvas = document.getElementById('renderCanvas');
-
-    if (songBox.style.width === '0%') {
-      songBox.style.width = '60%';
-      songBox.style.opacity = '1';
-    } else if (songBox.style.width === '60%'){
-      songBox.style.width = '0%';
-      songBox.style.opacity = '0';
-    }
-  }
-
-  toggleEditMenu() {
-    const editBox = document.getElementById('edit-menu');
-
-    if (editBox.style.opacity === '0') {
-      editBox.style.width = '15%';
-      editBox.style.opacity = '1';
-    } else if (editBox.style.opacity === '1'){
-      editBox.style.width = '0%';
-      editBox.style.opacity = '0';
     }
   }
 }
