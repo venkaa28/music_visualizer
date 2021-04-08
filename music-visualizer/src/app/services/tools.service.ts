@@ -13,6 +13,7 @@ export class ToolsService {
   public lowFreqAvgScalor;
   public midFreqAvgScalor;
   public highFreqAvgScalor;
+  private noise: SimplexNoise = new SimplexNoise();
 
   public freqSetup() {
     this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
@@ -29,7 +30,7 @@ export class ToolsService {
     const lowFreqAvg = this.avg(lowfrequncyData);
     const midFreqAvg = this.avg(midfrequncyData);
     const highFreqAvg = this.avg(highfrequncyData);
-    
+
     // Scale
     const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
     const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
@@ -41,13 +42,13 @@ export class ToolsService {
     this.highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
   }
 
-  wavesBuffer( waveSize, magnitude1,  magnitude2, plane) {
+  wavesBuffer( waveSize, magnitude1,  magnitude2, timeScalar, plane) {
 
     const pos = plane.geometry.attributes.position;
     const center = new THREE.Vector3(0, 0, 0);
     const vec3 = new THREE.Vector3();
 
-    const time = window.performance.now() * .001;
+    const time = window.performance.now() * timeScalar;
     for (let i = 0, l = pos.count; i < l; i++) {
 
       vec3.fromBufferAttribute(pos, i);
@@ -66,6 +67,11 @@ export class ToolsService {
     return (total / arr.length);
   }
 
+  absAvg = (arr) => {
+    const total = arr.reduce((sum, b) => sum + Math.abs(b));
+    return (total / arr.length);
+  }
+
   modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number) {
     const fr = this.fractionate(val, minVal, maxVal);
     const delta = outMax - outMin;
@@ -76,5 +82,8 @@ export class ToolsService {
     return (val - minVal) / (maxVal - minVal);
   }
 
-  constructor(public audioService: AudioService, private noise: SimplexNoise) {}
+  min = (arr) => arr.reduce((a, b) => Math.min(a, b));
+  max = (arr) => arr.reduce((a, b) => Math.max(a, b));
+
+  constructor(public audioService: AudioService) {}
 }
