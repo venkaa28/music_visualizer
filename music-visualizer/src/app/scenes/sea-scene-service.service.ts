@@ -204,20 +204,49 @@ export class SeaSceneService {
       this.mesh = new THREE.Mesh(geom, mat);
       this.mesh.receiveShadow = true;
 
-    }
+    };
 
-    Sea.prototype.moveWaves = function (){
+    Sea.prototype.moveWaves = function(bassFr: any, treFr: any){
       const position = this.mesh.geometry.attributes.position;
-      const l = position.count;
-
-      for (let i = 0; i < l; i++){
-        const vprops = this.waves[i];
-        position.setX(i, vprops.x + Math.cos(vprops.ang) * vprops.amp);
-        position.setY(i, vprops.y + Math.sin(vprops.ang) * vprops.amp);
-        vprops.ang += vprops.speed;
+      const vector = new THREE.Vector3();
+      const noise = new SimplexNoise();
+      for (let i = 0, l = position.count; i < l; i++) {
+        vector.fromBufferAttribute(position, i);
+        // console.log(vector);
+        // const offset = this.mesh.geometry.parameters.radius;
+        const offset = 600;
+        // console.log(offset);
+        const amp = 50;
+        const time = window.performance.now();
+        vector.normalize();
+        // console.log(vector);
+        const rf = 0.00001;
+        const distance = (offset + bassFr) + noise.noise3d((vector.x + time * rf * 5), (vector.y + time * rf * 6),
+          (vector.z + time * rf * 7)) * amp * treFr;
+        // console.log(distance);
+        vector.multiplyScalar(distance);
+        // console.log(vector);
+        position.setX(i, vector.x);
+        position.setY(i, vector.y);
+        // position.setZ(i, vector.z);
+        // mesh.geometry.attributes.position.needsUpdate = true;
+        // mesh.geometry.computeVertexNormals();
+        // mesh.geometry.computeFaceNormals();
+        // mesh.updateMatrix();
       }
-      this.mesh.geometry.verticesNeedUpdate = true;
-      this.mesh.rotation.z += .005;
+      // mesh.geometry.vertices.forEach(function (vertex, i) {
+      //     let offset = mesh.geometry.parameters.radius;
+      //     let amp = 7;
+      //     let time = window.performance.now();
+      //     vertex.normalize();
+      //     let rf = 0.00001;
+      //     let distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
+      //     vertex.multiplyScalar(distance);
+      // });
+      this.mesh.geometry.attributes.position.needsUpdate = true;
+      this.mesh.geometry.computeVertexNormals();
+      this.mesh.geometry.computeFaceNormals();
+      this.mesh.updateMatrix();
     };
 
 
@@ -560,43 +589,32 @@ export class SeaSceneService {
 
   sceneAnimation = () => {
 
-    this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    const numBins = this.audioService.analyzer.frequencyBinCount;
-
-    const lowerHalfFrequncyData = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
-    const lowfrequncyData = this.audioService.dataArray.slice(0, (lowerHalfFrequncyData.length / 3) - 1);
-    const midfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3),
-      (lowerHalfFrequncyData.length / 3) * 2 - 1);
-    const highfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3) * 2, lowerHalfFrequncyData.length);
-
-    // console.log(lowerHalfFrequncyData.length);
-
-
-    const lowFreqAvg = this.avg(lowfrequncyData);
-    const midFreqAvg = this.avg(midfrequncyData);
-    const highFreqAvg = this.avg(highfrequncyData);
-
-    const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
-    const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
-    const highFreqDownScaled = highFreqAvg / highfrequncyData.length;
-
-
-    const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0, 1, 0, 15);
-    const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
-    const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
-
-    // const position = this.cylinder.geometry.attributes.position;
-
-    // console.log(position);
-    const vector = new THREE.Vector3();
-    this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
-
 
     this.airplane.propeller.rotation.x += 0.3;
     this.sea.mesh.rotation.z += .005;
     this.sky.mesh.rotation.z += .01;
     this.airplane.pilot.updateHairs();
-    this.sea.moveWaves();
+
+
+    // if(typeof analyzer != "undefined") {
+    this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
+    // console.log(dataArray);
+
+    const lowerHalfArray = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
+    const upperHalfArray = this.audioService.dataArray.slice((this.audioService.dataArray.length / 2) - 1, this.audioService.dataArray.length - 1);
+
+    const overallAvg = this.avg(this.audioService.dataArray);
+    const lowerMax = this.max(lowerHalfArray);
+    const lowerAvg = this.avg(lowerHalfArray);
+    const upperMax = this.max(upperHalfArray);
+    const upperAvg = this.avg(upperHalfArray);
+
+    const lowerMaxFr = lowerMax / lowerHalfArray.length;
+    const lowerAvgFr = lowerAvg / lowerHalfArray.length;
+    const upperMaxFr = upperMax / upperHalfArray.length;
+    const upperAvgFr = upperAvg / upperHalfArray.length;
+
+    this.sea.moveWaves(this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(upperAvgFr, 0, 1, 0, 4));
 
   }
   // for re-use
