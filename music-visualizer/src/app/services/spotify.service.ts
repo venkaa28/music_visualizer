@@ -12,8 +12,15 @@ export class SpotifyService {
 
   public analysis: {};
   public feature: {};
+  public segmentIndex: number;
+  public segmentEnd: number;
 
-  constructor(public http: HttpClient, private router: Router, private authService: AuthService) { }
+  constructor(public http: HttpClient, private router: Router, private authService: AuthService) {
+    this.analysis = {};
+    this.feature = {};
+    this.segmentIndex = 0;
+    this.segmentEnd = 0;
+  }
 
   getAuth(){
     let tempURL = "https://accounts.spotify.com/authorize?";
@@ -54,33 +61,22 @@ export class SpotifyService {
   }
 
   getSegment(trackProgress){
-    const segmentIndex = (trackProgress / this.feature['duration_ms'])
-      * (this.analysis['segments'].length);
-    return this.analysis['segments'][Math.floor(segmentIndex)];
-  }
+    if (this.segmentEnd === 0) {
+      this.segmentIndex = 0;
 
-  getBar(trackProgress){
-    const barIndex = (trackProgress / this.feature['duration_ms'])
-      * (this.analysis['bars'].length);
-    return this.analysis['bars'][Math.floor(barIndex)];
-  }
+      while (this.analysis['segments'][this.segmentIndex]['start'] * 1000 <= trackProgress) {
+        this.segmentIndex++;
+      }
 
-  getBeat(trackProgress){
-    const beatIndex = (trackProgress / this.feature['duration_ms'])
-      * (this.analysis['beats'].length);
-    return this.analysis['beats'][Math.floor(beatIndex)];
-  }
+      this.segmentEnd = this.analysis['segments'][this.segmentIndex]['start'] + this.analysis['segments'][this.segmentIndex]['duration'];
+    } else if (trackProgress >= this.segmentEnd) {
+      while (this.analysis['segments'][this.segmentIndex]['start'] * 1000 <= trackProgress) {
+        this.segmentIndex++;
+      }
 
-  getTatum(trackProgress){
-    const tatumIndex = (trackProgress / this.feature['duration_ms'])
-      * (this.analysis['tatums'].length);
-    return this.analysis['tatums'][Math.floor(tatumIndex)];
-  }
+      this.segmentEnd = this.analysis['segments'][this.segmentIndex]['start'] + this.analysis['segments'][this.segmentIndex]['duration'];
+    }
 
-  getSection(trackProgress){
-    const sectionIndex = (trackProgress / this.feature['duration_ms'])
-      * (this.analysis['sections'].length);
-    return this.analysis['sections'][Math.floor(sectionIndex)];
+    return this.analysis['segments'][this.segmentIndex];
   }
-
 }
