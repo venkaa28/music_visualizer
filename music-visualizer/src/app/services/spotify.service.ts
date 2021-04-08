@@ -12,14 +12,19 @@ export class SpotifyService {
 
   public analysis: {};
   public feature: {};
+
   public segmentIndex: number;
   public segmentEnd: number;
+  public sectionIndex: number;
+  public sectionEnd: number;
 
   constructor(public http: HttpClient, private router: Router, private authService: AuthService) {
     this.analysis = {};
     this.feature = {};
     this.segmentIndex = 0;
     this.segmentEnd = 0;
+    this.sectionIndex = 0;
+    this.sectionEnd = 0;
   }
 
   getAuth(){
@@ -78,5 +83,25 @@ export class SpotifyService {
     }
 
     return this.analysis['segments'][this.segmentIndex];
+  }
+
+  getSection(trackProgress) {
+    if (this.sectionEnd === 0) {
+      this.sectionIndex = 0;
+
+      while (this.analysis['sections'][this.sectionIndex]['start'] * 1000 <= trackProgress) {
+        this.sectionIndex++;
+      }
+
+      this.sectionEnd = this.analysis['sections'][this.sectionIndex]['start'] + this.analysis['sections'][this.sectionIndex]['duration'];
+    } else if (trackProgress >= this.sectionEnd) {
+      while (this.analysis['sections'][this.sectionIndex]['start'] * 1000 <= trackProgress) {
+        this.sectionIndex++;
+      }
+
+      this.sectionEnd = this.analysis['sections'][this.sectionIndex]['start'] + this.analysis['sections'][this.sectionIndex]['duration'];
+    }
+
+    return this.analysis['sections'][this.sectionIndex];
   }
 }
