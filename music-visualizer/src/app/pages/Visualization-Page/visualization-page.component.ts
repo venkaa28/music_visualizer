@@ -15,6 +15,7 @@ import {PlaneSceneServiceService} from "../../scenes/plane-scene-service.service
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
 import {SeaSceneService} from '../../scenes/sea-scene-service.service';
+import {WavesSceneService} from "../../scenes/waves-scene.service";
 
 
 type Dict = {[key: string]: any};
@@ -40,7 +41,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   public audio: HTMLAudioElement; // audio element of window
   public current: Music; // music object
-  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene, this.seaScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene, this.seaScene, this.waveScene]; // current scene being used
   public micUsed: boolean;
 
   private scene: any; // current scene to use
@@ -48,10 +49,10 @@ export class VisualizationPageComponent implements AfterViewInit {
   private timeout: number; // id of current timeout
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
-    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, public seaScene: SeaSceneService, private readonly notifierService: NotifierService) {
+    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, public seaScene: SeaSceneService, public waveScene: WavesSceneService, private readonly notifierService: NotifierService) {
       this.current = new Music();
       this.micUsed = false;
-      this.scene = this.scenesAvailable[3];
+      this.scene = this.scenesAvailable[4];
       this.menuTimeout = 3000;
     }
 
