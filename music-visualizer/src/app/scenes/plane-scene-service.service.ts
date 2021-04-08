@@ -1,8 +1,9 @@
 import {ElementRef, Injectable, NgZone} from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
+import {ToolsService} from '../services/tools.service';
 import {AudioService} from '../services/audio.service';
-import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {SpotifyService} from "../services/spotify.service";
 import {SpotifyPlaybackSdkService} from "../services/spotify-playback-sdk.service";
 
@@ -12,8 +13,11 @@ import {SpotifyPlaybackSdkService} from "../services/spotify-playback-sdk.servic
 })
 export class PlaneSceneServiceService {
 
+
   constructor(private ngZone: NgZone, public audioService: AudioService,
-              private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService) { }
+              private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService,
+             public tool: ToolsService) { }
+
 
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -198,30 +202,13 @@ export class PlaneSceneServiceService {
 
   sceneAnimation = () => {
 
-    //this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    //const numBins = this.audioService.analyzer.frequencyBinCount;
 
-    // const lowerHalfFrequncyData = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
-    // const lowfrequncyData = this.audioService.dataArray.slice(0, (lowerHalfFrequncyData.length / 3) - 1);
-    // const midfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3),
-    //   (lowerHalfFrequncyData.length / 3) * 2 - 1);
-    // const highfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3) * 2, lowerHalfFrequncyData.length);
+    this.tool.freqSetup();
 
-    // console.log(lowerHalfFrequncyData.length);
+    const position = this.plane.geometry.attributes.position;
 
-
-    // const lowFreqAvg = this.avg(lowfrequncyData);
-    // const midFreqAvg = this.avg(midfrequncyData);
-    // const highFreqAvg = this.avg(highfrequncyData);
-    //
-    // const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
-    // const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
-    // const highFreqDownScaled = highFreqAvg / highfrequncyData.length;
-    //
-    //
-    // const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0, 1, 0, 15);
-    // const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
-    // const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
+    // console.log(position);
+    const vector = new THREE.Vector3();
 
     if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
 
@@ -244,24 +231,7 @@ export class PlaneSceneServiceService {
 
       //const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
 
-      //const scaledPitch = this.modulate(pitchAvg, 0, , 0, 25);
-      // dummy values that were easy to get three of curr + present, replace with further implementation
-      // var lowPitch = this.modulate(this.avg(currSegment['pitches'].slice(0, 3)), 0, 3, 1, 20);
-      // var medPitch = this.modulate(this.avg(currSegment['pitches'].slice(4, 7)), 0, 3, 0, 25);
-      // var highPitch = this.modulate(this.avg(currSegment['pitches'].slice(8, 11)), 0, 3, 1, 30);
-      //
-      // lowPitch = this.modulate(lowPitch, -3, 3, 15, 100);
-      // medPitch = this.modulate(medPitch, -3, 3, 15, 100);
-      // highPitch = this.modulate(highPitch, -3, 3, 15, 100);
-
-      //const scaledConfidence = this.modulate(barConfidence+ beatConfidence+ segConfidence, 0,3, 15 , 100 );
-      //console.log(scaledConfidence);
-      //const scaledBeatConfidence = this.modulate(currBeat['confidence'], 0, 1, 15, 100);
-      //console.log(scaledBeatConfidence);
-      //const scaledTempConfidence = this.modulate(currSection['tempo_confidence'], 0, 1, 0, 25);
-      //console.log(currSection['loudness']);
-
-
+      //this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, this.plane);
       this.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar);
     }
 
@@ -278,18 +248,20 @@ export class PlaneSceneServiceService {
 
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
-    // if (this.frame++ % 10 === 0) {
-    //   this.plane.material.color.setRGB(
-    //     lowFreqAvgScalor > 0 ? 1/lowFreqAvgScalor * 40 : 255,
-    //     midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 40 : 255,
-    //     highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 40 : 255
-    //   );
-    // }
+    if (this.frame++ % 1 === 0) {
+      this.plane.material.color.setRGB(
+        this.tool.highFreqAvgScalor > 0 ? 1/this.tool.highFreqAvgScalor * 30 : 255,
+        this.tool.midFreqAvgScalor > 0 ? 1/this.tool.midFreqAvgScalor * 30 : 255,
+        this.tool.lowFreqAvgScalor > 0 ?  1/this.tool.lowFreqAvgScalor * 30 : 255
+      );
+    }
+
 
     this.plane.geometry.attributes.position.needsUpdate = true;
     this.plane.updateMatrix();
   }
   // for re-use
+
 
   wavesBuffer( waveSize, magnitude1,  magnitude2, timeScalar) {
 
@@ -329,7 +301,6 @@ export class PlaneSceneServiceService {
   max = (arr) => arr.reduce((a, b) => Math.max(a, b));
 
   min = (arr) => arr.reduce((a, b) => Math.min(a, b));
-
 
   public resize(): void {
     const width = window.innerWidth;
