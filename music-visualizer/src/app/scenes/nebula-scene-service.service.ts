@@ -79,7 +79,7 @@ export class NebulaSceneServiceService {
     // sets a perspective camera
     this.camera = new THREE.PerspectiveCamera(65, (window.innerWidth) / (window.innerHeight), 0.1, 1000);
     // lets the camera at position x, y, z
-    this.camera.position.set(0, 0, 100);
+    this.camera.position.set(0, 50, 100);
     // set the camera to look at the center of the scene
     this.camera.lookAt(this.scene.position);
     // adds the camera to the scene
@@ -105,7 +105,7 @@ export class NebulaSceneServiceService {
     // rotates the particles
 
     // rotates the camera
-    this.camera.rotation.y += 0.1;
+    this.camera.rotation.y += 0.01;
   }
 
   public animate(): void {
