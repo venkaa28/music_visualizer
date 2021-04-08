@@ -3,6 +3,7 @@ import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from '@angular/common
 import {environment} from "../../environments/environment";
 import {Router} from "@angular/router";
 import {AuthService} from "./auth.service";
+import {ToolsService} from "./tools.service";
 import {map} from "rxjs/operators";
 
 @Injectable({
@@ -19,7 +20,8 @@ export class SpotifyService {
   public sectionEnd: number;
   public avgSegmentDuration: number;
 
-  constructor(public http: HttpClient, private router: Router, private authService: AuthService) {
+  constructor(public http: HttpClient, private router: Router, private authService: AuthService,
+              private tool: ToolsService) {
     this.segmentIndex = 0;
     this.segmentEnd = 0;
     this.sectionIndex = 0;
@@ -129,6 +131,28 @@ export class SpotifyService {
       this.avgSegmentDuration = sumDuration/this.analysis['segments'].length;
       return this.avgSegmentDuration;
     }
+  }
+
+  getTimbreAvg(trackProgress){
+    const currSegment = this.getSegment(trackProgress);
+    return this.tool.absAvg(currSegment.timbre);
+  }
+
+  getScaledAvgPitch(trackProgress){
+    const currSegment = this.getSegment(trackProgress);
+    const pitchAvg = this.tool.absAvg(currSegment.pitches);
+    return  this.tool.modulate(pitchAvg, this.tool.min(currSegment.pitches), this.tool.max(currSegment.pitches), 0, 180);
+  }
+
+  getSegmentLoudness(trackProgress){
+    const currSegment = this.getSegment(trackProgress);
+    return Math.abs(currSegment.loudness_max);
+  }
+
+  getTimeScalar(trackProgress){
+    const currSegment = this.getSegment(trackProgress);
+    const segDuration = currSegment.duration;
+    return (1 - segDuration) / 100;
   }
 
 }
