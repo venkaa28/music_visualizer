@@ -166,7 +166,7 @@ export class NebulaSceneServiceService {
     */
 
     // the one particle furthest left
-    this.nebula.emitters[2].setPosition(new THREE.Vector3(-40 , lowFreqAvgScalor , midFreqAvgScalor));
+    this.nebula.emitters[2].setPosition(new THREE.Vector3(-60 , lowFreqAvgScalor , midFreqAvgScalor));
     this.nebula.emitters[2].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
 
     // the particle in the middle
@@ -174,7 +174,7 @@ export class NebulaSceneServiceService {
     this.nebula.emitters[1].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
 
     // the particle furthest right
-    this.nebula.emitters[0].setPosition(new THREE.Vector3(40 , highFreqAvgScalor , lowFreqAvgScalor));
+    this.nebula.emitters[0].setPosition(new THREE.Vector3(60 , highFreqAvgScalor , lowFreqAvgScalor));
     this.nebula.emitters[0].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
 
 
