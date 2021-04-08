@@ -14,6 +14,7 @@ import { RegisterPageComponent } from './pages/Register-Page/register-page.compo
 import { NotFoundPageComponent } from './pages/Not-Found-Page/not-found-page.component';
 import { LoggedInGuard } from './guards/logged-in.guard';
 import { AboutPageComponent } from './pages/About-Page/about-page.component';
+import {CallbackComponent} from "./pages/callback/callback.component";
 
 const routes: Routes = [
   {
@@ -55,6 +56,11 @@ const routes: Routes = [
   {
     path: '404',
     component: NotFoundPageComponent
+  },
+  {
+    path: 'Callback',
+    canActivate: [UserAuthGuard],
+    component: CallbackComponent
   },
   {
     path: '**',

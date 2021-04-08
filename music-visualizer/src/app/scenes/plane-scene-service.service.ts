@@ -1,8 +1,11 @@
-import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
+import {ElementRef, Injectable, NgZone} from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
+import {ToolsService} from '../services/tools.service';
 import {AudioService} from '../services/audio.service';
-import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import {SpotifyService} from '../services/spotify.service';
+import {SpotifyPlaybackSdkService} from '../services/spotify-playback-sdk.service';
 
 
 @Injectable({
@@ -10,7 +13,13 @@ import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 })
 export class PlaneSceneServiceService {
 
-  constructor(private ngZone: NgZone, public audioService: AudioService) { }
+
+  constructor(private ngZone: NgZone, public audioService: AudioService,
+              private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService,
+              public tool: ToolsService) {
+    this.spotifyBool = true;
+  }
+
 
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -24,13 +33,23 @@ export class PlaneSceneServiceService {
   private loader: GLTFLoader;
   private textureLoader: THREE.TextureLoader;
   private darkSky: THREE.Group;
-  private rain: THREE.Points;
   private canvasRef: ElementRef<HTMLCanvasElement>;
-  public frame: number = 0;
+  public frame = 0;
+  public trackProgress = 0;
+  private prevSegment: [];
+  private timreIndex = 0;
+  public spotifyBool: boolean;
+
 
   private frameId: number = null;
 
   public ngOnDestroy = (): void => {
+    if (this.frameId != null) {
+      cancelAnimationFrame(this.frameId);
+    }
+  }
+
+  public cancelAnimation() {
     if (this.frameId != null) {
       cancelAnimationFrame(this.frameId);
     }
@@ -83,12 +102,10 @@ export class PlaneSceneServiceService {
 
           }
         });
-        console.log(this.darkSky);
 
       });
 
       this.group.add(this.darkSky);
-      console.log(this.darkSky.position);
     });
 
     // sets a perspective camera
@@ -117,34 +134,24 @@ export class PlaneSceneServiceService {
 
     this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
     this.plane.rotation.x = -0.5 * Math.PI;
-    // this.plane.rotation.z =  Math.PI;
-    // this.plane.rotation.x = 0.25 * Math.PI;
+
     this.plane.position.set(0, -30, 400);
 
     this.secondPlane = new THREE.Mesh(secondPlaneGeometry, secondPlaneMaterial);
     this.secondPlane.rotation.x = -0.5 * Math.PI;
-    // this.plane.rotation.z =  Math.PI;
-    // this.plane.rotation.x = 0.25 * Math.PI;
+
     this.secondPlane.position.set(0, -180, 0);
 
     this.group.add(this.plane);
     this.group.add(this.secondPlane);
     // adding ambient lighting to the scene
-    this.ambLight = new THREE.AmbientLight(0xaaaaaa, 2);
+    this.ambLight = new THREE.AmbientLight(0xaaaaaa, 1);
     this.scene.add(this.ambLight);
-
-    // adding a spotlight to the scene
-    // const spotLight = new THREE.SpotLight(0xffffff);
-    // spotLight.intensity = 0.9;
-    // spotLight.position.set(-10, 40, 20);
-    // spotLight.castShadow = true;
-    // this.scene.add(spotLight);
 
     const directionalLight = new THREE.DirectionalLight(0xffeedd);
     directionalLight.position.set(0, 0, 1);
     this.scene.add(directionalLight);
 
-    // group.rotation.y += 0.005;
     this.scene.add(this.group);
   }
 
@@ -168,126 +175,82 @@ export class PlaneSceneServiceService {
       this.render();
     });
 
-    this.sceneAnimation();
+    this.spotifyPlayer.player.getCurrentState().then(state => {
+      if (!state) {
+        // console.error('User is not playing music through the Web Playback SDK');
+        // return;
+      }else {
+        this.trackProgress = state.position;
+        this.sceneAnimation();
+        this.renderer.render(this.scene, this.camera);
+      }
+    });
 
-    this.renderer.render(this.scene, this.camera);
+
+  }
+
+  // based on x1 + at = x2
+  smoothTransition(val1: number, val2: number, duration: number): number {
+    if (this.frame > duration) {
+      this.frame = 0;
+    } else {
+      this.frame++;
+    }
+
+    const delta = val2 - val1; // the change in values
+    const slope = delta / duration; // scale to duration for smoothing
+    return val1 + slope * this.frame;
   }
 
   sceneAnimation = () => {
 
-    this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    const numBins = this.audioService.analyzer.frequencyBinCount;
+    if (!this.spotifyBool){
+      this.tool.freqSetup();
 
-    const lowerHalfFrequncyData = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
-    const lowfrequncyData = this.audioService.dataArray.slice(0, (lowerHalfFrequncyData.length / 3) - 1);
-    const midfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3),
-      (lowerHalfFrequncyData.length / 3) * 2 - 1);
-    const highfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3) * 2, lowerHalfFrequncyData.length);
+      const position = this.plane.geometry.attributes.position;
 
-    // console.log(lowerHalfFrequncyData.length);
+      // console.log(position);
+      const vector = new THREE.Vector3();
+      this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
+    }else {
+      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
 
+        //const pitchAvg = this.tool.absAvg(currSegment.pitches);
+        const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+        const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
+        const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+        const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
 
-    const lowFreqAvg = this.avg(lowfrequncyData);
-    const midFreqAvg = this.avg(midfrequncyData);
-    const highFreqAvg = this.avg(highfrequncyData);
+        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+        this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
+      }
+    }
 
-    const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
-    const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
-    const highFreqDownScaled = highFreqAvg / highfrequncyData.length;
-
-
-    const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0, 1, 0, 15);
-    const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
-    const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
-
-    const position = this.plane.geometry.attributes.position;
-
-    // console.log(position);
-    const vector = new THREE.Vector3();
-    this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
-
-    // for (let i = 0,  l = position.count; i < l; i++){
-    //   vector.fromBufferAttribute(position, i);
-      // const time = window.performance.now();
-      // const scalor = this.modulate(lowerHalfFrequncyData[i % 128], 0, 255, 0, 8);
-      // const distance  = -25 * scalor + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
-      // position.setZ(i, distance);
-      // if (i <= ((position.count / 3) - 1)){
-      //   const distance = (lowFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + lowFreqAvg * 0.001);
-      //   position.setZ(i, distance);
-      // }else if (i >= position.count / 3 && i <= (position.count / 3) * 2 - 1){
-      //   const distance = (midFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + midFreqAvg * 0.001);
-      //   position.setZ(i, distance);
-      // }else {
-      //   const distance = (highFreqAvgScalor) + this.noise.noise3d(vector.x, vector.y, vector.z + highFreqAvg * 0.001);
-      //   position.setZ(i, distance);
-      // }
-    // }
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
     this.darkSky.rotation.y += 0.0005;
-    this.secondPlane.position.z += 5;
-    if (this.secondPlane.position.z === 6000){
+
+    if (this.secondPlane.position.z >= 6000){
       this.secondPlane.position.z = 0;
     }
-    //console.log(this.secondPlane.position.z);
+    // //console.log(this.secondPlane.position.z);
     this.secondPlane.geometry.attributes.position.needsUpdate = true;
     this.secondPlane.updateMatrix();
 
     // this.group.rotation.x += 0.005;
     // this.group.rotation.z += 0.005;
-    if (this.frame++ % 1 === 0) {
-      this.plane.material.color.setRGB(
-        highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 30 : 255,
-        midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 30 : 255,
-        lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 30 : 255
-      );
-    }
+    // if (this.frame++ % 1 === 0) {
+    //   this.plane.material.color.setRGB(
+    //     this.tool.highFreqAvgScalor > 0 ? 1 / this.tool.highFreqAvgScalor * 30 : 255,
+    //     this.tool.midFreqAvgScalor > 0 ? 1 / this.tool.midFreqAvgScalor * 30 : 255,
+    //     this.tool.lowFreqAvgScalor > 0 ?  1 / this.tool.lowFreqAvgScalor * 30 : 255
+    //   );
+    // }
 
 
     this.plane.geometry.attributes.position.needsUpdate = true;
-    // this.plane.geometry.computeVertexNormals();
     this.plane.updateMatrix();
-
-    }
-    // for re-use
-
-  wavesBuffer( waveSize, magnitude1,  magnitude2) {
-
-    const pos = this.plane.geometry.attributes.position;
-    const center = new THREE.Vector3(0, 0, 0);
-    const vec3 = new THREE.Vector3();
-
-    const time = window.performance.now() * .001;
-    for (let i = 0, l = pos.count; i < l; i++) {
-
-      vec3.fromBufferAttribute(pos, i);
-      vec3.sub(center);
-
-      const sampleNoise = this.noise.noise3d((vec3.x + time * 0.00001), (vec3.y + time * 0.00001), (vec3.z + time * 0.00001));
-      const z = Math.sin(vec3.length() / -(waveSize) + (time)) * (magnitude1 + (sampleNoise * magnitude1 / 2.5)) - (magnitude2);
-      pos.setZ(i, z);
-
-    }
   }
-
-
-  fractionate(val: number, minVal: number, maxVal: number) {
-    return (val - minVal) / (maxVal - minVal);
-  }
-
-  modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number) {
-    const fr = this.fractionate(val, minVal, maxVal);
-    const delta = outMax - outMin;
-    return outMin + (fr * delta);
-  }
-
-  avg = (arr) => {
-    const total = arr.reduce((sum, b) => sum + b);
-    return (total / arr.length);
-  }
-
-  max = (arr) => arr.reduce((a, b) => Math.max(a, b));
 
 
   public resize(): void {

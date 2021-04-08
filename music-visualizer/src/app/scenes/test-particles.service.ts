@@ -29,6 +29,12 @@ export class TestParticlesService {
     }
   }
 
+  public cancelAnimation() {
+    if (this.frameId != null) {
+      cancelAnimationFrame(this.frameId);
+    }
+  }
+
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     this.canvas = canvas.nativeElement;
     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 4000 );
@@ -145,11 +151,11 @@ export class TestParticlesService {
     this.particles.rotation.y += 0.005;
     this.particles.rotation.z += 0.005;
 
-    this.particles.material.color.setRGB(
-        upperAvg > 0 ?  1/upperAvg * 30 : 255,
-        overallAvg > 0 ? 1/overallAvg * 30 : 255,
-        lowerAvg > 0 ? 1/lowerAvg * 30 : 255
-      );
+    // this.particles.material.color.setRGB(
+    //     upperAvg > 0 ?  1/upperAvg * 30 : 255,
+    //     overallAvg > 0 ? 1/overallAvg * 30 : 255,
+    //     lowerAvg > 0 ? 1/lowerAvg * 30 : 255
+    //   );
   }
 
 

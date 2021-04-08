@@ -12,7 +12,7 @@ export class AudioService {
   private context: AudioContext = new AudioContext(); // The audio context
   private element: HTMLAudioElement; // The html audio element
   private micStream: MediaStream; // the media stream of the mic
-  private fileTrack: MediaElementAudioSourceNode; // Set audio source
+  private fileTrack: MediaStreamTrackAudioSourceNode; // Set audio source
   private micTrack: MediaStreamAudioSourceNode; // Set mic source
 
   // Audio nodes
@@ -67,7 +67,7 @@ export class AudioService {
   }
 
   // set the fft value of the analyser
-  setFFT(level: number) {
+  setFFT(level: number): void {
     this.fftSize = level;
     this.analyzer.fftSize = level;
 
@@ -75,34 +75,34 @@ export class AudioService {
   }
 
   // set the smoothing constant of the analyser
-  setSC(level: number) {
+  setSC(level: number): void {
     this.smoothConstant = level;
     this.analyzer.smoothingTimeConstant = level;
   }
 
   // set the gain level
-  setGain(level: number) {
+  setGain(level: number): void {
     if (typeof this.gainNode !== 'undefined') {
       this.gainNode.gain.value = level;
     }
   }
 
   // set the pan level
-  setPan(level: number) {
+  setPan(level: number): void {
     if (typeof this.panNode !== 'undefined') {
       this.panNode.pan.value = level;
     }
   }
 
   // set the time in the song
-  setTime(time: number) {
+  setTime(time: number): void {
     if (typeof this.element !== 'undefined'){
       this.element.currentTime = time;
     }
   }
 
   // return the current time in the song
-  getTime() {
+  getTime(): number {
     if (typeof this.element !== 'undefined') {
       return this.element.currentTime;
     }
@@ -111,7 +111,7 @@ export class AudioService {
   }
 
   // return how long the song is
-  getDuration() {
+  getDuration(): number {
     if (typeof this.element !== 'undefined') {
       return this.element.duration
     }
@@ -120,7 +120,7 @@ export class AudioService {
   }
 
   // return whether or not the song is over
-  isOver() {
+  isOver(): boolean {
     if (typeof this.element !== 'undefined') {
       return (this.element.currentTime === 0) ? false : (this.element.currentTime >= this.element.duration)
     }
@@ -128,14 +128,22 @@ export class AudioService {
     return false;
   }
 
+  fileLoaded() {
+    return (typeof this.element !== 'undefined');
+  }
+
   // load the mic as the audio context
   loadMic(stream: MediaStream) {
-    this.micStream = stream;
 
     // initialize the track if it doesn't exist
     if (typeof this.micTrack === 'undefined') {
-      this.micTrack = this.context.createMediaStreamSource(stream);
+      this.micStream = stream;
+      this.micTrack = this.context.createMediaStreamSource(this.micStream);
     } else {
+      this.micStream.getTracks().forEach((track) => {
+        this.micStream.removeTrack(track);
+      })
+
       this.micTrack.disconnect();
     }
 
@@ -171,7 +179,10 @@ export class AudioService {
     if (typeof this.micStream !== 'undefined') {
       this.micStream.getAudioTracks().forEach(track => {
         track.stop();
+        this.micStream.removeTrack(track);
       });
+
+      this.micTrack.disconnect();
     }
 
     // set nodes here
