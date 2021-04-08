@@ -17,6 +17,7 @@ export class SpotifyService {
   public segmentEnd: number;
   public sectionIndex: number;
   public sectionEnd: number;
+  public avgSegmentDuration: number;
 
   constructor(public http: HttpClient, private router: Router, private authService: AuthService) {
     this.segmentIndex = 0;
@@ -116,4 +117,18 @@ export class SpotifyService {
 
     return this.analysis['sections'][this.sectionIndex];
   }
+
+  getAvgSegmentDuration(){
+    if(this.avgSegmentDuration !== 0){
+      return this.avgSegmentDuration;
+    }else {
+      let sumDuration = 0;
+      for(let i = 0; i <this.analysis['segments'].length; i++){
+        sumDuration += this.analysis['segments'][i]['duration'];
+      }
+      this.avgSegmentDuration = sumDuration/this.analysis['segments'].length;
+      return this.avgSegmentDuration;
+    }
+  }
+
 }

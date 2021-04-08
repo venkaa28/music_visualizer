@@ -226,28 +226,21 @@ export class PlaneSceneServiceService {
     if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
 
       const currSegment = this.spotifyService.getSegment(this.trackProgress);
-
-      if (currSegment === this.prevSegment) {
-        this.timreIndex++;
-        this.timreIndex = this.timreIndex % 12;
-      } else {
-        this.prevSegment = currSegment;
-        this.timreIndex = 0;
-      }
-
       const currSection = this.spotifyService.getSection(this.trackProgress);
+      //const avgSegDuration = this.spotifyService.getAvgSegmentDuration();
+      const segDuration = currSegment['duration'];
+      const timeScalar = (1 - segDuration) / 100; //(1 - avgSegDuration) / 100;
 
       //console.log(currSection);
 
       //const totalAvgPitch = this.spotifyService.trackPitchAvg;
-      const pitchAvg =  this.avg(currSegment['pitches']);
+      const pitchAvg = this.avg(currSegment['pitches']);
       const scaledAvgPitch = this.modulate(pitchAvg, this.min(currSegment['pitches']), this.max(currSegment['pitches']), 0, 180);
-      const timbre = currSegment['timbre'];
+      const timbreAvg = this.avg(currSegment['timbre']);
 
       const sectionLoudness = Math.abs(currSection['loudness']);
       const segmentLoudness = Math.abs(currSegment['loudness_max']);
 
-      const loudness = segmentLoudness;
 
       //const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
 
@@ -269,7 +262,7 @@ export class PlaneSceneServiceService {
       //console.log(currSection['loudness']);
 
 
-      this.wavesBuffer( scaledAvgPitch, Math.abs(timbre[this.timreIndex]), loudness);
+      this.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar);
     }
 
     // this.group.rotation.y += 0.005;
@@ -298,13 +291,13 @@ export class PlaneSceneServiceService {
   }
   // for re-use
 
-  wavesBuffer( waveSize, magnitude1,  magnitude2) {
+  wavesBuffer( waveSize, magnitude1,  magnitude2, timeScalar) {
 
     const pos = this.plane.geometry.attributes.position;
     const center = new THREE.Vector3(0, 0, 0);
     const vec3 = new THREE.Vector3();
 
-    const time = window.performance.now() * .005;
+    const time = window.performance.now() * timeScalar;
     for (let i = 0, l = pos.count; i < l; i++) {
 
       vec3.fromBufferAttribute(pos, i);
