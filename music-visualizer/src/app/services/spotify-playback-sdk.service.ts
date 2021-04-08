@@ -20,6 +20,9 @@ export class SpotifyPlaybackSdkService {
   private deviceId: string;
   private state: Spotify.PlaybackState;
   private currTrackID: string;
+  private artist: string;
+  private title: string;
+  private album: string;
 
 
   private subjectPlayState = new BehaviorSubject<Spotify.PlaybackState>(null);
@@ -77,15 +80,19 @@ export class SpotifyPlaybackSdkService {
                                                     track_window: { current_track },
                                                   }) => {
         console.log(current_track);
-        this.spotifyService.trackName = current_track.name;
-        this.spotifyService.artistName = '';
+        this.title = current_track.name;
+        
+        this.artist = '';
         current_track.artists.forEach((value) => {
-          this.spotifyService.artistName += value.name + ' ';
+          this.artist += value.name + ', ';
         });
-        console.log(this.spotifyService.artistName);
-        console.log(this.spotifyService.trackName);
+        this.artist = this.artist.slice(0, this.artist.length - 2);
+
+        this.album = current_track.album.images[0].url;
+
         console.log('Currently Playing', current_track.uri);
         this.currTrackID = current_track.id;
+
         try {
           this.spotifyService.getTrackAnalysisData(this.currTrackID);
           this.spotifyService.getTrackFeatureData(this.currTrackID);
@@ -96,6 +103,16 @@ export class SpotifyPlaybackSdkService {
 
         this.spotifyService.segmentEnd = 0;
         this.spotifyService.sectionEnd = 0;
+
+        var htmlAlbum = (document.getElementById('album') as HTMLMediaElement)
+        htmlAlbum.src = this.album;
+        htmlAlbum.style.width = '20%';
+        htmlAlbum.style.height = '20%';
+        htmlAlbum.style.margin = '0';
+
+        document.getElementById('song-title').textContent = this.title;
+        document.getElementById('song-subtitle').textContent = this.artist;
+        
         scene.animate();
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });

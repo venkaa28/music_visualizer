@@ -146,10 +146,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     if(this.authService.getUser().spotifyAPIKey == null) {
       await this.router.navigate(['../ProfilePage']);
     }
-
     this.scene.createScene(this.rendererCanvas);
     await this.spotifyPlaybackService.addSpotifyPlaybackSdk(this.scene);
     this.spotifyUsed = true;
+
     this.toggleUploadMenu();
   }
 
@@ -351,10 +351,8 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     if (songBox.style.width === '0%') {
       songBox.style.width = '60%';
-      canvas.style.filter = "blur(4px)";
       songBox.style.opacity = '1';
     } else if (songBox.style.width === '60%'){
-      canvas.style.filter = "blur(0)";
       songBox.style.width = '0%';
       songBox.style.opacity = '0';
     }

@@ -12,8 +12,6 @@ export class SpotifyService {
 
   public analysis: {};
   public feature: {};
-  public trackName: string;
-  public artistName: string;
 
   public segmentIndex: number;
   public segmentEnd: number;

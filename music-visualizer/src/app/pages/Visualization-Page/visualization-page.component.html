@@ -23,30 +23,45 @@
     </div>
   </div>
 
-  <div id="upload-menu" style="width: 60%;">
-    <!--File loader-->
-    <div class="upload-item">
-      <p>Browse your computer for an audio file</p>
-      <label id="load-label" for="load-file"><img src="../../../assets/icons/folder.svg"></label><br>
-      <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*" capture>
-    </div>
+  <div id="upload-menu" class="glass-pane" style="width: 60%;">
+    <p style="font-size: x-large;">Select an input source to visualize:</p>
+    <div id="upload-options">
+      <!--File loader-->
+      <div class="upload-item">
+        <div class="select-button" style="background-color: rgba(255, 255, 0, 1);">
+          <label class="select-img" id="load-label" for="load-file">
+            <img class="select-img" src="../../../assets/icons/folder.svg">
+          </label>
+          <br>
+        </div>
 
-    <div class="upload-item">
-      <p>Use the microphone</p>
-      <a id="load-mic" (click)="loadMic()">
-        <img src="../../../assets/icons/mic.svg">
-      </a>
-    </div>
+        <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*" capture>
 
-    <div class="upload-item">
-      <p>Play music from your Spotify account</p>
-      <a id="load-spotify" (click)="loadSpotify()">
-        <img src="../../../assets/icons/spotify.svg">
-      </a>
+        <p class="select-text">Local files</p>
+      </div>
+
+      <div class="upload-item">
+        <div class="select-button" style="background-color: rgba(127, 127, 127, 1);">
+          <a id="load-mic" (click)="loadMic()" capture>
+            <img class="select-img" src="../../../assets/icons/mic.svg">
+          </a>
+        </div>
+
+        <p class="select-text">Microphone</p>
+      </div>
+
+      <div class="upload-item">
+        <div class="select-button" style="background-color: rgba(0, 255, 0, 1);">
+          <a id="load-spotify" (click)="loadSpotify()">
+            <img class="select-img" src="../../../assets/icons/spotify.svg">
+          </a>
+        </div>
+        <p class="select-text">Connect Spotify</p>
+      </div>
     </div>
   </div>
 
-  <div id="edit-menu" style="width: 0%; opacity: 0;">
+  <div id="edit-menu" class="glass-pane" style="width: 0%; opacity: 0;">
     <!--Slider controls: volume, pan-->
           <div id="slider">
               <p>Settings</p>
