@@ -14,8 +14,16 @@ import { Sky } from './textures/Sky.js';
   providedIn: 'root'
 })
 export class WavesSceneService {
+  private sky: any;
 
-  constructor(private ngZone: NgZone, public audioService: AudioService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService) {
+    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas, // grabs the canvas element
+      alpha: true,    // transparent background
+      antialias: true // smooth edges
+    });
+  }
   private water: Water;
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -29,23 +37,22 @@ export class WavesSceneService {
   private textureLoader: THREE.TextureLoader;
   private canvasRef: ElementRef<HTMLCanvasElement>;
   public frame: number = 0;
+  private pmremGenerator: THREE.PMREMGenerator;
 
   private frameId: number = null;
-
+  public parameters = {
+    inclination: 0.49,
+    azimuth: 0.0
+  };
   public ngOnDestroy = (): void => {
     if (this.frameId != null) {
       cancelAnimationFrame(this.frameId);
     }
   }
 
+
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     this.canvas = canvas.nativeElement;
-
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas, // grabs the canvas element
-      alpha: true,    // transparent background
-      antialias: true // smooth edges
-    });
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -92,34 +99,16 @@ export class WavesSceneService {
     skyUniforms[ 'mieCoefficient' ].value = 0.005;
     skyUniforms[ 'mieDirectionalG' ].value = 0.8;
 
-    const parameters = {
-      inclination: 0.49,
-      azimuth: 0.205
-    };
 
-    const pmremGenerator = new THREE.PMREMGenerator( this.renderer );
 
-    function updateSun(sun, water, scene) {
 
-      const theta = Math.PI * ( parameters.inclination - 0.5 );
-      const phi = 2 * Math.PI * ( parameters.azimuth - 0.5 );
-        sun.x = Math.cos(phi);
-        sun.y = Math.sin(phi) * Math.sin(theta);
-        sun.z = Math.sin(phi) * Math.cos(theta);
-        //
-         sky.material.uniforms['sunPosition'].value.copy(sun);
-         water.material.uniforms['sunDirection'].value.copy(sun).normalize();
-
-      scene.environment = pmremGenerator.fromScene( sky ).texture;
-
-    }
-    updateSun(this.sun, this.water, this.scene);
+    this.updateSun(this.sun, this.water, this.scene);
 
     const geometry = new THREE.BoxGeometry( 30, 30, 30 );
     const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
 
     this.mesh = new THREE.Mesh( geometry, material );
-    this.scene.add( this.mesh );
+    // this.scene.add( this.mesh );
 
     const controls = new OrbitControls( this.camera, this.renderer.domElement );
     controls.maxPolarAngle = Math.PI * 0.495;
@@ -130,22 +119,6 @@ export class WavesSceneService {
 
 //     let stats = new Stats();
 //     this.scene.appendChild( stats.dom );
-
-    // GUI
-
-    const gui = new GUI();
-
-    const folderSky = gui.addFolder( 'Sky' );
-    folderSky.add( parameters, 'inclination', 0, 0.5, 0.0001 ).onChange( updateSun );
-    folderSky.add( parameters, 'azimuth', 0, 1, 0.0001 ).onChange( updateSun );
-    folderSky.open();
-
-    const waterUniforms = this.water.material.uniforms;
-
-    const folderWater = gui.addFolder( 'Water' );
-    folderWater.add( waterUniforms.distortionScale, 'value', 0, 8, 0.1 ).name( 'distortionScale' );
-    folderWater.add( waterUniforms.size, 'value', 0.1, 10, 0.1 ).name( 'size' );
-    folderWater.open();
   }
 
   public animate(): void {
@@ -206,7 +179,7 @@ export class WavesSceneService {
     const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
     const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
 
-    const position = this.mesh.geometry.attributes.position;
+    const position = this.water.geometry.attributes.position;
 
     console.log(position);
     const vector = new THREE.Vector3();
@@ -240,7 +213,9 @@ export class WavesSceneService {
         lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 30 : 255
       );
     }
-
+      const songProgress = this.audioService.getTime() / this.audioService.getDuration();
+      this.parameters.azimuth = songProgress;
+      this.updateSun(this.sun, this.water, this.scene);
 
      this.mesh.geometry.attributes.position.needsUpdate = true;
       this.mesh.geometry.computeVertexNormals();
@@ -296,5 +271,19 @@ export class WavesSceneService {
 
     this.renderer.setSize(width, height);
     this.createScene(this.canvasRef);
+  }
+  public updateSun(sun, water, scene) {
+
+    const theta = Math.PI * ( this.parameters.inclination - 0.5 );
+    const phi = 2 * Math.PI * ( this.parameters.azimuth - 0.5 );
+    sun.x = Math.cos(phi);
+    sun.y = Math.sin(phi) * Math.sin(theta);
+    sun.z = Math.sin(phi) * Math.cos(theta);
+    //
+    this.sky.material.uniforms['sunPosition'].value.copy(sun);
+    water.material.uniforms['sunDirection'].value.copy(sun).normalize();
+
+    scene.environment = this.pmremGenerator.fromScene( this.sky ).texture;
+
   }
 }
