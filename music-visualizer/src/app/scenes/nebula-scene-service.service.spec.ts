@@ -1,19 +1,20 @@
 import { TestBed } from '@angular/core/testing';
 
-import { PlaneSceneServiceService } from './plane-scene-service.service';
+import { TemplateSceneServiceService } from './template-scene-service.service';
 import {RouterTestingModule} from "@angular/router/testing";
 import {ReactiveFormsModule} from "@angular/forms";
 import {AngularFireModule} from "@angular/fire";
 import {firebaseConfig} from "../firebase";
 import {NotifierModule} from "angular-notifier";
 
-describe('PlaneSceneServiceService', () => {
-  let service: PlaneSceneServiceService;
+describe('TemplateSceneServiceService', () => {
+  let service: TemplateSceneServiceService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
+        ReactiveFormsModule,
         // BrowserModule,
         AngularFireModule.initializeApp(firebaseConfig),
         // AngularFireDatabaseModule,
@@ -22,7 +23,7 @@ describe('PlaneSceneServiceService', () => {
         NotifierModule
       ],
     });
-    service = TestBed.inject(PlaneSceneServiceService);
+    service = TestBed.inject(TemplateSceneServiceService);
   });
 
   it('should be created', () => {
@@ -50,6 +51,10 @@ describe('PlaneSceneServiceService', () => {
   });
 
   it('test resize()', () => {
+    expect(true).toBe(false);
+  });
+
+  it('test makeRoughBall()', () => {
     expect(true).toBe(false);
   });
 });
