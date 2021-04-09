@@ -10,10 +10,10 @@ import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import {SpotifyService} from '../services/spotify.service';
 import {SpotifyPlaybackSdkService} from '../services/spotify-playback-sdk.service';
-import scene3 from './sixo.json';
+import scene3 from './rainbow.json';
 import { range } from 'rxjs';
 import { ThisReceiver } from '@angular/compiler';
-import { max } from 'rxjs/operators';
+import { max, min } from 'rxjs/operators';
 
 //class Rate {
 //  constructor(number1: number, number2: number) {
@@ -43,6 +43,8 @@ export class NebulaSceneServiceService {
   public spotifyBool: boolean;
   public trackProgress = 0;
   private lastProgress = 0; // saved last progress so we only update when the segment changes
+  private dropFrames = 0;
+
 
   private vectors: Array<Vector3>; // vector for positions of all 6 orbs
 
@@ -71,10 +73,10 @@ export class NebulaSceneServiceService {
       console.log(loaded);
       const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
       this.nebula = loaded.addRenderer(nebulaRenderer);
-      this.vectors = new Array<Vector3>(6);
+      this.vectors = new Array<Vector3>(12);
 
       // Set up the vectors for the scene
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 12; i++) {
         this.vectors[i] = this.nebula.emitters[i].position;
       }
     });
@@ -169,10 +171,11 @@ export class NebulaSceneServiceService {
         
         if (this.lastProgress !== this.trackProgress) {
           this.lastProgress = this.trackProgress;
-          const curPitches = this.spotifyService.getSegment(this.trackProgress).pitches;
+          const curPitches = this.spotifyService.getSegment(this.trackProgress-800).pitches;
 
-          for (let i = 0; i < 6; i++) {
-            let loopVal = curPitches[2 * i] + curPitches[2 * i + 1]; // go by 2's because it's close enough
+          for (let i = 0; i < 12; i++) {
+            //let loopVal = curPitches[2 * i] + curPitches[2 * i + 1]; // go by 2's because it's close enough
+            let loopVal = curPitches[i];
             //if (loopVal > 0.99) {
             //  const json = {
             //    particlesMin: 1,
@@ -184,19 +187,25 @@ export class NebulaSceneServiceService {
             //  this.nebula.emitters[i].setRate(Rate.fromJSON(json));
             //} else {
               //this.vectors[i].setY((1 - curPitches[i]) * 20);
+
+            // keep framerate from dropping too much with too many particles, 
+            let perSecond = 1;
+
+            if (loopVal > 0.4) {
+              perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.01);
+            }
             const json = {
               particlesMin: 1,
               particlesMax: 1,
-              perSecondMin: ((2 - loopVal) ** 2) / 12,
-              perSecondMax: ((2 - loopVal) ** 2) / 12,
+              perSecondMin: perSecond,
+              perSecondMax: perSecond,
             };
             this.nebula.emitters[i].setRate(Rate.fromJSON(json));
+            
             //}
             //this.nebula.emitters[i].setPosition(this.vectors[i]);
           }
         }
-
-
       }
     }
     this.nebula.update();
