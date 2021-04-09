@@ -3,6 +3,7 @@ import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 // import {DEFAULT_EMITTER_RATE} from 'three-nebula/src/emitter/constants.js';
 import System from 'three-nebula';
 import * as THREE from 'three';
+import { Vector3, setY } from 'three';
 import Nebula, { SpriteRenderer, Alpha } from 'three-nebula';
 import {ToolsService} from '../services/tools.service'
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
@@ -11,6 +12,7 @@ import {SpotifyService} from '../services/spotify.service';
 import {SpotifyPlaybackSdkService} from '../services/spotify-playback-sdk.service';
 import scene3 from './rainbow.json';
 import { range } from 'rxjs';
+import { ThisReceiver } from '@angular/compiler';
 
 //class Rate {
 //  constructor(number1: number, number2: number) {
@@ -40,6 +42,8 @@ export class NebulaSceneServiceService {
   public spotifyBool: boolean;
   public trackProgress = 0;
 
+  private vectors: Array<Vector3>; // vector for positions of all 12 orbs
+
   private targetPool: any;
   //public DEFAULT_EMITTER_RATE = new Rate(1, 0.1);
 
@@ -65,6 +69,12 @@ export class NebulaSceneServiceService {
       console.log(loaded);
       const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
       this.nebula = loaded.addRenderer(nebulaRenderer);
+      this.vectors = new Array<Vector3>(12);
+
+      // Set up the vectors for the scene
+      for (let i = 0; i < 12; i++) {
+        this.vectors[i] = this.nebula.emitters[i].position;
+      }
     });
 
     this.renderer = new THREE.WebGLRenderer({
@@ -84,7 +94,7 @@ export class NebulaSceneServiceService {
     // sets a perspective camera
     this.camera = new THREE.PerspectiveCamera(65, (window.innerWidth) / (window.innerHeight), 0.1, 1000);
     // lets the camera at position x, y, z
-    this.camera.position.set(0, 50, 100);
+    this.camera.position.set(0, 80, 100);
     // set the camera to look at the center of the scene
     this.camera.lookAt(this.scene.position);
     // adds the camera to the scene
@@ -93,8 +103,7 @@ export class NebulaSceneServiceService {
     // rotates the camera
     this.camera.rotation.y += 0.01;
 
-
-    // 
+    
 
   }
 
@@ -153,7 +162,7 @@ export class NebulaSceneServiceService {
       //this.nebula.emitters[0].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
 
     } else {
-      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined' && this.vectors[1] !== 'undefined') {
 
         //const pitchAvg = this.tool.absAvg(currSegment.pitches);
         
@@ -167,12 +176,12 @@ export class NebulaSceneServiceService {
         //this.nebula.emitters[0].behaviours[0].alphaA.b = curPitches[1];
 
         for (let i = 0; i < 12; i++) {
-          let oldPos = this.nebula.emitters[i].position;
-          if (curPitches[i] < 0.2) {
-            this.nebula.emitters[i].setPosition(new THREE.Vector3(oldPos.x, 0, oldPos.z));
+          if (curPitches[i] > 0.99) {
+            this.vectors[i].setY(0);
           } else {
-            this.nebula.emitters[i].setPosition(new THREE.Vector3(oldPos.x, (1-curPitches[i])*40, oldPos.z));
+            this.vectors[i].setY((1 - curPitches[i]) * 20);
           }
+          this.nebula.emitters[i].setPosition(this.vectors[i]);
         }
       }
     }
