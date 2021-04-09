@@ -32,7 +32,6 @@ export class NebulaSceneServiceService {
   private ambLight!: THREE.AmbientLight;
   private noise = new SimplexNoise();
   private nebula!: any;
-  private composer!: THREE.Composer;
   private frameId: number = null;
   public frame = 0;
   private spotifyBool: boolean;
