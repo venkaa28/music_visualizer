@@ -17,7 +17,6 @@ export class PlaneSceneServiceService {
   constructor(private ngZone: NgZone, public audioService: AudioService,
               private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService,
               public tool: ToolsService) {
-    this.spotifyBool = true;
   }
 
 
@@ -175,17 +174,21 @@ export class PlaneSceneServiceService {
       this.render();
     });
 
-    this.spotifyPlayer.player.getCurrentState().then(state => {
-      if (!state) {
-        // console.error('User is not playing music through the Web Playback SDK');
-        // return;
-      }else {
-        this.trackProgress = state.position;
-        this.sceneAnimation();
-        this.renderer.render(this.scene, this.camera);
-      }
-    });
-
+    if(this.spotifyBool === true) {
+      this.spotifyPlayer.player.getCurrentState().then(state => {
+        if (!state) {
+          // console.error('User is not playing music through the Web Playback SDK');
+          // return;
+        } else {
+          this.trackProgress = state.position;
+          this.sceneAnimation();
+          this.renderer.render(this.scene, this.camera);
+        }
+      });
+    }else {
+      this.sceneAnimation();
+      this.renderer.render(this.scene, this.camera);
+    }
 
   }
 

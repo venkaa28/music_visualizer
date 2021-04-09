@@ -103,6 +103,7 @@ input[type=range] {
   margin-left: 20%;
   vertical-align: middle;
   padding: 3%;
+  border: 5px black solid;
 }
 
 .select-img {
