@@ -25,6 +25,7 @@ export class SeaSceneService {
   private sea;
   private airplane;
   private sky;
+  private pivot;
   public frame = 0;
 
   private height: any;
@@ -139,14 +140,14 @@ export class SeaSceneService {
     // A hemisphere light is a gradient colored light;
     // the first parameter is the sky color, the second parameter is the ground color,
     // the third parameter is the intensity of the light
-    hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, .9)
+    hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9);
 
     // A directional light shines from a specific direction.
     // It acts like the sun, that means that all the rays produced are parallel.
     shadowLight = new THREE.DirectionalLight(0xffffff, .9);
 
     // Set the direction of the light
-    shadowLight.position.set(150, 350, 350);
+    shadowLight.position.set(150, 100, 350);
 
     // Allow shadow casting
     shadowLight.castShadow = true;
@@ -174,14 +175,34 @@ export class SeaSceneService {
 
     // the function to create the sea
     const Sea = function(){
-      const geom = new THREE.CylinderGeometry(600, 600, 800, 40, 10);
-      geom.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+      // const geom = new THREE.CylinderGeometry(60, 60, 80, 40, 10);
+      const geom = new THREE.SphereGeometry(50, 50, 50);
+      // const geom = new THREE.IcosahedronGeometry(50, 50);
+
+      // const geom = new THREE.IcosahedronGeometry(50, 10);
+      const lambertMaterial = new THREE.MeshLambertMaterial({
+        color: Colors.blue,
+        transparent: true,
+        opacity: 0.9,
+        // wireframe: true
+      });
+
+      // this.ball = new THREE.Mesh(geom, lambertMaterial);
+      // const lambertMaterial = new THREE.MeshLambertMaterial({
+      //   color: 0xff00ee,
+      //   wireframe: true
+      // });
+
+      // const geom = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
+      // geom.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
 
       const position = geom.attributes.position;
       const l = position.count;
       const v = new THREE.Vector3();
 
       this.waves = [];
+
+      this.noise = new SimplexNoise();
 
       for (let i = 0; i < l; i++){
         // var v = geom.vertices[i];
@@ -190,59 +211,42 @@ export class SeaSceneService {
         this.waves.push({y: v.y,
           x: v.x,
           z: v.z,
-          ang: Math.random() * Math.PI * 2,
-          amp: 5 + Math.random() * 15,
-          speed: 0.016 + Math.random() * 0.032
         });
       };
-      const mat = new THREE.MeshPhongMaterial({
-        color: Colors.blue,
-        transparent: true,
-        opacity: .8,
-      });
+      // const mat = new THREE.MeshPhongMaterial({
+      //   color: Colors.blue,
+      //   transparent: true,
+      //   opacity: .8,
+      // });
 
-      this.mesh = new THREE.Mesh(geom, mat);
+      this.mesh = new THREE.Mesh(geom, lambertMaterial);
       this.mesh.receiveShadow = true;
 
     };
 
     Sea.prototype.moveWaves = function(bassFr: any, treFr: any){
+      // console.log(bassFr, treFr);
       const position = this.mesh.geometry.attributes.position;
       const vector = new THREE.Vector3();
-      const noise = new SimplexNoise();
       for (let i = 0, l = position.count; i < l; i++) {
         vector.fromBufferAttribute(position, i);
         // console.log(vector);
-        // const offset = this.mesh.geometry.parameters.radius;
-        const offset = 600;
+        const offset = this.mesh.geometry.parameters.radius;
         // console.log(offset);
-        const amp = 50;
+        const amp = 3;
+
         const time = window.performance.now();
+        // console.log(time);
         vector.normalize();
         // console.log(vector);
         const rf = 0.00001;
-        const distance = (offset + bassFr) + noise.noise3d((vector.x + time * rf * 5), (vector.y + time * rf * 6),
+        const distance = (offset + bassFr) + this.noise.noise3d((vector.x + time * rf * 5), (vector.y + time * rf * 6),
           (vector.z + time * rf * 7)) * amp * treFr;
-        // console.log(distance);
         vector.multiplyScalar(distance);
-        // console.log(vector);
         position.setX(i, vector.x);
         position.setY(i, vector.y);
-        // position.setZ(i, vector.z);
-        // mesh.geometry.attributes.position.needsUpdate = true;
-        // mesh.geometry.computeVertexNormals();
-        // mesh.geometry.computeFaceNormals();
-        // mesh.updateMatrix();
+        position.setZ(i, vector.z);
       }
-      // mesh.geometry.vertices.forEach(function (vertex, i) {
-      //     let offset = mesh.geometry.parameters.radius;
-      //     let amp = 7;
-      //     let time = window.performance.now();
-      //     vertex.normalize();
-      //     let rf = 0.00001;
-      //     let distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
-      //     vertex.multiplyScalar(distance);
-      // });
       this.mesh.geometry.attributes.position.needsUpdate = true;
       this.mesh.geometry.computeVertexNormals();
       this.mesh.geometry.computeFaceNormals();
@@ -253,7 +257,7 @@ export class SeaSceneService {
     // create the sea
     this.sea = new Sea();
     // push it a little bit at the bottom of the scene
-    this.sea.mesh.position.y = -600;
+    this.sea.mesh.position.y = 100;
     // add the mesh of the sea to the scene
     this.scene.add(this.sea.mesh);
 
@@ -307,7 +311,10 @@ export class SeaSceneService {
       this.mesh = new THREE.Object3D();
 
       // choose a number of clouds to be scattered in the sky
-      this.nClouds = 20;
+      this.nClouds = 15;
+      this.clouds_buf = [];
+      this.clouds_amp_buf = [];
+      this.clouds_phase_buf = [];
 
       // To distribute the clouds consistently,
       // we need to place them according to a uniform angle
@@ -320,7 +327,7 @@ export class SeaSceneService {
         // set the rotation and the position of each cloud;
         // for that we use a bit of trigonometry
         const a = stepAngle * i; // this is the final angle of the cloud
-        const h = 750 + Math.random() * 200; // this is the distance between the center of the axis and the cloud itself
+        const h = 330 + Math.random() * 50; // this is the distance between the center of the axis and the cloud itself
 
         // Trigonometry!!! I hope you remember what you've learned in Math :)
         // in case you don't:
@@ -339,14 +346,31 @@ export class SeaSceneService {
         const s = 1 + Math.random() * 2;
         c.mesh.scale.set(s, s, s);
 
+        const pivot = new THREE.Object3D();
+        pivot.position.set(0, 100, 0);
+        pivot.add(c.mesh);
+
+        this.clouds_buf.push(pivot);
+        this.clouds_amp_buf.push(Math.random());
+        this.clouds_phase_buf.push(Math.random() * Math.PI * 2);
+
         // do not forget to add the mesh of each cloud in the scene
-        this.mesh.add(c.mesh);
+        this.mesh.add(pivot);
       }
     }
 
+    Sky.prototype.moveClouds = function(angle){
+      const time = window.performance.now() * .001;
+      for (let i = 0; i < this.nClouds; i++) {
+        this.clouds_buf[i].rotation.z += angle * this.clouds_amp_buf[i];
+        // this.clouds_buf[i].position.z = -400 - 200 * Math.sin(this.clouds_phase_buf[i]);
+        // this.clouds_phase_buf[i] += 0.01 * 1 / this.nClouds * Math.PI * 2;
+      }
+    };
+
     // create the sky
     this.sky = new Sky();
-    this.sky.mesh.position.y = -600;
+    this.sky.mesh.position.y = 100;
     this.scene.add(this.sky.mesh);
 
 
@@ -522,16 +546,22 @@ export class SeaSceneService {
 
     // create the plane
     this.airplane = new AirPlane();
-    this.airplane.mesh.scale.set(.25,.25,.25);
-    this.airplane.mesh.position.y = 100;
-    this.scene.add(this.airplane.mesh);
+    this.airplane.mesh.scale.set(.25, .25, .25);
+
+
+    this.pivot = new THREE.Object3D();
+    this.pivot.position.set(0, 100, 0);
+    this.pivot.add(this.airplane.mesh);
+    this.airplane.mesh.position.y = 95;
+
+    this.scene.add(this.pivot);
 
 
     // create the lights
     // A hemisphere light is a gradient colored light;
     // the first parameter is the sky color, the second parameter is the ground color,
     // the third parameter is the intensity of the light
-    this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa,0x000000, .9)
+    this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9)
 
     // A directional light shines from a specific direction.
     // It acts like the sun, that means that all the rays produced are parallel.
@@ -559,6 +589,14 @@ export class SeaSceneService {
     // to activate the lights, just add them to the scene
     this.scene.add(hemisphereLight);
     this.scene.add(shadowLight);
+
+    // // spotlight for the sea
+    // const spotLight = new THREE.SpotLight(0xffffff);
+    // spotLight.intensity = 0.9;
+    // spotLight.position.set(-10, 40, 20);
+    // spotLight.lookAt(this.sea.mesh.position);
+    // spotLight.castShadow = true;
+    // this.scene.add(spotLight);
 
   }
 
@@ -591,8 +629,12 @@ export class SeaSceneService {
 
 
     this.airplane.propeller.rotation.x += 0.3;
+    this.airplane.mesh.rotation.x += -0.1;
+    this.pivot.rotation.z -= 0.01;
     this.sea.mesh.rotation.z += .005;
+    this.sea.mesh.rotation.y += .005;
     this.sky.mesh.rotation.z += .01;
+    // this.sky.moveClouds(0.01);
     this.airplane.pilot.updateHairs();
 
 
@@ -618,27 +660,6 @@ export class SeaSceneService {
 
   }
   // for re-use
-
-  wavesBuffer(waveSize, magnitude1, magnitude2) {
-
-    // const pos = this.cylinder.geometry.attributes.position;
-    const center = new THREE.Vector3(0, 0, 0);
-    const vec3 = new THREE.Vector3();
-
-    const time = window.performance.now() * .001;
-    // for (let i = 0, l = pos.count; i < l; i++) {
-    //
-    //   vec3.fromBufferAttribute(pos, i);
-    //   vec3.sub(center);
-    //
-    //   const sampleNoise = this.noise.noise3d((vec3.x + time * 0.00001), (vec3.y + time * 0.00001), (vec3.z + time * 0.00001));
-    //   const z = Math.sin(vec3.length() / -(waveSize) + (time)) * (magnitude1 + (sampleNoise * magnitude1 / 2.5)) - (magnitude2);
-    //   pos.setZ(i, z);
-    //
-    // }
-    // this.cylinder.geometry.scale(waveSize, magnitude1, magnitude2);
-    // this.cylinder.translateX(10);
-  }
 
   fractionate(val: number, minVal: number, maxVal: number) {
     return (val - minVal) / (maxVal - minVal);
