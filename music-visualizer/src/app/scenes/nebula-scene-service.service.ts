@@ -7,6 +7,8 @@ import Nebula, { SpriteRenderer } from 'three-nebula';
 import {ToolsService} from '../services/tools.service'
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
+import {SpotifyService} from '../services/spotify.service';
+import {SpotifyPlaybackSdkService} from '../services/spotify-playback-sdk.service';
 import scene3 from './selfNebula.json';
 import scene4 from './selfNebula.json';
 
@@ -22,7 +24,8 @@ import scene4 from './selfNebula.json';
 })
 export class NebulaSceneServiceService {
 
-  constructor(private ngZone: NgZone, public audioService: AudioService, private tool: ToolsService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService, private tool: ToolsService, 
+    private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService) { }
 
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -34,7 +37,8 @@ export class NebulaSceneServiceService {
   private nebula!: any;
   private frameId: number = null;
   public frame = 0;
-  private spotifyBool: boolean;
+  public spotifyBool: boolean;
+  public trackProgress = 0;
 
   private targetPool: any;
   //public DEFAULT_EMITTER_RATE = new Rate(1, 0.1);
@@ -129,15 +133,56 @@ export class NebulaSceneServiceService {
       this.render(nebula);
     });
 
-    this.sceneAnimation();
-
-    this.renderer.render(this.scene, this.camera);
+    if(this.spotifyBool === true) {
+      this.spotifyPlayer.player.getCurrentState().then(state => {
+        if (!state) {
+          // console.error('User is not playing music through the Web Playback SDK');
+          // return;
+        } else {
+          this.trackProgress = state.position;
+          this.sceneAnimation();
+          this.renderer.render(this.scene, this.camera);
+        }
+      });
+    }else {
+      this.sceneAnimation();
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   sceneAnimation = () => {
 
-    this.tool.freqSetup();
+    if (!this.spotifyBool){
+      this.tool.freqSetup();
 
+      // the one particle furthest left
+      this.nebula.emitters[2].setPosition(new THREE.Vector3(-60 , this.tool.lowFreqAvgScalor , this.tool.midFreqAvgScalor));
+      //this.nebula.emitters[2].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
+
+      // the particle in the middle
+      this.nebula.emitters[1].setPosition(new THREE.Vector3(0, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor));
+      //this.nebula.emitters[1].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
+
+      // the particle furthest right
+      this.nebula.emitters[0].setPosition(new THREE.Vector3(60 , this.tool.highFreqAvgScalor , this.tool.lowFreqAvgScalor));
+      //this.nebula.emitters[0].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
+
+    } else {
+      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+
+        //const pitchAvg = this.tool.absAvg(currSegment.pitches);
+        const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+        const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
+        const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+        const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+
+        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+        this.nebula.emitters[2].setPosition(new THREE.Vector3(-60, segmentLoudness*100, 0));
+
+
+      
+      }
+    }
     // console.log(this.nebula);
     // console.log(this.nebula.emitters[0]);
 
@@ -147,18 +192,7 @@ export class NebulaSceneServiceService {
     this.particleEmission(this.nebula.emitters[2], highFreqDownScaled);
     */
 
-    // the one particle furthest left
-    this.nebula.emitters[2].setPosition(new THREE.Vector3(-60 , this.tool.lowFreqAvgScalor , this.tool.midFreqAvgScalor));
-    //this.nebula.emitters[2].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
-
-    // the particle in the middle
-    this.nebula.emitters[1].setPosition(new THREE.Vector3(0, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor));
-    //this.nebula.emitters[1].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
-
-    // the particle furthest right
-    this.nebula.emitters[0].setPosition(new THREE.Vector3(60 , this.tool.highFreqAvgScalor , this.tool.lowFreqAvgScalor));
-    //this.nebula.emitters[0].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
-
+    
 
     this.nebula.update();
   }
