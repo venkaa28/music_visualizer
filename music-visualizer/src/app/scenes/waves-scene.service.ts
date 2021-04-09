@@ -42,8 +42,13 @@ export class WavesSceneService {
   }
 
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
-    this.container = document.getElementById('container');
-    this.renderer = new THREE.WebGLRenderer();
+    this.canvas = canvas.nativeElement;
+
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas, // grabs the canvas element
+      alpha: true,    // transparent background
+      antialias: true // smooth edges
+    });
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -52,7 +57,9 @@ export class WavesSceneService {
     this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 1, 20000);
     this.camera.position.set(30, 30, 100);
 
-    // this.scene.add(this.camera);
+    this.camera.lookAt(0, 0, 0);
+    // adds the camera to the scene
+    this.scene.add(this.camera);
 
     const waterGeometry = new THREE.PlaneGeometry(10000, 10000);
      this.water = new Water(
@@ -206,7 +213,7 @@ export class WavesSceneService {
 
     // console.log(position);
     // const vector = new THREE.Vector3();
-    this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
+    // this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
 
     // for (let i = 0,  l = position.count; i < l; i++){
     //   vector.fromBufferAttribute(position, i);
@@ -238,9 +245,9 @@ export class WavesSceneService {
     }
 
 
-    this.plane.geometry.attributes.position.needsUpdate = true;
-    // this.plane.geometry.computeVertexNormals();
-    this.plane.updateMatrix();
+    // this.plane.geometry.attributes.position.needsUpdate = true;
+    // // this.plane.geometry.computeVertexNormals();
+    // this.plane.updateMatrix();
 
   }
   // for re-use
