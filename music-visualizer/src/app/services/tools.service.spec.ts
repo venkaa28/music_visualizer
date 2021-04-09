@@ -35,13 +35,18 @@ describe('ToolsService', () => {
     expect(service.getIndicesOfMax(testArray, 0)).toEqual([]);
   });
 
-  it('test getIndicesOfMax(): array with one element', () => {
-    let testArray = [1];
-    expect(service.getIndicesOfMax(testArray, 1)).toEqual([0]);
+  it('test getIndicesOfMax(): two element array', () => {
+    let testArray = [1, 5];
+    expect(service.getIndicesOfMax(testArray, 1)).toEqual([1]);
+  });
+
+  it('test getIndicesOfMax(): three element array', () => {
+    let testArray = [1, 5, 7];
+    expect(service.getIndicesOfMax(testArray, 2)).toEqual([2, 1]);
   });
 
   it('test getIndicesOfMax(): many element array', () => {
-    let testArray = [1, 5, 7];
-    expect(service.getIndicesOfMax(testArray, 2)).toEqual([1, 0]);
+    let testArray = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    expect(service.getIndicesOfMax(testArray, 4)).toEqual([9, 8, 7, 6]);
   });
 });
