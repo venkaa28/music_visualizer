@@ -98,7 +98,7 @@ export class NebulaSceneServiceService {
     // sets a perspective camera
     this.camera = new THREE.PerspectiveCamera(65, (window.innerWidth) / (window.innerHeight), 0.1, 1000);
     // lets the camera at position x, y, z
-    this.camera.position.set(0, 80, 100);
+    this.camera.position.set(0, 80, 50);
     // set the camera to look at the center of the scene
     this.camera.lookAt(this.scene.position);
     // adds the camera to the scene
@@ -173,6 +173,23 @@ export class NebulaSceneServiceService {
           this.lastProgress = this.trackProgress;
           const curPitches = this.spotifyService.getSegment(this.trackProgress-800).pitches;
 
+          let sortedPitches = [...curPitches];
+          sortedPitches.sort((a, b) => a - b);
+         // console.log(sortedPitches);
+          //console.log(curPitches);
+
+          let keptPitches = [];
+          for (let i = 11; i > 8; i--) {
+            keptPitches.push(sortedPitches[i]);
+          }
+          //console.log(keptPitches);
+
+          let keptIndices = [];
+          for (let i = 0; i < 3; i++) {
+            keptIndices.push(curPitches.indexOf(keptPitches[i]));
+          }
+          //console.log(keptIndices);
+
           for (let i = 0; i < 12; i++) {
             //let loopVal = curPitches[2 * i] + curPitches[2 * i + 1]; // go by 2's because it's close enough
             let loopVal = curPitches[i];
@@ -191,8 +208,9 @@ export class NebulaSceneServiceService {
             // keep framerate from dropping too much with too many particles, 
             let perSecond = 1;
 
-            if (loopVal > 0.4) {
-              perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.01);
+            if (keptIndices.includes(i) || (loopVal > 0.9)) {
+              perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.04);
+              //perSecond = 0.06;
             }
             const json = {
               particlesMin: 1,
