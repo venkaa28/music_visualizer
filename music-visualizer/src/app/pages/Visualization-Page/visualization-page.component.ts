@@ -143,6 +143,16 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.current.source = 'local'; // set source
     await this.audioService.pause();
 
+    if (this.spotifyUsed) {
+      this.spotifyPlaybackService.player.pause().then(() => {
+        this.spotifyUsed = false;
+        this.planeScene.spotifyBool = false;
+      });
+      await this.spotifyPlaybackService.player.removeListener('player_state_changed');
+      await this.spotifyPlaybackService.player.removeListener('ready');
+      this.spotifyPlaybackService.player.disconnect();
+    }
+
     if (typeof this.micStream === 'undefined') {
       await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
       .then((stream) => {
