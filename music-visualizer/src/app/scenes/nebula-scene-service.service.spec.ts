@@ -54,7 +54,4 @@ describe('TemplateSceneServiceService', () => {
     expect(true).toBe(false);
   });
 
-  it('test makeRoughBall()', () => {
-    expect(true).toBe(false);
-  });
 });
