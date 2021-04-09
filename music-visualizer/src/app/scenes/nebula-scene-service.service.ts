@@ -4,7 +4,7 @@ import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import System from 'three-nebula';
 import * as THREE from 'three';
 import { Vector3, setY } from 'three';
-import Nebula, { SpriteRenderer, Alpha, Rate} from 'three-nebula';
+import Nebula, { SpriteRenderer } from 'three-nebula';
 import {ToolsService} from '../services/tools.service'
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
@@ -107,8 +107,6 @@ export class NebulaSceneServiceService {
     // rotates the camera
     this.camera.rotation.y += 0.01;
 
-    
-
   }
 
   public animate(): void {
@@ -153,6 +151,16 @@ export class NebulaSceneServiceService {
     if (!this.spotifyBool){
       this.tool.freqSetup();
 
+      this.nebula.emitters[0];
+      //this.nebula.emitters[6];
+      //this.nebula.emitters[3];
+      //this.nebula.emitters[9];
+
+      //this.nebula.emitters[1];
+      //this.nebula.emitters[7];
+      //this.nebula.emitters[4];
+
+
       // the one particle furthest left
       this.nebula.emitters[2].setPosition(new THREE.Vector3(-60 , this.tool.lowFreqAvgScalor , this.tool.midFreqAvgScalor));
       //this.nebula.emitters[2].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
@@ -167,61 +175,21 @@ export class NebulaSceneServiceService {
 
     } else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined' && this.vectors[1] !== 'undefined') {
-        //const pitchAvg = this.tool.absAvg(currSegment.pitches);
-        
+
         if (this.lastProgress !== this.trackProgress) {
           this.lastProgress = this.trackProgress;
           const curPitches = this.spotifyService.getSegment(this.trackProgress-800).pitches;
 
-          let sortedPitches = [...curPitches];
-          sortedPitches.sort((a, b) => a - b);
-         // console.log(sortedPitches);
-          //console.log(curPitches);
-
-          let keptPitches = [];
-          for (let i = 11; i > 8; i--) {
-            keptPitches.push(sortedPitches[i]);
-          }
-          //console.log(keptPitches);
-
-          let keptIndices = [];
-          for (let i = 0; i < 3; i++) {
-            keptIndices.push(curPitches.indexOf(keptPitches[i]));
-          }
-          //console.log(keptIndices);
+          let keptIndices = this.tool.getIndicesOfMax(curPitches, 4);
 
           for (let i = 0; i < 12; i++) {
-            //let loopVal = curPitches[2 * i] + curPitches[2 * i + 1]; // go by 2's because it's close enough
             let loopVal = curPitches[i];
-            //if (loopVal > 0.99) {
-            //  const json = {
-            //    particlesMin: 1,
-            //    particlesMax: 1,
-            //    perSecondMin: 1,
-            //    perSecondMax: 1,
-            //  };
-              //this.vectors[i].setY(0);
-            //  this.nebula.emitters[i].setRate(Rate.fromJSON(json));
-            //} else {
-              //this.vectors[i].setY((1 - curPitches[i]) * 20);
-
-            // keep framerate from dropping too much with too many particles, 
             let perSecond = 1;
 
             if (keptIndices.includes(i) || (loopVal > 0.9)) {
               perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.04);
-              //perSecond = 0.06;
             }
-            const json = {
-              particlesMin: 1,
-              particlesMax: 1,
-              perSecondMin: perSecond,
-              perSecondMax: perSecond,
-            };
-            this.nebula.emitters[i].setRate(Rate.fromJSON(json));
-            
-            //}
-            //this.nebula.emitters[i].setPosition(this.vectors[i]);
+            this.tool.setRate(this.nebula.emitters[i], perSecond);
           }
         }
       }
