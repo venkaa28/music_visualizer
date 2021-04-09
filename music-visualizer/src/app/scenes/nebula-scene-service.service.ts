@@ -3,7 +3,7 @@ import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 // import {DEFAULT_EMITTER_RATE} from 'three-nebula/src/emitter/constants.js';
 import System from 'three-nebula';
 import * as THREE from 'three';
-import Nebula, { SpriteRenderer } from 'three-nebula';
+import Nebula, { SpriteRenderer, Alpha } from 'three-nebula';
 import {ToolsService} from '../services/tools.service'
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
@@ -171,16 +171,16 @@ export class NebulaSceneServiceService {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
 
         //const pitchAvg = this.tool.absAvg(currSegment.pitches);
-        const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
-        const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
-        const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-        const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+        
+        const curPitches = this.spotifyService.getSegment(this.trackProgress).pitches;
 
         // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
-        this.nebula.emitters[2].setPosition(new THREE.Vector3(-60, segmentLoudness*100, 0));
-
-
-      
+        //this.nebula.emitters[2].setPosition(new THREE.Vector3(-60, segmentLoudness*100, 0));
+        //console.log(this.nebula.emitters[2]);
+        const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+        this.nebula.emitters[0].alpha = curPitches[1];
+        this.nebula.emitters[0].behaviours[0].alphaA.a = curPitches[1];
+        this.nebula.emitters[0].behaviours[0].alphaA.b = curPitches[1];
       }
     }
     // console.log(this.nebula);
