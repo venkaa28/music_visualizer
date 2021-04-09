@@ -79,7 +79,7 @@ export class SpotifyPlaybackSdkService {
                                                     duration,
                                                     track_window: { current_track },
                                                   }) => {
-        console.log(current_track);
+        //console.log(current_track);
         this.title = current_track.name;
         
         this.artist = '';

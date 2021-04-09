@@ -9,8 +9,8 @@ import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import {SpotifyService} from '../services/spotify.service';
 import {SpotifyPlaybackSdkService} from '../services/spotify-playback-sdk.service';
-import scene3 from './selfNebula.json';
-import scene4 from './selfNebula.json';
+import scene3 from './rainbow.json';
+import { range } from 'rxjs';
 
 //class Rate {
 //  constructor(number1: number, number2: number) {
@@ -90,27 +90,12 @@ export class NebulaSceneServiceService {
     // adds the camera to the scene
     this.scene.add(this.camera);
 
-    // add scene objects with mesh and material here
-
-    // adding ambient lighting to the scene
-    this.ambLight = new THREE.AmbientLight(0xFFFFFF);
-    this.scene.add(this.ambLight);
-
-    // adding a spotlight to the scene
-    const spotLight = new THREE.SpotLight(0xff8c19);
-    spotLight.intensity = 0.9;
-    spotLight.position.set(-10, 40, 20);
-    // spotLight.lookAt(this.ball.position);
-    spotLight.castShadow = true;
-    this.scene.add(spotLight);
-    this.scene.fog = new THREE.FogExp2(0x03544e, 0.01);
-
-    this.scene.add(this.group);
-
-    // rotates the particles
-
     // rotates the camera
     this.camera.rotation.y += 0.01;
+
+
+    // 
+
   }
 
   public animate(): void {
@@ -174,13 +159,21 @@ export class NebulaSceneServiceService {
         
         const curPitches = this.spotifyService.getSegment(this.trackProgress).pitches;
 
-        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
         //this.nebula.emitters[2].setPosition(new THREE.Vector3(-60, segmentLoudness*100, 0));
         //console.log(this.nebula.emitters[2]);
-        const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-        this.nebula.emitters[0].alpha = curPitches[1];
-        this.nebula.emitters[0].behaviours[0].alphaA.a = curPitches[1];
-        this.nebula.emitters[0].behaviours[0].alphaA.b = curPitches[1];
+        //const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+        //this.nebula.emitters[0].alpha = curPitches[1];
+        //this.nebula.emitters[0].behaviours[0].alphaA.a = curPitches[1];
+        //this.nebula.emitters[0].behaviours[0].alphaA.b = curPitches[1];
+
+        for (let i = 0; i < 12; i++) {
+          let oldPos = this.nebula.emitters[i].position;
+          if (curPitches[i] < 0.2) {
+            this.nebula.emitters[i].setPosition(new THREE.Vector3(oldPos.x, 0, oldPos.z));
+          } else {
+            this.nebula.emitters[i].setPosition(new THREE.Vector3(oldPos.x, (1-curPitches[i])*40, oldPos.z));
+          }
+        }
       }
     }
     // console.log(this.nebula);
