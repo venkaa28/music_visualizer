@@ -96,7 +96,7 @@ export class ToolsService {
     sortedPitches.sort((a, b) => a - b);
 
     let keptPitches = [];
-    for (let i = origArray.length; i > origArray.length - length; i--) {
+    for (let i = origArray.length - 1; i > origArray.length - length - 1; i--) {
       keptPitches.push(sortedPitches[i]);
     }
 
