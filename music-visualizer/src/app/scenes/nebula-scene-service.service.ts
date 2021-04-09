@@ -4,24 +4,25 @@ import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import System from 'three-nebula';
 import * as THREE from 'three';
 import Nebula, { SpriteRenderer } from 'three-nebula';
+import {ToolsService} from '../services/tools.service'
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import scene3 from './selfNebula.json';
 import scene4 from './selfNebula.json';
 
-class Rate {
-  constructor(number1: number, number2: number) {
+//class Rate {
+//  constructor(number1: number, number2: number) {
 
-  }
+//  }
 
-}
+//}
 
 @Injectable({
   providedIn: 'root'
 })
 export class NebulaSceneServiceService {
 
-  constructor(private ngZone: NgZone, public audioService: AudioService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService, private tool: ToolsService) { }
 
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -34,9 +35,10 @@ export class NebulaSceneServiceService {
   private composer!: THREE.Composer;
   private frameId: number = null;
   public frame = 0;
+  private spotifyBool: boolean;
 
   private targetPool: any;
-  public DEFAULT_EMITTER_RATE = new Rate(1, 0.1);
+  //public DEFAULT_EMITTER_RATE = new Rate(1, 0.1);
 
   public ngOnDestroy = (): void => {
     if (this.frameId != null) {
@@ -134,27 +136,8 @@ export class NebulaSceneServiceService {
   }
 
   sceneAnimation = () => {
-    // grabbing the audio service data
-    this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    const numBins = this.audioService.analyzer.frequencyBinCount;
 
-    const lowerThirdFrequncyData = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 3) - 1);
-    const lowfrequncyData = this.audioService.dataArray.slice(0, (lowerThirdFrequncyData.length / 3) - 1);
-    const midfrequncyData = this.audioService.dataArray.slice((lowerThirdFrequncyData.length / 3),
-      (lowerThirdFrequncyData.length / 3) * 2 - 1);
-    const highfrequncyData = this.audioService.dataArray.slice((lowerThirdFrequncyData.length / 3) * 2, lowerThirdFrequncyData.length);
-
-    const lowFreqAvg = this.avg(lowfrequncyData);
-    const midFreqAvg = this.avg(midfrequncyData);
-    const highFreqAvg = this.avg(highfrequncyData);
-
-    const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
-    const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
-    const highFreqDownScaled = highFreqAvg / highfrequncyData.length;
-
-    const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0, 1, 0, 5);
-    const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 5);
-    const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 5);
+    this.tool.freqSetup();
 
     // console.log(this.nebula);
     // console.log(this.nebula.emitters[0]);
@@ -166,16 +149,16 @@ export class NebulaSceneServiceService {
     */
 
     // the one particle furthest left
-    this.nebula.emitters[2].setPosition(new THREE.Vector3(-60 , lowFreqAvgScalor , midFreqAvgScalor));
-    this.nebula.emitters[2].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
+    this.nebula.emitters[2].setPosition(new THREE.Vector3(-60 , this.tool.lowFreqAvgScalor , this.tool.midFreqAvgScalor));
+    //this.nebula.emitters[2].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
 
     // the particle in the middle
-    this.nebula.emitters[1].setPosition(new THREE.Vector3(0, midFreqAvgScalor, highFreqAvgScalor));
-    this.nebula.emitters[1].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
+    this.nebula.emitters[1].setPosition(new THREE.Vector3(0, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor));
+    //this.nebula.emitters[1].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
 
     // the particle furthest right
-    this.nebula.emitters[0].setPosition(new THREE.Vector3(60 , highFreqAvgScalor , lowFreqAvgScalor));
-    this.nebula.emitters[0].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
+    this.nebula.emitters[0].setPosition(new THREE.Vector3(60 , this.tool.highFreqAvgScalor , this.tool.lowFreqAvgScalor));
+    //this.nebula.emitters[0].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
 
 
     this.nebula.update();
@@ -184,21 +167,6 @@ export class NebulaSceneServiceService {
   particleEmission(emitter, scale) {
     // emitter.emit(scale, 1);
     // emitter.setRate(DEFAULT_EMITTER_RATE * scale);
-  }
-
-  avg = (arr) => {
-    const total = arr.reduce((sum, b) => sum + b);
-    return (total / arr.length);
-  }
-
-  fractionate(val: number, minVal: number, maxVal: number) {
-    return (val - minVal) / (maxVal - minVal);
-  }
-
-  modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number) {
-    const fr = this.fractionate(val, minVal, maxVal);
-    const delta = outMax - outMin;
-    return outMin + (fr * delta);
   }
 
   public resize(): void {
