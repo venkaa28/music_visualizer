@@ -106,9 +106,6 @@ export class SpotifyPlaybackSdkService {
 
         var htmlAlbum = (document.getElementById('album') as HTMLMediaElement)
         htmlAlbum.src = this.album;
-        htmlAlbum.style.width = '20%';
-        htmlAlbum.style.height = '20%';
-        htmlAlbum.style.margin = '0';
 
         document.getElementById('song-title').textContent = this.title;
         document.getElementById('song-subtitle').textContent = this.artist;

@@ -103,6 +103,7 @@ input[type=range] {
   margin-left: 20%;
   vertical-align: middle;
   padding: 3%;
+  border: 5px black solid;
 }
 
 .select-img {
@@ -123,7 +124,9 @@ input[type=range] {
 .song-display-container {
   display: inline-block;
   vertical-align: middle;
-  margin-right: 10%;
+  margin-right: 5%;
+  width: 15%;
+  height: 15%;
 }
 
 .song-text {
@@ -154,8 +157,8 @@ input[type=range] {
                                       ID's
 *******************************************************************************/
 #album {
-  width: 200%;
-  height: 200%;
+  width: 100%;
+  height: 100%;
   position: relative;
 }
 
