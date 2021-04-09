@@ -4,15 +4,16 @@ import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import System from 'three-nebula';
 import * as THREE from 'three';
 import { Vector3, setY } from 'three';
-import Nebula, { SpriteRenderer, Alpha } from 'three-nebula';
+import Nebula, { SpriteRenderer, Alpha, Rate} from 'three-nebula';
 import {ToolsService} from '../services/tools.service'
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import {SpotifyService} from '../services/spotify.service';
 import {SpotifyPlaybackSdkService} from '../services/spotify-playback-sdk.service';
-import scene3 from './rainbow.json';
+import scene3 from './sixo.json';
 import { range } from 'rxjs';
 import { ThisReceiver } from '@angular/compiler';
+import { max } from 'rxjs/operators';
 
 //class Rate {
 //  constructor(number1: number, number2: number) {
@@ -41,8 +42,9 @@ export class NebulaSceneServiceService {
   public frame = 0;
   public spotifyBool: boolean;
   public trackProgress = 0;
+  private lastProgress = 0; // saved last progress so we only update when the segment changes
 
-  private vectors: Array<Vector3>; // vector for positions of all 12 orbs
+  private vectors: Array<Vector3>; // vector for positions of all 6 orbs
 
   private targetPool: any;
   //public DEFAULT_EMITTER_RATE = new Rate(1, 0.1);
@@ -69,10 +71,10 @@ export class NebulaSceneServiceService {
       console.log(loaded);
       const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
       this.nebula = loaded.addRenderer(nebulaRenderer);
-      this.vectors = new Array<Vector3>(12);
+      this.vectors = new Array<Vector3>(6);
 
       // Set up the vectors for the scene
-      for (let i = 0; i < 12; i++) {
+      for (let i = 0; i < 6; i++) {
         this.vectors[i] = this.nebula.emitters[i].position;
       }
     });
@@ -163,45 +165,41 @@ export class NebulaSceneServiceService {
 
     } else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined' && this.vectors[1] !== 'undefined') {
-
         //const pitchAvg = this.tool.absAvg(currSegment.pitches);
         
-        const curPitches = this.spotifyService.getSegment(this.trackProgress).pitches;
+        if (this.lastProgress !== this.trackProgress) {
+          this.lastProgress = this.trackProgress;
+          const curPitches = this.spotifyService.getSegment(this.trackProgress).pitches;
 
-        //this.nebula.emitters[2].setPosition(new THREE.Vector3(-60, segmentLoudness*100, 0));
-        //console.log(this.nebula.emitters[2]);
-        //const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-        //this.nebula.emitters[0].alpha = curPitches[1];
-        //this.nebula.emitters[0].behaviours[0].alphaA.a = curPitches[1];
-        //this.nebula.emitters[0].behaviours[0].alphaA.b = curPitches[1];
-
-        for (let i = 0; i < 12; i++) {
-          if (curPitches[i] > 0.99) {
-            this.vectors[i].setY(0);
-          } else {
-            this.vectors[i].setY((1 - curPitches[i]) * 20);
+          for (let i = 0; i < 6; i++) {
+            let loopVal = curPitches[2 * i] + curPitches[2 * i + 1]; // go by 2's because it's close enough
+            //if (loopVal > 0.99) {
+            //  const json = {
+            //    particlesMin: 1,
+            //    particlesMax: 1,
+            //    perSecondMin: 1,
+            //    perSecondMax: 1,
+            //  };
+              //this.vectors[i].setY(0);
+            //  this.nebula.emitters[i].setRate(Rate.fromJSON(json));
+            //} else {
+              //this.vectors[i].setY((1 - curPitches[i]) * 20);
+            const json = {
+              particlesMin: 1,
+              particlesMax: 1,
+              perSecondMin: ((2 - loopVal) ** 2) / 12,
+              perSecondMax: ((2 - loopVal) ** 2) / 12,
+            };
+            this.nebula.emitters[i].setRate(Rate.fromJSON(json));
+            //}
+            //this.nebula.emitters[i].setPosition(this.vectors[i]);
           }
-          this.nebula.emitters[i].setPosition(this.vectors[i]);
         }
+
+
       }
     }
-    // console.log(this.nebula);
-    // console.log(this.nebula.emitters[0]);
-
-    /* messing with number of particles emitted as another dynamic change to the scene
-    this.particleEmission(this.nebula.emitters[0], lowFreqDownScaled);
-    this.particleEmission(this.nebula.emitters[1], midFreqDownScaled);
-    this.particleEmission(this.nebula.emitters[2], highFreqDownScaled);
-    */
-
-    
-
     this.nebula.update();
-  }
-
-  particleEmission(emitter, scale) {
-    // emitter.emit(scale, 1);
-    // emitter.setRate(DEFAULT_EMITTER_RATE * scale);
   }
 
   public resize(): void {
