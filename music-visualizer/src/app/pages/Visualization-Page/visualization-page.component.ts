@@ -128,6 +128,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.loadSong(this.audio);
     this.micUsed = false;
 
+    document.getElementById('song-title').textContent = this.current.name;
+    document.getElementById('song-subtitle').textContent = this.current.artist;
+    let htmlAlbum = (document.getElementById('album') as HTMLMediaElement);
+    htmlAlbum.src = '../../../assets/icons/disc.svg';
 
     this.scene.animate();
     this.toggleUploadMenu();
