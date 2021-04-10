@@ -30,23 +30,22 @@ describe('PlaneSceneServiceService', () => {
   });
 
   it('test createScene()', () => {
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test animate()', () => {
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test render()', () => {
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test sceneAnimation()', () => {
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test resize()', () => {
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
-
 });
