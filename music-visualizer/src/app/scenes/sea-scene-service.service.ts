@@ -4,13 +4,17 @@ import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {ToolsService} from '../services/tools.service'
+import {SpotifyPlaybackSdkService} from "../services/spotify-playback-sdk.service";
+import {SpotifyService} from "../services/spotify.service";
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class SeaSceneService {
-  constructor(private ngZone: NgZone, public audioService: AudioService, private tool: ToolsService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService, private spotifyService: SpotifyService,
+              private spotifyPlayer: SpotifyPlaybackSdkService,
+              private tool: ToolsService) { }
 
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -38,6 +42,8 @@ export class SeaSceneService {
   private farPlane: number;
   private frameId: number = null;
   private cylinderGeometry: any;
+  public spotifyBool: boolean;
+  public trackProgress = 0;
 
   public ngOnDestroy = (): void => {
     if (this.frameId != null) {
@@ -584,12 +590,48 @@ export class SeaSceneService {
       this.render();
     });
 
-    this.sceneAnimation();
-
-    this.renderer.render(this.scene, this.camera);
+    if(this.spotifyBool === true) {
+      this.spotifyPlayer.player.getCurrentState().then(state => {
+        if (!state) {
+          // console.error('User is not playing music through the Web Playback SDK');
+          // return;
+        } else {
+          this.trackProgress = state.position;
+          this.sceneAnimation();
+          this.renderer.render(this.scene, this.camera);
+        }
+      });
+    }else {
+      this.sceneAnimation();
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   sceneAnimation = () => {
+
+
+    if (!this.spotifyBool){
+      this.tool.freqSetup();
+
+      const position = this.plane.geometry.attributes.position;
+
+      // console.log(position);
+      const vector = new THREE.Vector3();
+      // this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
+      this.tool.makeRoughBall(this.sea, this.modulate(Math.pow(this.tool.lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(this.tool.upperAvgFr, 0, 1, 0, 4))
+
+    }else {
+      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+
+        const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+        const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
+        const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+        const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+        // this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
+        this.tool.makeRoughBall(this.sea, this.modulate(Math.pow(this.tool.lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(this.tool.upperAvgFr, 0, 1, 0, 4))
+      }
+    }
 
 
     this.airplane.propeller.rotation.x += 0.3;
@@ -600,22 +642,6 @@ export class SeaSceneService {
     this.sky.mesh.rotation.z += .01;
     // this.sky.moveClouds(0.01);
     this.airplane.pilot.updateHairs();
-
-
-    // if(typeof analyzer != "undefined") {
-    this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    // console.log(dataArray);
-
-    const lowerHalfArray = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
-    const upperHalfArray = this.audioService.dataArray.slice((this.audioService.dataArray.length / 2) - 1, this.audioService.dataArray.length - 1);
-
-    const lowerMax = this.max(lowerHalfArray);
-    const upperAvg = this.avg(upperHalfArray);
-
-    const lowerMaxFr = lowerMax / lowerHalfArray.length;
-    const upperAvgFr = upperAvg / upperHalfArray.length;
-
-    this.tool.makeRoughBall(this.sea, this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(upperAvgFr, 0, 1, 0, 4))
   }
   // for re-use
 
