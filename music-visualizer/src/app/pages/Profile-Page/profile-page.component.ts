@@ -21,7 +21,6 @@ export class ProfilePageComponent implements OnInit {
   // until we get the api hooked up
   public spotifyLinked: boolean;
 
-
   getUserCookie() {
     return this.cookieService.get('account');
   }
@@ -35,17 +34,10 @@ export class ProfilePageComponent implements OnInit {
     }
   }
 
-
   constructor(public router: Router, private authService: AuthService, private cookieService: CookieService, private spotifyService: SpotifyService, 
              private readonly notifierService: NotifierService) {
               this.userData = this.authService.getUser();
             }
-
-  getSpotifyLinked(): boolean {
-    return false;
-  }
-
-    
 
   ngOnInit(): void {
     this.getUserData();

@@ -118,5 +118,7 @@ export class ToolsService {
     emitter.setRate(Rate.fromJSON(json));
   }
 
+  
+
 
 }

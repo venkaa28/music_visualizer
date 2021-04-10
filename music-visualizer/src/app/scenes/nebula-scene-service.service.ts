@@ -6,21 +6,10 @@ import * as THREE from 'three';
 import { Vector3, setY } from 'three';
 import Nebula, { SpriteRenderer } from 'three-nebula';
 import {ToolsService} from '../services/tools.service'
-import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import {SpotifyService} from '../services/spotify.service';
 import {SpotifyPlaybackSdkService} from '../services/spotify-playback-sdk.service';
 import scene3 from './rainbow.json';
-import { range } from 'rxjs';
-import { ThisReceiver } from '@angular/compiler';
-import { max, min } from 'rxjs/operators';
-
-//class Rate {
-//  constructor(number1: number, number2: number) {
-
-//  }
-
-//}
 
 @Injectable({
   providedIn: 'root'
@@ -34,17 +23,12 @@ export class NebulaSceneServiceService {
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
   private scene!: THREE.Scene;
-  private group!: THREE.Group;
-  private ambLight!: THREE.AmbientLight;
-  private noise = new SimplexNoise();
   private nebula!: any;
   private frameId: number = null;
   public frame = 0;
   public spotifyBool: boolean;
   public trackProgress = 0;
   private lastProgress = 0; // saved last progress so we only update when the segment changes
-  private dropFrames = 0;
-
 
   private vectors: Array<Vector3>; // vector for positions of all 6 orbs
 
@@ -59,7 +43,6 @@ export class NebulaSceneServiceService {
 
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     this.scene = new THREE.Scene();
-    this.group = new THREE.Group();
     this.canvas = canvas.nativeElement;
 
     /*
