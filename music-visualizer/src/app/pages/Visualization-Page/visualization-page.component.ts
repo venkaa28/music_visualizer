@@ -128,6 +128,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.loadSong(this.audio);
     this.micUsed = false;
 
+    document.getElementById('song-title').textContent = this.current.name;
+    document.getElementById('song-subtitle').textContent = this.current.artist;
+    let htmlAlbum = (document.getElementById('album') as HTMLMediaElement);
+    htmlAlbum.src = '../../../assets/icons/disc.svg';
 
     this.scene.animate();
     this.toggleUploadMenu();
@@ -143,6 +147,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.spotifyPlaybackService.player.pause().then(() => {
         this.spotifyUsed = false;
         this.nebulaScene.spotifyBool = false;
+        this.planeScene.spotifyBool = false;
       });
       await this.spotifyPlaybackService.player.removeListener('player_state_changed');
       await this.spotifyPlaybackService.player.removeListener('ready');
