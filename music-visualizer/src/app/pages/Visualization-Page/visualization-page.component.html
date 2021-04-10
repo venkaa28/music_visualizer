@@ -12,7 +12,7 @@
   <audio #audioFile id='audio-file' crossorigin="anonymous">
     <source id="audio-source" origin="http://localhost:4200" type="audio/*" src="../../../assets/music/ILLENIUM, X Ambassadors - In Your Arms (Visualizer).mp3">
   </audio>
-  
+
   <div id="canvas-visualizer">
     <canvas #rendererCanvas id="renderCanvas"></canvas>
 
@@ -69,11 +69,11 @@
             <!--Scene slider: broken right now-->
             <div id="scene">
               <p style="display: inline">1</p>
-              <input id="scene-slider" type="range" min="1" max={{this.scenesAvailable.length}} value="1" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
+              <input id="scene-slider" type="range" min="0" max="3" value="1" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
               <p style="display: inline">{{this.scenesAvailable.length}}</p>
               <p class="edit-label">Scene</p>
             </div>
-            
+
             <!--FFT slider-->
             <div id="fft">
               <p style="display: inline">0</p>
@@ -97,7 +97,7 @@
               <img src="../../../assets/icons/volumeup.svg">
               <p class="edit-label">Volume</p>
             </div>
-            
+
             <!--Pan slider-->
             <div id="panner">
               <p style="display: inline;">L</p>
@@ -122,7 +122,7 @@
       <div class="controls">
         <!--Song title and album art (if exists)-->
         <div id="song-display">
-          
+
           <!--Song title-->
           <div class="song-display-container">
             <img id="album" src={{current.album}}>

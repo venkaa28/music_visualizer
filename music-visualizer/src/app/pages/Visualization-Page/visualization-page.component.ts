@@ -203,7 +203,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   // handle play or pause
   async togglePlay() {
     if (this.spotifyUsed) {
-      this.spotifyPlaybackService.player.togglePlay();
+      await this.spotifyPlaybackService.player.togglePlay();
     } else {
       await this.audioService.playOrPause();
     }
@@ -214,7 +214,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   // load next song from firebase
   async nextSong() {
     if (this.spotifyUsed) {
-      this.spotifyPlaybackService.player.nextTrack();
+      await this.spotifyPlaybackService.player.nextTrack();
     } else {
       if (this.audioService.getTime() + 10 > this.audioService.getDuration()) {
         this.audioService.setTime(this.audioService.getDuration());
@@ -227,7 +227,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   // load previous song from firebase
   async rewindSong() {
     if (this.spotifyUsed) {
-      this.spotifyPlaybackService.player.previousTrack();
+      await this.spotifyPlaybackService.player.previousTrack();
     } else {
       if (this.audioService.getTime() - 10 < 0) {
         this.audioService.setTime(0);
@@ -239,7 +239,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   // change the current visualization scene
   async changeScene(event: any) {
-    this.authService.setSceneCookie(event.value - 1);
+    await this.authService.setSceneCookie((event.value as number));
     window.location.reload();
   }
 

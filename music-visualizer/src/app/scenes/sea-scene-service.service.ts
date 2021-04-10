@@ -613,10 +613,6 @@ export class SeaSceneService {
     if (!this.spotifyBool){
       this.tool.freqSetup();
 
-      const position = this.plane.geometry.attributes.position;
-
-      // console.log(position);
-      const vector = new THREE.Vector3();
       // this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
       this.tool.makeRoughBall(this.sea, this.modulate(Math.pow(this.tool.lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(this.tool.upperAvgFr, 0, 1, 0, 4))
 
