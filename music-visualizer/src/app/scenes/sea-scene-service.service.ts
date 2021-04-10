@@ -3,13 +3,14 @@ import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
+import {ToolsService} from '../services/tools.service'
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class SeaSceneService {
-  constructor(private ngZone: NgZone, public audioService: AudioService) { }
+  constructor(private ngZone: NgZone, public audioService: AudioService, private tool: ToolsService) { }
 
   private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
@@ -177,7 +178,7 @@ export class SeaSceneService {
     const Sea = function(){
       // const geom = new THREE.CylinderGeometry(60, 60, 80, 40, 10);
       const geom = new THREE.SphereGeometry(50, 50, 50);
-      // const geom = new THREE.IcosahedronGeometry(50, 50);
+      // const geom = new THREE.IcosahedronGeometry(50, 100);
 
       // const geom = new THREE.IcosahedronGeometry(50, 10);
       const lambertMaterial = new THREE.MeshLambertMaterial({
@@ -222,35 +223,6 @@ export class SeaSceneService {
       this.mesh = new THREE.Mesh(geom, lambertMaterial);
       this.mesh.receiveShadow = true;
 
-    };
-
-    Sea.prototype.moveWaves = function(bassFr: any, treFr: any){
-      // console.log(bassFr, treFr);
-      const position = this.mesh.geometry.attributes.position;
-      const vector = new THREE.Vector3();
-      for (let i = 0, l = position.count; i < l; i++) {
-        vector.fromBufferAttribute(position, i);
-        // console.log(vector);
-        const offset = this.mesh.geometry.parameters.radius;
-        // console.log(offset);
-        const amp = 3;
-
-        const time = window.performance.now();
-        // console.log(time);
-        vector.normalize();
-        // console.log(vector);
-        const rf = 0.00001;
-        const distance = (offset + bassFr) + this.noise.noise3d((vector.x + time * rf * 5), (vector.y + time * rf * 6),
-          (vector.z + time * rf * 7)) * amp * treFr;
-        vector.multiplyScalar(distance);
-        position.setX(i, vector.x);
-        position.setY(i, vector.y);
-        position.setZ(i, vector.z);
-      }
-      this.mesh.geometry.attributes.position.needsUpdate = true;
-      this.mesh.geometry.computeVertexNormals();
-      this.mesh.geometry.computeFaceNormals();
-      this.mesh.updateMatrix();
     };
 
 
@@ -637,19 +609,13 @@ export class SeaSceneService {
     const lowerHalfArray = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
     const upperHalfArray = this.audioService.dataArray.slice((this.audioService.dataArray.length / 2) - 1, this.audioService.dataArray.length - 1);
 
-    const overallAvg = this.avg(this.audioService.dataArray);
     const lowerMax = this.max(lowerHalfArray);
-    const lowerAvg = this.avg(lowerHalfArray);
-    const upperMax = this.max(upperHalfArray);
     const upperAvg = this.avg(upperHalfArray);
 
     const lowerMaxFr = lowerMax / lowerHalfArray.length;
-    const lowerAvgFr = lowerAvg / lowerHalfArray.length;
-    const upperMaxFr = upperMax / upperHalfArray.length;
     const upperAvgFr = upperAvg / upperHalfArray.length;
 
-    this.sea.moveWaves(this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(upperAvgFr, 0, 1, 0, 4));
-
+    this.tool.makeRoughBall(this.sea, this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(upperAvgFr, 0, 1, 0, 4))
   }
   // for re-use
 

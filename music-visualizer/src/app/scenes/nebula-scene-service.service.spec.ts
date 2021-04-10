@@ -1,14 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-
-import { AudioService } from './audio.service';
+import { TemplateSceneServiceService } from './template-scene-service.service';
 import {RouterTestingModule} from "@angular/router/testing";
 import {ReactiveFormsModule} from "@angular/forms";
 import {AngularFireModule} from "@angular/fire";
 import {firebaseConfig} from "../firebase";
 import {NotifierModule} from "angular-notifier";
 
-describe('AudioService', () => {
-  let service: AudioService;
+describe('TemplateSceneServiceService', () => {
+  let service: TemplateSceneServiceService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,50 +22,35 @@ describe('AudioService', () => {
         NotifierModule
       ],
     });
-    service = TestBed.inject(AudioService);
+    service = TestBed.inject(TemplateSceneServiceService);
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('test upload()', () => {
-    // var testFile = new File([""], "test.mp3", { type: 'mp3' });
-    // service.upload(testFile);
-    // todo: expect
-    expect(true).toBe(false);
-
+  it('should be created', () => {
+    expect(service).toBeTruthy();
   });
 
-  it('test getRemoteSong()', () => {
-    // var uid = '1';
-    // // todo: expect
-    // expect(function () { service.getRemoteSong(uid); }).toThrow('A song with that id does not exist on the database');
+  it('test createScene()', () => {
     expect(true).toBe(false);
   });
 
-  it('test playOrPause()', () => {
-    service.playOrPause();
-    // todo: expect
+  it('test animate()', () => {
     expect(true).toBe(false);
   });
 
-  it('test play()', () => {
-    service.play();
-    // todo: expect
+  it('test render()', () => {
     expect(true).toBe(false);
   });
 
-  it('test pause()', () => {
-    service.pause();
-    // todo: expect
+  it('test sceneAnimation()', () => {
     expect(true).toBe(false);
   });
 
-  it('test loadSong()', () => {
-    var mockAudio = new Audio('../../../assets/music/tripleT.mp3');
-    service.loadSong(mockAudio);
-    // // todo: expect
+  it('test resize()', () => {
     expect(true).toBe(false);
   });
+
 });

@@ -1,9 +1,13 @@
 /******************************************************************************
                                 HTML Elements
 ******************************************************************************/
-html {
-  overflow-x: hidden;
-  overflow-y: hidden;
+button {
+  padding: 0px;
+  display: inline-block;
+  outline: none;
+  border: none;
+  color: white;
+  background-color: rgba(0, 0, 0, 0);
 }
 
 H1 {
@@ -13,14 +17,9 @@ H1 {
   color: var(--light);
 }
 
-button {
-  padding: 0px;
-  display: inline-block;
-  align-items: center;
-  outline: none;
-  border: none;
-  color: white;
-  background-color: rgba(0, 0, 0, 0);
+html {
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 input[type=file] {
@@ -33,47 +32,58 @@ input[type=range] {
   -webkit-appearance: none;
   border-radius: 5px;
   height: 5px;
-  background-color: white;
-  margin: 0;
+  background-color: black;
 }
 
 /******************************************************************************
                                     Classes
 ******************************************************************************/
-.ui-button {
-  height: 200% !important;
-  width: 200% !important;
-}
-
-.overlay {
-  text-align: center;
-  height: 100%;
-  width: 100%;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: rgba(0,0,0, 0.4);
-  overflow-x: hidden;
-  overflow-y: hidden;
-}
-
-.overlay-content {
-  color: white;
-}
-
 .controls {
   color: white;
   position: absolute;
   margin: 0;
   width: 100%;
-  align-items: center;
-  top: 85%;
+  top: 0%;
 }
 
-.custom_icon {
+.custom-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.custom-icon-play {
   width: 50px;
   height: 50px;
+  margin: 10px;
+}
+
+.glass-pane {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 15px;
+  border: 1px rgba(255, 255, 255, 0.15) solid;
+  backdrop-filter: blur(5px);
+  box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.2);
+}
+
+.overlay {
+  text-align: center;
+  height: 10%;
+  width: 100%;
+  opacity: 1;
+  position: fixed;
+  z-index: 1;
+  top: 90%;
+  left: 0;
+  background-color: rgba(0,0,0, 0.4);
+  overflow-x: hidden;
+  overflow-y: hidden;
+  transition: 0.2s;
+}
+
+.overlay-content {
+  color: white;
+  top: 0;
+  left: 0;
 }
 
 .progress {
@@ -86,15 +96,103 @@ input[type=range] {
   height: 9px !important;
 }
 
+.select-button {
+  border-radius: 50%;
+  width: 60%;
+  height: 30%;
+  margin-left: 20%;
+  vertical-align: middle;
+  padding: 3%;
+  border: 5px black solid;
+}
+
+.select-img {
+  width: 100%;
+  height: 100%;
+}
+
+.select-text {
+  margin-top: 5%;
+  font-size: small;
+}
+
+.settings-button {
+  width: 20%;
+  margin-left: 1%;
+}
+
+.song-display-container {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 5%;
+  width: 15%;
+  height: 15%;
+}
+
+.song-text {
+  margin: 0;
+  text-align: left;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+
+.ui-button {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.upload-item {
+  display: inline-block;
+  text-align: center;
+  height: 100%;
+  width: 20%;
+  margin: 2%;
+  border-radius: 15px;
+  padding: 1%;
+}
+
 /*******************************************************************************
                                       ID's
 *******************************************************************************/
+#album {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#button {
+  float: center;
+}
+
 #canvas-visualizer {
   position: relative;
   margin: 0;
   width: 100%;
   height: 100%;
   padding: 0;
+}
+
+#edit-menu {
+  position: absolute;
+  bottom: 12%;
+  left: 85%;
+  text-align: center;
+  padding: 1%;
+  opacity: 0;
+  width: 0%;
+  transition: 0.1s 0.2s;
+}
+
+#load-label {
+  cursor: pointer;
+  margin-bottom: 1%;
+}
+
+#load-mic {
+  cursor: pointer;
+  margin-top: -2%;
 }
 
 #renderCanvas {
@@ -126,30 +224,69 @@ input[type=range] {
   overflow-y: hidden;
 }
 
-#load-label {
-  cursor: pointer;
-  margin-bottom: 1%;
+#panner p {
+  padding: 1%;
 }
 
-#load-mic {
-  cursor: pointer;
-  margin-top: -2%;
+#progress-time {
+  position: absolute;
+  width: 100%;
+  margin: 0;
+  top: 70%;
 }
 
-#button {
-  float: center;
+#settings {
+  position: absolute;
+  right: 2%;
+  top: 25%;
+  display: inline-block;
+  width: 12%;
+  text-align: right;
 }
 
 #slider {
+  display: inline-block;
+}
+
+#song-display {
   position: absolute;
-  right: 2%;
-  bottom: 55%;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  left: 2%;
+  top: 15%;
+  margin: 0;
+  width: 20%;
+}
+
+#song-display-text {
+  width: 100%;
+}
+
+#song-title {
+  font-size: large;
+}
+
+#song-subtitle {
+  font-size: small;
+}
+
+#upload-menu {
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  padding: 5%;
+  color: black;
+  width: 60%;
+  height: 50%;
+  text-align: center;
+  transition: 0.1s 0.2s;
+}
+
+#upload-options {
+  margin-top: 5%;
 }
 
 #volume #panner {
   display: block;
-}
-
-#panner p {
-  padding: 1%;
 }
