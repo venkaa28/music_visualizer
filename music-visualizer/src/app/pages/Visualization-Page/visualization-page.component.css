@@ -57,6 +57,10 @@ input[type=range] {
   margin: 10px;
 }
 
+.edit-label {
+  font-size: small;
+}
+
 .glass-pane {
   background-color: rgba(255, 255, 255, 0.15);
   border-radius: 15px;
