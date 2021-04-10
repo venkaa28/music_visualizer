@@ -25,11 +25,7 @@ describe('TemplateSceneServiceService', () => {
     });
     service = TestBed.inject(TemplateSceneServiceService);
   });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
+  
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
