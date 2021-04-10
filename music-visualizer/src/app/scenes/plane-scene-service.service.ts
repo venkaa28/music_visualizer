@@ -217,13 +217,11 @@ export class PlaneSceneServiceService {
       this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
     }else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
-
         //const pitchAvg = this.tool.absAvg(currSegment.pitches);
         const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
         const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
         const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
         const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
-
         // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
         this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
       }
