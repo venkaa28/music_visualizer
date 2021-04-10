@@ -41,7 +41,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   public audio: HTMLAudioElement; // audio element of window
   public current: Music; // music object
-  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene, this.nebulaScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.nebulaScene]; // current scene being used
   public micUsed: boolean;
 
   private scene: any; // current scene to use
@@ -58,7 +58,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.current = new Music();
     this.micUsed = false;
     this.spotifyUsed = false;
-    this.scene = this.scenesAvailable[3];
+    this.scene = this.scenesAvailable[0];
     this.menuTimeout = 2000;
 
 
@@ -112,7 +112,9 @@ export class VisualizationPageComponent implements AfterViewInit {
     if (this.spotifyUsed) {
       this.spotifyPlaybackService.player.pause().then(() => {
         this.spotifyUsed = false;
-        this.nebulaScene.spotifyBool = false;
+        this.scenesAvailable.forEach((scene) => {
+          scene.spotifyBool = false;
+        });
       });
       await this.spotifyPlaybackService.player.removeListener('player_state_changed');
       await this.spotifyPlaybackService.player.removeListener('ready');
@@ -146,8 +148,9 @@ export class VisualizationPageComponent implements AfterViewInit {
     if (this.spotifyUsed) {
       this.spotifyPlaybackService.player.pause().then(() => {
         this.spotifyUsed = false;
-        this.nebulaScene.spotifyBool = false;
-        this.planeScene.spotifyBool = false;
+        this.scenesAvailable.forEach((scene) => {
+          scene.spotifyBool = false;
+        });
       });
       await this.spotifyPlaybackService.player.removeListener('player_state_changed');
       await this.spotifyPlaybackService.player.removeListener('ready');
@@ -176,9 +179,12 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
     this.scene.createScene(this.rendererCanvas);
     this.spotifyPlaybackService.addSpotifyPlaybackSdk(this.scene).then(() => {
-        this.nebulaScene.spotifyBool = true;
+      this.scenesAvailable.forEach((scene) => {
+        scene.spotifyBool = true;
+      });
       }
     );
+
     this.spotifyUsed = true;
 
     this.toggleUploadMenu();
@@ -224,14 +230,13 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   // change the current visualization scene
-  changeScene(event: any) {
+  async changeScene(event: any) {
     this.scene.cancelAnimation();
-    this.scene = this.scenesAvailable[3];
-    this.scene.createScene(this.rendererCanvas);
 
-    if (this.audioService.fileLoaded()) {
-      this.scene.animate();
-    }
+    this.scene = this.scenesAvailable[event.value];
+    await this.scene.createScene(this.rendererCanvas);
+
+    this.scene.animate();
   }
 
   // change fft value based on slider input

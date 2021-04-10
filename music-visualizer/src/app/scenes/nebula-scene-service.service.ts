@@ -41,7 +41,13 @@ export class NebulaSceneServiceService {
     }
   }
 
-  public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
+  public cancelAnimation(): void {
+    if (this.frameId != null) {
+      cancelAnimationFrame(this.frameId);
+    }
+  }
+
+  public async createScene(canvas: ElementRef<HTMLCanvasElement>): Promise<void> {
     this.scene = new THREE.Scene();
     this.canvas = canvas.nativeElement;
 
@@ -52,7 +58,7 @@ export class NebulaSceneServiceService {
     this.composer.addPass(new EffectPass(this.camera, new BloomEffect()));
     */
 
-    Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
+    await Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
       console.log(loaded);
       const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
       this.nebula = loaded.addRenderer(nebulaRenderer);

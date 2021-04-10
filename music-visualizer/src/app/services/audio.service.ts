@@ -165,6 +165,8 @@ export class AudioService {
     this.dataArray = new Uint8Array(this.bufferLength); // set data array
   }
 
+  
+
   // load a song into the audio context
   loadSong(song: HTMLMediaElement = this.element) {
     this.element = song; // set the audio as the song

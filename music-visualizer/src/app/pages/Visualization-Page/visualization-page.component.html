@@ -69,7 +69,7 @@
             <!--Scene slider: broken right now-->
             <div id="scene">
               <p style="display: inline">0</p>
-              <input id="scene-slider" type="range" min="0" max="2" value="0" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
+              <input id="scene-slider" type="range" min="0" max="1" value="0" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
               <p style="display: inline">2</p>
             </div>
             
@@ -106,8 +106,7 @@
   <!--Control info menu listed when info button is pressed-->
   <div id="info-menu" style="width: 0%;">
     <h2>Controls:</h2>
-    <p>m     : toggle the menu<br>
-       d     : play the previous song<br>
+    <p>d     : play the previous song<br>
        a     : play the next song<br>
        space : play/pause the music</p>
   </div>
