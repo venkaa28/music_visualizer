@@ -12,7 +12,7 @@ describe('ToolsService', () => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(ToolsService);
     // intialize frequencies (getting audio source?)
-    service.freqSetup();
+    //service.freqSetup();
   });
 
   it('should be created', () => {
@@ -24,29 +24,31 @@ describe('ToolsService', () => {
     var magnitude1 = null;
     var magnitude2 = null;
     var timeScalar = null;
-    var plane = null;
+    var plane = new THREE.Mesh(new THREE.PlaneGeometry(1600, 1600, 100, 100), 
+    new THREE.MeshLambertMaterial({
+      color: 0x25E0EC,
+      side: THREE.DoubleSide,
+      wireframe: true
+    }));
     service.wavesBuffer(waveSize, magnitude1, magnitude2, timeScalar, plane);
     //expect(plane).toBe(?);
   });
   
   // Test Helper Methods
   it('should be correct avg', () => {
-    // TODO: make and expect arr value
     var arr = [1, 2, 3, 4, 5];
     expect(service.avg(arr)).toBe(3);
   });
 
   it('should be correct absAvg', () => {
-    // TODO: make and expect arr value
     var arr = [-1, -2, -3, -4, -5];
     expect(service.absAvg(arr)).toBe(2.6);
   });
 
   it('should be correct fractionate', () => {
-    // TODO: make and expect arr value
-    var val = null;
-    var minVal = null;
-    var maxVal = null;
-    expect(service.fractionate(val, minVal, maxVal)).toBe(null);
+    var val = 9;
+    var maxVal = 9999;
+    var minVal = 1;
+    expect(service.fractionate(val, minVal, maxVal)).toBeCloseTo(0.0008001600320064013);
   });
 });
