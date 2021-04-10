@@ -10,6 +10,7 @@ import { firebaseConfig } from '../../firebase';
 import { NotifierService, NotifierModule } from 'angular-notifier';
 import {ReactiveFormsModule} from "@angular/forms";
 import {ElementRef, ViewChild} from "@angular/core";
+import {HttpClientModule} from "@angular/common/http";
 
 describe('VisualizationPageComponent', () => {
   let component: VisualizationPageComponent;
@@ -25,6 +26,7 @@ describe('VisualizationPageComponent', () => {
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
+        HttpClientModule,
         NotifierModule
       ],
       declarations: [ VisualizationPageComponent ]
@@ -57,9 +59,15 @@ describe('VisualizationPageComponent', () => {
   it('test createScene()', () => {
     // @ViewChild('rendererCanvas', {static: true})
     // var rendererCanvas!: ElementRef<HTMLCanvasElement>;
-    // component.planeScene.createScene(rendererCanvas);
-    // component.planeScene.animate();
-    expect(true).toBe(false);
+    component.nebulaScene.createScene(component.rendererCanvas);
+    component.planeScene.createScene(component.rendererCanvas);
+    component.demoScene.createScene(component.rendererCanvas);
+    //component.planeScene.animate();
+    //expect(true).toBe(false);
+  });
+
+  it('test animate()', () => {
+    //component.nebulaScene.animate();
   });
 
 });
