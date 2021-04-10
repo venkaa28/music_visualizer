@@ -132,6 +132,17 @@ export class AudioService {
     return (typeof this.element !== 'undefined');
   }
 
+  stopMic() {
+    if (typeof this.micStream !== 'undefined') {
+      this.micStream.getAudioTracks().forEach(track => {
+        track.stop();
+        this.micStream.removeTrack(track);
+      });
+
+      this.micTrack.disconnect();
+    }
+  }
+
   // load the mic as the audio context
   loadMic(stream: MediaStream) {
 
@@ -140,11 +151,7 @@ export class AudioService {
       this.micStream = stream;
       this.micTrack = this.context.createMediaStreamSource(this.micStream);
     } else {
-      this.micStream.getTracks().forEach((track) => {
-        this.micStream.removeTrack(track);
-      })
-
-      this.micTrack.disconnect();
+      this.stopMic();
     }
 
     // set nodes here
@@ -178,15 +185,8 @@ export class AudioService {
       this.fileTrack.disconnect();
     }
 
-    if (typeof this.micStream !== 'undefined') {
-      this.micStream.getAudioTracks().forEach(track => {
-        track.stop();
-        this.micStream.removeTrack(track);
-      });
-
-      this.micTrack.disconnect();
-    }
-
+    this.stopMic();
+    
     // set nodes here
     this.gainNode = this.context.createGain(); // reset volume
     this.panNode = this.context.createStereoPanner(); // reset pan
