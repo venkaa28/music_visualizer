@@ -74,7 +74,6 @@ export class SpotifyService {
   //       .set("Authorization", 'Bearer ' + this.authService.getUser().spotifyAPIKey);
   //     this.http.get(url, {headers}).subscribe((resp) => this.feature = resp);
   //   } catch (e) {
-  //     console.log('Error with HTTP Request to spotify for track analysis data: ' + e);
   //     throw new Error('Error retrieving track feature data from spotify ');
   //   }
   // }

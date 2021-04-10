@@ -19,8 +19,6 @@ export class UserAuthGuard implements CanActivate {
   }
   
   private checkLogin(url: string): true|UrlTree {
-    console.log("AuthGuard used");
-
     if (this.authService.getLoggedIn()) { return true; }
 
     // Redirect to the login page

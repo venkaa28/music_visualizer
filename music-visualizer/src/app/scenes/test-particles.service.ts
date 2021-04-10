@@ -130,7 +130,6 @@ export class TestParticlesService {
   sceneAnimation() {
 
     this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    // console.log(dataArray);
 
     const lowerHalfArray = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
     const upperHalfArray = this.audioService.dataArray.slice((this.audioService.dataArray.length / 2) - 1, this.audioService.dataArray.length - 1);

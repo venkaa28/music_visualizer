@@ -195,7 +195,6 @@ export class WavesSceneService {
 
       const position = this.water.geometry.attributes.position;
 
-      // console.log(position);
       const vector = new THREE.Vector3();
       this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.water);
     }else {
@@ -219,7 +218,6 @@ export class WavesSceneService {
       (lowerHalfFrequncyData.length / 3) * 2 - 1);
     const highfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3) * 2, lowerHalfFrequncyData.length);
 
-    // console.log(lowerHalfFrequncyData.length);
 
 
     const lowFreqAvg = this.avg(lowfrequncyData);
@@ -248,8 +246,6 @@ export class WavesSceneService {
     vec3.fromBufferAttribute(pos, 1700);
 
     this.shark.position.y = Math.sin( time ) * .25 + midFreqAvgScalor;
-    console.log(this.shark.position.y);
-    //
     this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
 
     this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
