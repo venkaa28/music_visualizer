@@ -1,10 +1,9 @@
-import { Injectable } from '@angular/core';
-import {HttpClient, HttpHeaders, HttpParams, HttpResponse} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {environment} from "../../environments/environment";
 import {Router} from "@angular/router";
 import {AuthService} from "./auth.service";
 import {ToolsService} from "./tools.service";
-import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -142,6 +141,11 @@ export class SpotifyService {
     const currSegment = this.getSegment(trackProgress);
     const pitchAvg = this.tool.absAvg(currSegment.pitches);
     return  this.tool.modulate(pitchAvg, this.tool.min(currSegment.pitches), this.tool.max(currSegment.pitches), 0, 180);
+  }
+
+  getAvgPitch(trackProgress){
+    const currSegment = this.getSegment(trackProgress);
+    return  this.tool.absAvg(currSegment.pitches);
   }
 
   getSegmentLoudness(trackProgress){
