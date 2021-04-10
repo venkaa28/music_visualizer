@@ -18,6 +18,7 @@ export class SpotifyService {
   public sectionIndex: number;
   public sectionEnd: number;
   public avgSegmentDuration: number;
+  public trackDuration: number;
 
   constructor(public http: HttpClient, private router: Router, private authService: AuthService,
               private tool: ToolsService) {

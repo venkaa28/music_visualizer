@@ -135,7 +135,11 @@ export class WavesSceneService {
 
   updateSun(sun, water, scene, pmremGenerator) {
 
-    this.parameters.azimuth = (this.audioService.getTime() / this.audioService.getDuration()) * 0.5;
+    if(!this.spotifyBool){
+      this.parameters.azimuth = (this.audioService.getTime() / this.audioService.getDuration()) * 0.5;
+    }else {
+      this.parameters.azimuth = this.trackProgress/this.spotifyService.trackDuration *0.5;
+    }
     const theta = Math.PI * ( this.parameters.inclination - 0.5 );
     const phi = 2 * Math.PI * ( this.parameters.azimuth - 0.5 );
     sun.x = Math.cos(phi);
@@ -193,11 +197,18 @@ export class WavesSceneService {
     if (!this.spotifyBool){
       this.tool.freqSetup();
 
-      const position = this.water.geometry.attributes.position;
+      const time = performance.now() * 0.001;
+      const vec3 = new Vector3();
+      const pos = this.water.geometry.attributes.position;
+      vec3.fromBufferAttribute(pos, 1700);
 
-      // console.log(position);
-      const vector = new THREE.Vector3();
+      this.shark.position.y = Math.sin( time ) * .25 + this.tool.midFreqAvgScalor;
+
+      this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
+
       this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.water);
+      this.water.geometry.attributes.position.needsUpdate = true;
+      this.water.updateMatrix();
     }else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
         //const pitchAvg = this.tool.absAvg(currSegment.pitches);
@@ -205,69 +216,20 @@ export class WavesSceneService {
         const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
         const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
         const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
-        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+
+        const time = performance.now() * 0.001;
+
+        this.shark.position.y = Math.sin( time ) * 20 + 5;
+        this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
+
         this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.water);
+        this.water.geometry.attributes.position.needsUpdate = true;
+        this.water.updateMatrix();
       }
     }
 
-    this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    const numBins = this.audioService.analyzer.frequencyBinCount;
-
-    const lowerHalfFrequncyData = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
-    const lowfrequncyData = this.audioService.dataArray.slice(0, (lowerHalfFrequncyData.length / 3) - 1);
-    const midfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3),
-      (lowerHalfFrequncyData.length / 3) * 2 - 1);
-    const highfrequncyData = this.audioService.dataArray.slice((lowerHalfFrequncyData.length / 3) * 2, lowerHalfFrequncyData.length);
-
-    // console.log(lowerHalfFrequncyData.length);
-
-
-    const lowFreqAvg = this.avg(lowfrequncyData);
-    const midFreqAvg = this.avg(midfrequncyData);
-    const highFreqAvg = this.avg(highfrequncyData);
-
-    const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
-    const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
-    const highFreqDownScaled = highFreqAvg / highfrequncyData.length;
-
-
-    const lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0, 1, 0, 15);
-    const midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 10);
-    const highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 2);
-
-    // this.water.material.uniforms.distortionScale = 0;
-    // this.water.material.uniformsNeedUpdate = true;
-
-    // const position = this.mesh.geometry.attributes.position;
-    //
-    // const vector = new THREE.Vector3();
-    //
-    const time = performance.now() * 0.001;
-    const vec3 = new Vector3();
-    const pos = this.water.geometry.attributes.position;
-    vec3.fromBufferAttribute(pos, 1700);
-
-    this.shark.position.y = Math.sin( time ) * .25 + midFreqAvgScalor;
-    console.log(this.shark.position.y);
-    //
-    this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
-
-    this.wavesBuffer(1 + lowFreqAvgScalor, midFreqAvgScalor, highFreqAvgScalor);
-    this.water.geometry.attributes.position.needsUpdate = true;
-    this.water.updateMatrix();
-
-    // if (this.frame++ % 1 === 0) {
-    //   this.mesh.material.color.setRGB(
-    //     highFreqAvgScalor > 0 ? 1/highFreqAvgScalor * 30 : 255,
-    //     midFreqAvgScalor > 0 ? 1/midFreqAvgScalor * 30 : 255,
-    //     lowFreqAvgScalor > 0 ?  1/lowFreqAvgScalor * 30 : 255
-    //   );
-    // }
-
     this.updateSun(this.sun, this.water, this.scene, this.pmremGenerator);
-    // this.mesh.geometry.attributes.position.needsUpdate = true;
-    //  this.mesh.geometry.computeVertexNormals();
-    // this.mesh.updateMatrix();
+
 
   }
   // for re-use
