@@ -3,7 +3,7 @@ import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 // import {DEFAULT_EMITTER_RATE} from 'three-nebula/src/emitter/constants.js';
 import System from 'three-nebula';
 import * as THREE from 'three';
-import { Vector3, setY } from 'three';
+import { Vector3 } from 'three';
 import Nebula, { SpriteRenderer } from 'three-nebula';
 import {ToolsService} from '../services/tools.service'
 import {AudioService} from '../services/audio.service';
@@ -16,7 +16,7 @@ import scene3 from './rainbow.json';
 })
 export class NebulaSceneServiceService {
 
-  constructor(private ngZone: NgZone, public audioService: AudioService, private tool: ToolsService, 
+  constructor(private ngZone: NgZone, public audioService: AudioService, private tool: ToolsService,
     private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService) { }
 
   private canvas!: HTMLCanvasElement;
@@ -152,7 +152,7 @@ export class NebulaSceneServiceService {
       this.nebula.emitters[10].setPosition(new THREE.Vector3(this.vectors[10].x, this.tool.midFreqAvgScalor/2, this.vectors[10].z));
       // nobody likes high's
     } else {
-      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined' && this.vectors[1] !== 'undefined') {
+      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined' && typeof this.vectors[1] !== 'undefined') {
 
         if (this.lastProgress !== this.trackProgress) {
           this.lastProgress = this.trackProgress;

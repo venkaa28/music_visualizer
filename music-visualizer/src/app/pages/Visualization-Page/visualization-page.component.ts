@@ -58,9 +58,8 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.current = new Music();
     this.micUsed = false;
     this.spotifyUsed = false;
-    this.scene = this.scenesAvailable[0];
     this.menuTimeout = 2000;
-
+    this.getSceneIndex();
 
     // TODO: scroll text on hover
   }
@@ -99,6 +98,12 @@ export class VisualizationPageComponent implements AfterViewInit {
 
 
   /**************************************Loading functions**************************************/
+  async getSceneIndex() {
+    var sceneIndex = await this.authService.getSceneCookie();
+    this.scene = this.scenesAvailable[sceneIndex];
+    (document.getElementById('scene-slider') as HTMLInputElement).value = sceneIndex.toString();
+  }
+
 
   // load song from local file
   async loadFilePath(event: any) {
@@ -231,12 +236,8 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   // change the current visualization scene
   async changeScene(event: any) {
-    this.scene.cancelAnimation();
-
-    this.scene = this.scenesAvailable[event.value];
-    await this.scene.createScene(this.rendererCanvas);
-
-    this.scene.animate();
+    this.authService.setSceneCookie(event.value);
+    window.location.reload();
   }
 
   // change fft value based on slider input
