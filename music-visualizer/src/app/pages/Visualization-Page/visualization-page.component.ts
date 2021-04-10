@@ -185,6 +185,9 @@ export class VisualizationPageComponent implements AfterViewInit {
     if (this.authService.getUser().spotifyAPIKey == null) {
       await this.router.navigate(['../ProfilePage']);
     }
+
+    this.audioService.stopMic();
+
     this.scene.createScene(this.rendererCanvas);
     this.spotifyPlaybackService.addSpotifyPlaybackSdk(this.scene).then(() => {
       this.scenesAvailable.forEach((scene) => {
