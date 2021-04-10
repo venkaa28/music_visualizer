@@ -32,32 +32,32 @@ describe('TestParticlesService', () => {
 
   it('test createScene()', () => {
     // TODO: Integrate
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test animate()', () => {
     // TODO: Integrate
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test render()', () => {
     // TODO: Integrate
-    // expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test sceneAnimation()', () => {
     // TODO: Integrate
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test resize()', () => {
     // TODO: Integrate
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test makeRoughBall()', () => {
     // TODO: Integrate
-    //expect(true).toBe(false);
+    expect(true).toBe(false);
   });
 
   it('test fractionate()', () => {
