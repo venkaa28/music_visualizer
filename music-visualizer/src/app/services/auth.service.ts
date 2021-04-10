@@ -136,7 +136,6 @@ export class AuthService {
     var expireHours: number = 1; // number of hours to expire
     var expireDate: Date = new Date; // current + offset in milliseconds
     expireDate.setHours(expireDate.getHours() + expireHours);
-    console.log(expireDate);
 
     await this.cookieService.set('spotify', token, {path: '/', sameSite: 'Lax', expires: expireDate}); // set token cookie
   }
