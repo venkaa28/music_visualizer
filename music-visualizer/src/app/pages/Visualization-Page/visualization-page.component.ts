@@ -16,6 +16,7 @@ import {SpotifyPlaybackSdkService} from '../../services/spotify-playback-sdk.ser
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
 import {NebulaSceneServiceService} from '../../scenes/nebula-scene-service.service';
+import {SeaSceneService} from "../../scenes/sea-scene-service.service";
 
 
 type Dict = {[key: string]: any};
@@ -51,7 +52,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   private spotifyUsed: boolean; // control spotify
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
-
+              public seaScene: SeaSceneService,
               public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
               private spotifyPlaybackService: SpotifyPlaybackSdkService, public nebulaScene: NebulaSceneServiceService) {
     // initialize variables

@@ -56,18 +56,36 @@ describe('VisualizationPageComponent', () => {
   //   component.planeScene.animate();
   // });
 
-  it('test createScene()', () => {
-    // @ViewChild('rendererCanvas', {static: true})
-    // var rendererCanvas!: ElementRef<HTMLCanvasElement>;
+  it('test nebular', () => {
     component.nebulaScene.createScene(component.rendererCanvas);
-    component.planeScene.createScene(component.rendererCanvas);
-    component.demoScene.createScene(component.rendererCanvas);
-    //component.planeScene.animate();
-    //expect(true).toBe(false);
+    expect(component.nebulaScene).toBeTruthy();
   });
 
-  it('test animate()', () => {
-    //component.nebulaScene.animate();
+  it('test sea', () => {
+    component.seaScene.createScene(component.rendererCanvas);
+    expect(component.seaScene).toBeTruthy();
   });
+
+  // it('test waves', () => {
+  //   component.wavesScene.createScene(component.rendererCanvas);
+  //   expect(component.wavesScene).toBeTruthy();
+  // });
+
+  it('test demo', () => {
+    component.demoScene.createScene(component.rendererCanvas);
+    expect(component.demoScene).toBeTruthy();
+  });
+
+  it('test partical', () => {
+    component.testParticles.createScene(component.rendererCanvas);
+    expect(component.testParticles).toBeTruthy();
+  });
+
+  it('test nebular', () => {
+    component.planeScene.createScene(component.rendererCanvas);
+    expect(component.planeScene).toBeTruthy();
+  });
+
+
 
 });
