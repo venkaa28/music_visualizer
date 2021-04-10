@@ -54,6 +54,7 @@ describe('ToolsService', () => {
   it('test getIndicesOfMax(): many element array', () => {
     let testArray = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     expect(service.getIndicesOfMax(testArray, 4)).toEqual([9, 8, 7, 6]);
+  });
 
   it('wavesBuffer should set correct plane values', () => {
     var waveSize = null;
@@ -87,4 +88,6 @@ describe('ToolsService', () => {
     var minVal = 1;
     expect(service.fractionate(val, minVal, maxVal)).toBeCloseTo(0.0008001600320064013);
   });
+
 });
+
