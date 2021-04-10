@@ -41,20 +41,28 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   public audio: HTMLAudioElement; // audio element of window
   public current: Music; // music object
-  public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene, this.seaScene, this.waveScene]; // current scene being used
+
+  public readonly scenesAvailable = [this.planeScene, this.nebulaScene, this.seaScene, this.waveScene]; // current scene being used
+
   public micUsed: boolean;
 
   private scene: any; // current scene to use
   private menuTimeout: number; // timeout in ms of menu
   private timeout: number; // id of current timeout
 
-  constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
-    public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, public seaScene: SeaSceneService, public waveScene: WavesSceneService, private readonly notifierService: NotifierService) {
-      this.current = new Music();
-      this.micUsed = false;
-      this.scene = this.scenesAvailable[4];
-      this.menuTimeout = 3000;
-    }
+  constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public seaScene: SeaSceneService,
+              public waveScene: WavesSceneService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
+              private spotifyPlaybackService: SpotifyPlaybackSdkService, public nebulaScene: NebulaSceneServiceService) {
+    // initialize variables
+    this.current = new Music();
+    this.micUsed = false;
+    this.spotifyUsed = false;
+    this.scene = this.scenesAvailable[0];
+    this.menuTimeout = 2000;
+
+
+    // TODO: scroll text on hover
+  }
 
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement; // grab audio element from html
@@ -96,8 +104,25 @@ export class VisualizationPageComponent implements AfterViewInit {
   /**************************************Loading functions**************************************/
 
   // load song from local file
-  loadFilePath(event: any) {
-    var file = event as HTMLInputElement; // get filelist from html
+  async loadFilePath(event: any) {
+    let element = event as HTMLInputElement; // get filelist from html
+    let file = element.files[0];
+
+    if (typeof file === 'undefined') {
+      return;
+    }
+
+    if (this.spotifyUsed) {
+      this.spotifyPlaybackService.player.pause().then(() => {
+        this.spotifyUsed = false;
+        this.scenesAvailable.forEach((scene) => {
+          scene.spotifyBool = false;
+        });
+      });
+      await this.spotifyPlaybackService.player.removeListener('player_state_changed');
+      await this.spotifyPlaybackService.player.removeListener('ready');
+      this.spotifyPlaybackService.player.disconnect();
+    }
 
     this.current = new Music(); // init new music
     this.current.filepath = URL.createObjectURL(file.files[0]); // get filepath from html input
@@ -114,7 +139,19 @@ export class VisualizationPageComponent implements AfterViewInit {
   async loadMic() {
     this.current = new Music(); // init new music
     this.current.source = 'local'; // set source
-    this.audioService.pause();
+    await this.audioService.pause();
+
+    if (this.spotifyUsed) {
+      this.spotifyPlaybackService.player.pause().then(() => {
+        this.spotifyUsed = false;
+        this.scenesAvailable.forEach((scene) => {
+          scene.spotifyBool = false;
+        });
+      });
+      await this.spotifyPlaybackService.player.removeListener('player_state_changed');
+      await this.spotifyPlaybackService.player.removeListener('ready');
+      this.spotifyPlaybackService.player.disconnect();
+    }
 
     await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then((stream) => {
@@ -124,6 +161,25 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.micUsed = true;
 
     this.scene.animate();
+  }
+
+  async loadSpotify() {
+    // TODO: error handle not token cookie
+    await this.audioService.pause();
+    if (this.authService.getUser().spotifyAPIKey == null) {
+      await this.router.navigate(['../ProfilePage']);
+    }
+    this.scene.createScene(this.rendererCanvas);
+    this.spotifyPlaybackService.addSpotifyPlaybackSdk(this.scene).then(() => {
+      this.scenesAvailable.forEach((scene) => {
+        scene.spotifyBool = true;
+      });
+      }
+    );
+
+    this.spotifyUsed = true;
+
+    this.toggleUploadMenu();
   }
 
   /**************************************Audio controls**************************************/
@@ -156,9 +212,12 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   // change the current visualization scene
-  changeScene(event: any) {
+  async changeScene(event: any) {
+    this.scene.cancelAnimation();
+
     this.scene = this.scenesAvailable[event.value];
-    this.scene.createScene(this.rendererCanvas);
+    await this.scene.createScene(this.rendererCanvas);
+
     this.scene.animate();
   }
 

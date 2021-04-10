@@ -29,10 +29,6 @@ describe('PlaneSceneServiceService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
   it('test createScene()', () => {
     expect(true).toBe(false);
   });
@@ -52,5 +48,4 @@ describe('PlaneSceneServiceService', () => {
   it('test resize()', () => {
     expect(true).toBe(false);
   });
-
 });
