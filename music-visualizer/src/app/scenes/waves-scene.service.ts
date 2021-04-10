@@ -4,6 +4,7 @@ import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import { GUI } from './textures/dat.gui.module.js';
+import { OrbitControls } from './textures/OrbitControl.js';
 import { Water } from './textures/Water.js';
 import { Sky } from './textures/Sky.js';
 import {Vector3} from "three";
@@ -36,6 +37,7 @@ export class WavesSceneService {
   private sky: any;
   private parameters: {inclination, azimuth};
   private pmremGenerator:  THREE.PMREMGenerator;
+  private shark: THREE.Group;
 
   private frameId: number = null;
 
@@ -44,6 +46,7 @@ export class WavesSceneService {
       cancelAnimationFrame(this.frameId);
     }
   }
+
 
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
     this.canvas = canvas.nativeElement;
@@ -56,6 +59,7 @@ export class WavesSceneService {
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.loader = new GLTFLoader();
     // this.container.appendChild( this.renderer.domElement );
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 1, 20000);
@@ -66,7 +70,7 @@ export class WavesSceneService {
     this.scene.add(this.camera);
 
     const waterGeometry = new THREE.PlaneGeometry(10000, 10000, 100, 100);
-     this.water = new Water(
+    this.water = new Water(
       waterGeometry,
       {
         textureWidth: 512,
@@ -104,12 +108,17 @@ export class WavesSceneService {
     this.pmremGenerator = new THREE.PMREMGenerator( this.renderer );
 
     this.updateSun(this.sun, this.water, this.scene, this.pmremGenerator);
+    // "Shark" (https://skfb.ly/6YsQn) by Greg is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+    this.loader.load('../../../assets/3d_models/shark/scene.gltf', (model) => {
+      this.shark = model.scene;
+      this.shark.scale.set(5, 5, 5);
+      this.shark.rotateY(180);
+      this.scene.add( this.shark );
+    });
+    const geometry = new THREE.BoxGeometry( 30, 30, 30 );
+    const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
+    this.mesh = new THREE.Mesh( geometry, material );
 
-    // const geometry = new THREE.BoxGeometry( 30, 30, 30 );
-    // const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
-    //
-    // this.mesh = new THREE.Mesh( geometry, material );
-    // this.scene.add( this.mesh );
 
     // const controls = new OrbitControls( this.camera, this.renderer.domElement );
     // controls.maxPolarAngle = Math.PI * 0.495;
@@ -194,13 +203,13 @@ export class WavesSceneService {
     //
     // const vector = new THREE.Vector3();
     //
-     const time = performance.now() * 0.001;
-     const vec3 = new Vector3();
+    const time = performance.now() * 0.001;
+    const vec3 = new Vector3();
     const pos = this.water.geometry.attributes.position;
     vec3.fromBufferAttribute(pos, 1700);
 
-     this.shark.position.y = Math.sin( time ) * .25 + midFreqAvgScalor;
-     console.log(this.shark.position.y);
+    this.shark.position.y = Math.sin( time ) * .25 + midFreqAvgScalor;
+    console.log(this.shark.position.y);
     //
     this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
 
@@ -217,9 +226,9 @@ export class WavesSceneService {
     // }
 
     this.updateSun(this.sun, this.water, this.scene, this.pmremGenerator);
-     // this.mesh.geometry.attributes.position.needsUpdate = true;
-     //  this.mesh.geometry.computeVertexNormals();
-     // this.mesh.updateMatrix();
+    // this.mesh.geometry.attributes.position.needsUpdate = true;
+    //  this.mesh.geometry.computeVertexNormals();
+    // this.mesh.updateMatrix();
 
   }
   // for re-use
@@ -233,12 +242,12 @@ export class WavesSceneService {
     const time = window.performance.now() * .001;
     for (let i = 0, l = pos.count; i < l; i++) {
 
-     vec3.fromBufferAttribute(pos, i);
+      vec3.fromBufferAttribute(pos, i);
       vec3.sub(center);
 
       //const sampleNoise = this.noise.noise3d((vec3.x + time * 0.00001), (vec3.y + time * 0.00001), (vec3.z + time * 0.00001));
       const z = Math.sin(vec3.length() / -(waveSize) + (time)) * (magnitude1 + (magnitude1 / 2.5)) - (magnitude2);
-     pos.setZ(i, z);
+      pos.setZ(i, z);
 
     }
   }
