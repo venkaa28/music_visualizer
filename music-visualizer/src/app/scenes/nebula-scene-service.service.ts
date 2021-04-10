@@ -59,7 +59,6 @@ export class NebulaSceneServiceService {
     */
 
     await Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
-      console.log(loaded);
       const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
       this.nebula = loaded.addRenderer(nebulaRenderer);
       this.vectors = new Array<Vector3>(12);

@@ -17,8 +17,6 @@ export class LoggedInGuard implements CanActivate {
   }
 
   private checkLogin(url: string): true|UrlTree {
-    console.log("LoggedIn used");
-
     if (!this.authService.getLoggedIn()) { return true; }
 
     // Redirect to the login page

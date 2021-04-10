@@ -126,7 +126,6 @@ export class DemoSceneServiceService implements OnDestroy{
   sceneAnimation = () => {
     // if(typeof analyzer != "undefined") {
     this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    // console.log(dataArray);
 
     const lowerHalfArray = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
     const upperHalfArray = this.audioService.dataArray.slice((this.audioService.dataArray.length / 2) - 1, this.audioService.dataArray.length - 1);
@@ -142,8 +141,6 @@ export class DemoSceneServiceService implements OnDestroy{
     const upperMaxFr = upperMax / upperHalfArray.length;
     const upperAvgFr = upperAvg / upperHalfArray.length;
 
-    // console.log(plane.geometry.isBufferGeometry);
-    // console.log(plane2.geometry.isBufferGeometry);
     //this.makeRoughGround(this.plane, this.modulate(upperAvgFr, 0, 1, 0.5, 4));
     //this.makeRoughGround(this.plane2, this.modulate(lowerMaxFr, 0, 1, 0.5, 4));
 
@@ -208,7 +205,6 @@ export class DemoSceneServiceService implements OnDestroy{
     const vector = new THREE.Vector3();
     for (let i = 0,  l = position.count; i < l; i++){
       vector.fromBufferAttribute(position, i);
-      // console.log(vector);
       const amp = 1;
       const time = Date.now();
       const distance = (this.noise.noise(vector.x + time * 0.0003, vector.y + time * 0.0001) + 0) * distortionFr * amp;
