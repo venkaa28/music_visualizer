@@ -79,13 +79,13 @@ export class SpotifyPlaybackSdkService {
                                                     track_window: { current_track },
                                                   }) => {
         this.title = current_track.name;
-        
+
         this.artist = '';
         current_track.artists.forEach((value) => {
           this.artist += value.name + ', ';
         });
         this.artist = this.artist.slice(0, this.artist.length - 2);
-
+        this.spotifyService.trackDuration = duration;
         this.album = current_track.album.images[0].url;
 
         this.currTrackID = current_track.id;
@@ -106,7 +106,7 @@ export class SpotifyPlaybackSdkService {
 
         document.getElementById('song-title').textContent = this.title;
         document.getElementById('song-subtitle').textContent = this.artist;
-        
+
         scene.animate();
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });
