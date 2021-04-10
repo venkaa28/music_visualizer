@@ -623,13 +623,14 @@ export class SeaSceneService {
     }else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
 
-        const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
-        const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
+        // const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+        // const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
         const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-        const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+        //const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+        const avgPitch = this.spotifyService.getAvgPitch(this.trackProgress);
         // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
         // this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
-        this.tool.makeRoughBall(this.sea, this.modulate(Math.pow(this.tool.lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(this.tool.upperAvgFr, 0, 1, 0, 4))
+        this.tool.makeRoughBall(this.sea, this.modulate(Math.pow(segmentLoudness/100, 0.8), 0, 1, 0, 8), this.modulate(avgPitch, 0, 1, 0, 4))
       }
     }
 
