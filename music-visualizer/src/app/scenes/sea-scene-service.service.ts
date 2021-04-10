@@ -590,14 +590,6 @@ export class SeaSceneService {
     this.scene.add(hemisphereLight);
     this.scene.add(shadowLight);
 
-    // // spotlight for the sea
-    // const spotLight = new THREE.SpotLight(0xffffff);
-    // spotLight.intensity = 0.9;
-    // spotLight.position.set(-10, 40, 20);
-    // spotLight.lookAt(this.sea.mesh.position);
-    // spotLight.castShadow = true;
-    // this.scene.add(spotLight);
-
   }
 
   public animate(): void {
