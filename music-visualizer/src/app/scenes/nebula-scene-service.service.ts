@@ -76,7 +76,6 @@ export class NebulaSceneServiceService {
       antialias: true // smooth edges
     });
 
-
     // const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
 
     // sets the background color to black
