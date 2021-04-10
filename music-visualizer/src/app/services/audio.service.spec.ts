@@ -45,13 +45,6 @@ describe('AudioService', () => {
     expect(true).toBe(false);
   });
 
-
-  it('test getSongList()', () => {
-    service.getSongList();
-    // todo: expect
-    expect(true).toBe(false);
-  });
-
   it('test playOrPause()', () => {
     service.playOrPause();
     // todo: expect
@@ -66,20 +59,6 @@ describe('AudioService', () => {
 
   it('test pause()', () => {
     service.pause();
-    // todo: expect
-    expect(true).toBe(false);
-  });
-
-  it('test rewind()', () => {
-    var mockAudio = new Audio('../../../assets/music/tripleT.mp3');
-    service.loadSong(mockAudio);
-    // service.play();
-    // todo: expect
-    expect(service.audioElement.currentTime).toBe(0);
-  });
-
-  it('test reloadSong()', () => {
-    service.reloadSong();
     // todo: expect
     expect(true).toBe(false);
   });
