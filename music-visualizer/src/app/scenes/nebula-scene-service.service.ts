@@ -134,28 +134,18 @@ export class NebulaSceneServiceService {
     if (!this.spotifyBool){
       this.tool.freqSetup();
 
-      this.nebula.emitters[0];
-      //this.nebula.emitters[6];
-      //this.nebula.emitters[3];
-      //this.nebula.emitters[9];
+      // set emitter position based on low/mid/high frequency scalor
 
-      //this.nebula.emitters[1];
-      //this.nebula.emitters[7];
-      //this.nebula.emitters[4];
+      this.nebula.emitters[0].setPosition(new THREE.Vector3(this.vectors[0].x, -this.tool.lowFreqAvgScalor/2, this.vectors[0].z));
+      this.nebula.emitters[6].setPosition(new THREE.Vector3(this.vectors[6].x, -this.tool.lowFreqAvgScalor/2, this.vectors[6].z));
+      this.nebula.emitters[3].setPosition(new THREE.Vector3(this.vectors[3].x, -this.tool.lowFreqAvgScalor/2, this.vectors[3].z));
+      this.nebula.emitters[9].setPosition(new THREE.Vector3(this.vectors[9].x, -this.tool.lowFreqAvgScalor/2, this.vectors[9].z));
 
-
-      // the one particle furthest left
-      this.nebula.emitters[2].setPosition(new THREE.Vector3(-60 , this.tool.lowFreqAvgScalor , this.tool.midFreqAvgScalor));
-      //this.nebula.emitters[2].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
-
-      // the particle in the middle
-      this.nebula.emitters[1].setPosition(new THREE.Vector3(0, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor));
-      //this.nebula.emitters[1].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
-
-      // the particle furthest right
-      this.nebula.emitters[0].setPosition(new THREE.Vector3(60 , this.tool.highFreqAvgScalor , this.tool.lowFreqAvgScalor));
-      //this.nebula.emitters[0].setRotation(new THREE.Vector3(Math.sin(90) , midFreqDownScaled , highFreqDownScaled));
-
+      this.nebula.emitters[1].setPosition(new THREE.Vector3(this.vectors[1].x, this.tool.midFreqAvgScalor/2, this.vectors[1].z));
+      this.nebula.emitters[7].setPosition(new THREE.Vector3(this.vectors[7].x, this.tool.midFreqAvgScalor/2, this.vectors[7].z));
+      this.nebula.emitters[4].setPosition(new THREE.Vector3(this.vectors[4].x, this.tool.midFreqAvgScalor/2, this.vectors[4].z));
+      this.nebula.emitters[10].setPosition(new THREE.Vector3(this.vectors[10].x, this.tool.midFreqAvgScalor/2, this.vectors[10].z));
+      // nobody likes high's
     } else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined' && this.vectors[1] !== 'undefined') {
 
