@@ -62,6 +62,36 @@ export class ToolsService {
     }
   }
 
+
+  makeRoughBall(ball, bassFr: any, treFr: any){
+    // console.log(bassFr, treFr);
+    const position = ball.mesh.geometry.attributes.position;
+    const vector = new THREE.Vector3();
+    const time = window.performance.now() / 5;
+    for (let i = 0, l = position.count; i < l; i++) {
+      vector.fromBufferAttribute(position, i);
+      // console.log(vector);
+      const offset = ball.mesh.geometry.parameters.radius;
+      // console.log(offset);
+      const amp = 3;
+
+      vector.normalize();
+      // console.log(vector);
+      const rf = 0.1;
+      const distance = (offset + bassFr) + this.noise.noise3d((vector.x + rf * 50 * Math.sin((i + time) / l * Math.PI * 2)), (vector.y + rf * 5),
+        (vector.z + rf * 5)) * amp * treFr;
+
+      vector.multiplyScalar(distance);
+      position.setX(i, vector.x);
+      position.setY(i, vector.y);
+      position.setZ(i, vector.z);
+    }
+    ball.mesh.geometry.attributes.position.needsUpdate = true;
+    ball.mesh.geometry.computeVertexNormals();
+    ball.mesh.geometry.computeFaceNormals();
+    ball.mesh.updateMatrix();
+  };
+
   // Helper methods
   avg = (arr) => {
     const total = arr.reduce((sum, b) => sum + b);
@@ -118,7 +148,7 @@ export class ToolsService {
     emitter.setRate(Rate.fromJSON(json));
   }
 
-  
+
 
 
 }
