@@ -32,14 +32,14 @@ describe('ToolsService', () => {
   // Test Helper Methods
   it('should be correct avg', () => {
     // TODO: make and expect arr value
-    var arr = null;
-    expect(service.avg(arr)).toBe(null);
+    var arr = [1, 2, 3, 4, 5];
+    expect(service.avg(arr)).toBe(3);
   });
 
   it('should be correct absAvg', () => {
     // TODO: make and expect arr value
-    var arr = null;
-    expect(service.avg(arr)).toBe(null);
+    var arr = [-1, -2, -3, -4, -5];
+    expect(service.absAvg(arr)).toBe(2.6);
   });
 
   it('should be correct fractionate', () => {
