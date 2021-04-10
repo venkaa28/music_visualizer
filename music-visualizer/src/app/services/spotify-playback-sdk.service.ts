@@ -3,7 +3,7 @@ import {SpotifyService} from "./spotify.service";
 import {BehaviorSubject, Observable, Subscription} from 'rxjs';
 import {AuthService} from './auth.service';
 import {NotifierService} from 'angular-notifier';
-// import '@types/spotify-web-playback-sdk/index.d.ts';
+//import '@types/spotify-web-playback-sdk/index.d.ts';
 
 declare global {
   interface window {
@@ -79,7 +79,7 @@ export class SpotifyPlaybackSdkService {
                                                     duration,
                                                     track_window: { current_track },
                                                   }) => {
-        console.log(current_track);
+        //console.log(current_track);
         this.title = current_track.name;
         
         this.artist = '';
@@ -106,9 +106,6 @@ export class SpotifyPlaybackSdkService {
 
         var htmlAlbum = (document.getElementById('album') as HTMLMediaElement)
         htmlAlbum.src = this.album;
-        htmlAlbum.style.width = '20%';
-        htmlAlbum.style.height = '20%';
-        htmlAlbum.style.margin = '0';
 
         document.getElementById('song-title').textContent = this.title;
         document.getElementById('song-subtitle').textContent = this.artist;
