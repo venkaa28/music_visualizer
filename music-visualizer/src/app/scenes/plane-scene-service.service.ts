@@ -76,7 +76,8 @@ export class PlaneSceneServiceService {
     this.textureLoader = new THREE.TextureLoader();
     // renderer.shadowMap.enabled = true;
 
-    this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
+    /*
+    await this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
       this.darkSky = model.scene;
       this.darkSky.scale.set(450, 450, 450);
       this.darkSky.rotateY(180);
@@ -106,6 +107,7 @@ export class PlaneSceneServiceService {
 
       this.group.add(this.darkSky);
     });
+    */
 
     // sets a perspective camera
     this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
@@ -229,7 +231,7 @@ export class PlaneSceneServiceService {
 
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
-    this.darkSky.rotation.y += 0.0005;
+    //this.darkSky.rotation.y += 0.0005;
 
     if (this.secondPlane.position.z >= 6000){
       this.secondPlane.position.z = 0;
