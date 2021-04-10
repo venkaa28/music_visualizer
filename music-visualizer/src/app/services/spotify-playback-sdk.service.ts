@@ -45,7 +45,6 @@ export class SpotifyPlaybackSdkService {
     document.head.appendChild(script);
     window.onSpotifyWebPlaybackSDKReady = () => {
       console.log('The Web Playback SDK is ready. We have access to Spotify.Player');
-      // console.log(window.Spotify.Player);
       this.player = new Spotify.Player({
         name: 'MusicVisualizer',
         // volume: +localStorage.getItem('musiple-volume') / 100,
@@ -79,7 +78,6 @@ export class SpotifyPlaybackSdkService {
                                                     duration,
                                                     track_window: { current_track },
                                                   }) => {
-        //console.log(current_track);
         this.title = current_track.name;
 
         this.artist = '';
@@ -90,7 +88,6 @@ export class SpotifyPlaybackSdkService {
         this.spotifyService.trackDuration = duration;
         this.album = current_track.album.images[0].url;
 
-        console.log('Currently Playing', current_track.uri);
         this.currTrackID = current_track.id;
 
         try {
