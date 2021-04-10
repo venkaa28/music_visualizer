@@ -16,6 +16,8 @@ import {SpotifyPlaybackSdkService} from '../../services/spotify-playback-sdk.ser
 import {TestParticlesService} from '../../scenes/test-particles.service';
 import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
 import {NebulaSceneServiceService} from '../../scenes/nebula-scene-service.service';
+import { SeaSceneService } from 'src/app/scenes/sea-scene-service.service';
+import { WavesSceneService } from 'src/app/scenes/waves-scene.service';
 
 
 type Dict = {[key: string]: any};
@@ -41,7 +43,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   public audio: HTMLAudioElement; // audio element of window
   public current: Music; // music object
-  public readonly scenesAvailable = [this.planeScene, this.nebulaScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.nebulaScene, this.seaScene, this.waveScene]; // current scene being used
   public micUsed: boolean;
 
   private scene: any; // current scene to use
@@ -53,7 +55,8 @@ export class VisualizationPageComponent implements AfterViewInit {
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
 
               public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
-              private spotifyPlaybackService: SpotifyPlaybackSdkService, public nebulaScene: NebulaSceneServiceService) {
+              private spotifyPlaybackService: SpotifyPlaybackSdkService, public nebulaScene: NebulaSceneServiceService, public seaScene: SeaSceneService,
+              public waveScene: WavesSceneService) {
     // initialize variables
     this.current = new Music();
     this.micUsed = false;
@@ -236,7 +239,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   // change the current visualization scene
   async changeScene(event: any) {
-    this.authService.setSceneCookie(event.value);
+    this.authService.setSceneCookie(event.value - 1);
     window.location.reload();
   }
 

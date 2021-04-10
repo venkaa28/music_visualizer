@@ -68,9 +68,10 @@
 
             <!--Scene slider: broken right now-->
             <div id="scene">
-              <p style="display: inline">0</p>
-              <input id="scene-slider" type="range" min="0" max="1" value="0" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
-              <p style="display: inline">2</p>
+              <p style="display: inline">1</p>
+              <input id="scene-slider" type="range" min="1" max={{this.scenesAvailable.length}} value="1" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
+              <p style="display: inline">{{this.scenesAvailable.length}}</p>
+              <p class="edit-label">Scene</p>
             </div>
             
             <!--FFT slider-->
@@ -78,6 +79,7 @@
               <p style="display: inline">0</p>
               <input id="fft-slider" type="range" min="5" max="15" value="4" step="1" (change)="changeFFT($event.srcElement)">
               <p style="display: inline">9</p>
+              <p class="edit-label">Fast Fourier Transform</p>
             </div>
 
             <!--Smoothing time constant slider-->
@@ -85,6 +87,7 @@
               <p style="display: inline">0</p>
               <input id="sc-slider" type="range" min="0" max="0.99" value="0.74" step="0.01" (change)="changeSC($event.srcElement)">
               <p style="display: inline">1</p>
+              <p class="edit-label">Smoothing Constant</p>
             </div>
 
             <!--Volume slider-->
@@ -92,6 +95,7 @@
               <img src="../../../assets/icons/volumedown.svg">
               <input id= "volume-slider" type="range" min="0" max="1" value="1" step="0.1" (input)="changeVolume($event.srcElement)">
               <img src="../../../assets/icons/volumeup.svg">
+              <p class="edit-label">Volume</p>
             </div>
             
             <!--Pan slider-->
@@ -99,6 +103,7 @@
               <p style="display: inline;">L</p>
               <input id="panner-slider" type="range" style="display: inline;" min="-1" max="1" value="0" step="0.01" (input)="changePan($event.srcElement)">
               <p style="display: inline;">R</p>
+              <p class="edit-label">Pan</p>
             </div>
           </div>
   </div>
