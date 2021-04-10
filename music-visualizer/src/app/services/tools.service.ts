@@ -3,6 +3,7 @@ import {AudioService} from '../services/audio.service';
 // threejs
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
+import Nebula, { Rate } from 'three-nebula';
 
 @Injectable({
   providedIn: 'root'
@@ -86,4 +87,38 @@ export class ToolsService {
   max = (arr) => arr.reduce((a, b) => Math.max(a, b));
 
   constructor(public audioService: AudioService) {}
+
+  // given original array and number of indices to find, get the indices
+  // for 'length' number of indices
+  // expects array to contain more than one element and length to be shorter than array
+  public getIndicesOfMax(origArray: Array<number>, length) {
+    let sortedPitches = [...origArray];
+    sortedPitches.sort((a, b) => a - b);
+
+    let keptPitches = [];
+    for (let i = origArray.length - 1; i > origArray.length - length - 1; i--) {
+      keptPitches.push(sortedPitches[i]);
+    }
+
+    let keptIndices = [];
+    for (let i = 0; i < length; i++) {
+      keptIndices.push(origArray.indexOf(keptPitches[i]));
+    }
+    return keptIndices;
+  }
+
+  // set particle rate of given emitter
+  public setRate(emitter, perSecond) {
+    const json = {
+      particlesMin: 1,
+      particlesMax: 1,
+      perSecondMin: perSecond,
+      perSecondMax: perSecond,
+    };
+    emitter.setRate(Rate.fromJSON(json));
+  }
+
+  
+
+
 }

@@ -58,7 +58,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.current = new Music();
     this.micUsed = false;
     this.spotifyUsed = false;
-    this.scene = this.scenesAvailable[0];
+    this.scene = this.scenesAvailable[3];
     this.menuTimeout = 2000;
 
 
@@ -112,7 +112,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     if (this.spotifyUsed) {
       this.spotifyPlaybackService.player.pause().then(() => {
         this.spotifyUsed = false;
-        this.planeScene.spotifyBool = false;
+        this.nebulaScene.spotifyBool = false;
       });
       await this.spotifyPlaybackService.player.removeListener('player_state_changed');
       await this.spotifyPlaybackService.player.removeListener('ready');
@@ -146,6 +146,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     if (this.spotifyUsed) {
       this.spotifyPlaybackService.player.pause().then(() => {
         this.spotifyUsed = false;
+        this.nebulaScene.spotifyBool = false;
         this.planeScene.spotifyBool = false;
       });
       await this.spotifyPlaybackService.player.removeListener('player_state_changed');
@@ -175,7 +176,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
     this.scene.createScene(this.rendererCanvas);
     this.spotifyPlaybackService.addSpotifyPlaybackSdk(this.scene).then(() => {
-        this.planeScene.spotifyBool = true;
+        this.nebulaScene.spotifyBool = true;
       }
     );
     this.spotifyUsed = true;
@@ -225,7 +226,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   // change the current visualization scene
   changeScene(event: any) {
     this.scene.cancelAnimation();
-    this.scene = this.scenesAvailable[event.value];
+    this.scene = this.scenesAvailable[3];
     this.scene.createScene(this.rendererCanvas);
 
     if (this.audioService.fileLoaded()) {
