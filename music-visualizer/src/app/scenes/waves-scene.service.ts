@@ -6,6 +6,7 @@ import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import { GUI } from './textures/dat.gui.module.js';
 import { Water } from './textures/Water.js';
 import { Sky } from './textures/Sky.js';
+import {Vector3} from "three";
 
 
 @Injectable({
@@ -16,7 +17,7 @@ export class WavesSceneService {
   constructor(private ngZone: NgZone, public audioService: AudioService) {
     this.parameters = {
       inclination: 0.49,
-      azimuth: 0.00
+      azimuth: 0.01
     };
   }
   private water: Water;
@@ -117,9 +118,6 @@ export class WavesSceneService {
     // controls.maxDistance = 200.0;
     // controls.update();
 
-//     let stats = new Stats();
-//     this.scene.appendChild( stats.dom );
-
   }
 
   updateSun(sun, water, scene, pmremGenerator) {
@@ -196,10 +194,13 @@ export class WavesSceneService {
     //
     // const vector = new THREE.Vector3();
     //
-    // const time = performance.now() * 0.001;
-    // this.mesh.position.y = Math.sin( time ) * 20 + 5;
-    // this.mesh.rotation.x = time * 0.5;
-    // this.mesh.rotation.z = time * 0.51;
+     const time = performance.now() * 0.001;
+     const vec3 = new Vector3();
+    const pos = this.water.geometry.attributes.position;
+    vec3.fromBufferAttribute(pos, 1700);
+
+     this.shark.position.y = Math.sin( time ) * .25 + midFreqAvgScalor;
+     console.log(this.shark.position.y);
     //
     this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
 
