@@ -635,7 +635,7 @@ export class SeaSceneService {
     this.airplane.mesh.rotation.x += -0.1;
     this.pivot.rotation.z -= 0.01;
     this.sea.mesh.rotation.z += .005;
-    this.sea.mesh.rotation.y += .005;
+    // this.sea.mesh.rotation.y += .005;
     this.sky.mesh.rotation.z += .01;
     // this.sky.moveClouds(0.01);
     this.airplane.pilot.updateHairs();
