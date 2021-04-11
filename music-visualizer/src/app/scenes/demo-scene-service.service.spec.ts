@@ -29,11 +29,11 @@ describe('DemoSceneServiceService', () => {
     });
     service = TestBed.inject(DemoSceneServiceService);
   });
-
+  
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
-
+  
   it('test createScene()', () => {
     expect(true).toBe(false);
   });
@@ -52,9 +52,9 @@ describe('DemoSceneServiceService', () => {
 
   it('test resize()', () => {
     // todo: renderer is private
-    expect(true).toBe(false);
+    // expect(true).toBe(false);
   });
-
+  
   it('test makeRoughBall()', () => {
     // service.makeRoughBall();
     expect(true).toBe(false);

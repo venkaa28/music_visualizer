@@ -16,5 +16,6 @@
     <orderEntry type="library" name="angular" level="project" />
     <orderEntry type="library" name="magnific-popup.js" level="application" />
     <orderEntry type="library" name="jquery-easing" level="application" />
+    <orderEntry type="library" name="Spotify" level="application" />
   </component>
 </module>

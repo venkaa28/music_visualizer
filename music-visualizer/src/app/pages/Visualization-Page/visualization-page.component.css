@@ -57,6 +57,18 @@ input[type=range] {
   margin: 10px;
 }
 
+.edit-label {
+  font-size: small;
+}
+
+.glass-pane {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 15px;
+  border: 1px rgba(255, 255, 255, 0.15) solid;
+  backdrop-filter: blur(5px);
+  box-shadow: 5px 5px 5px 5px rgba(0, 0, 0, 0.2);
+}
+
 .overlay {
   text-align: center;
   height: 10%;
@@ -88,6 +100,26 @@ input[type=range] {
   height: 9px !important;
 }
 
+.select-button {
+  border-radius: 50%;
+  width: 60%;
+  height: 30%;
+  margin-left: 20%;
+  vertical-align: middle;
+  padding: 3%;
+  border: 5px black solid;
+}
+
+.select-img {
+  width: 100%;
+  height: 100%;
+}
+
+.select-text {
+  margin-top: 5%;
+  font-size: small;
+}
+
 .settings-button {
   width: 20%;
   margin-left: 1%;
@@ -96,7 +128,9 @@ input[type=range] {
 .song-display-container {
   display: inline-block;
   vertical-align: middle;
-  margin-right: 10%;
+  margin-right: 5%;
+  width: 15%;
+  height: 15%;
 }
 
 .song-text {
@@ -113,26 +147,22 @@ input[type=range] {
   width: 100% !important;
 }
 
-.upload-blur {
-  filter: blur(1px);
-}
-
 .upload-item {
   display: inline-block;
   text-align: center;
+  height: 100%;
   width: 20%;
   margin: 2%;
   border-radius: 15px;
   padding: 1%;
-  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /*******************************************************************************
                                       ID's
 *******************************************************************************/
 #album {
-  width: 200%;
-  height: 200%;
+  width: 100%;
+  height: 100%;
   position: relative;
 }
 
@@ -152,9 +182,7 @@ input[type=range] {
   position: absolute;
   bottom: 12%;
   left: 85%;
-  background-color: rgba(255, 255, 255, 0.4);
   text-align: center;
-  border-radius: 15px;
   padding: 1%;
   opacity: 0;
   width: 0%;
@@ -250,15 +278,17 @@ input[type=range] {
 #upload-menu {
   position: absolute;
   top: 20%;
-  border-radius: 15px;
   left: 20%;
   padding: 5%;
-  background-color: rgb(255, 255, 255, 0.5);
   color: black;
   width: 60%;
   height: 50%;
   text-align: center;
   transition: 0.1s 0.2s;
+}
+
+#upload-options {
+  margin-top: 5%;
 }
 
 #volume #panner {

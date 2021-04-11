@@ -130,7 +130,6 @@ export class TestParticlesService {
   sceneAnimation() {
 
     this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
-    // console.log(dataArray);
 
     const lowerHalfArray = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
     const upperHalfArray = this.audioService.dataArray.slice((this.audioService.dataArray.length / 2) - 1, this.audioService.dataArray.length - 1);
@@ -151,11 +150,11 @@ export class TestParticlesService {
     this.particles.rotation.y += 0.005;
     this.particles.rotation.z += 0.005;
 
-    this.particles.material.color.setRGB(
-        upperAvg > 0 ?  1/upperAvg * 30 : 255,
-        overallAvg > 0 ? 1/overallAvg * 30 : 255,
-        lowerAvg > 0 ? 1/lowerAvg * 30 : 255
-      );
+    // this.particles.material.color.setRGB(
+    //     upperAvg > 0 ?  1/upperAvg * 30 : 255,
+    //     overallAvg > 0 ? 1/overallAvg * 30 : 255,
+    //     lowerAvg > 0 ? 1/lowerAvg * 30 : 255
+    //   );
   }
 
 
