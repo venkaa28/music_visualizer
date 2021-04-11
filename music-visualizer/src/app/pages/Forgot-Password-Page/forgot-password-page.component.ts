@@ -22,7 +22,6 @@ export class ForgotPasswordPageComponent implements OnInit {
 
   async onSubmit(): Promise<void> {
     // request reset password email
-    console.log(this.emailForm.get('email')?.value);
     try {
       const res = await this.authService.resetPassword(this.emailForm.get('email')?.value);
       console.log(res);
