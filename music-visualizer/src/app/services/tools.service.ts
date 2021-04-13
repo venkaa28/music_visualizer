@@ -16,6 +16,9 @@ export class ToolsService {
   public highFreqAvgScalor;
   public lowerMaxFr;
   public upperAvgFr;
+  public lowFreqDownScaled;
+  public midFreqDownScaled;
+  public highFreqDownScaled;
   private noise: SimplexNoise = new SimplexNoise();
 
   public freqSetup() {
@@ -36,14 +39,14 @@ export class ToolsService {
     const highFreqAvg = this.avg(highfrequncyData);
 
     // Scale
-    const lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
-    const midFreqDownScaled = midFreqAvg / midfrequncyData.length;
-    const highFreqDownScaled = highFreqAvg / highfrequncyData.length;
+    this.lowFreqDownScaled = lowFreqAvg / lowfrequncyData.length;
+    this.midFreqDownScaled = midFreqAvg / midfrequncyData.length;
+    this.highFreqDownScaled = highFreqAvg / highfrequncyData.length;
 
     // Scalor
-    this.lowFreqAvgScalor = this.modulate(lowFreqDownScaled, 0, 1, 0, 15);
-    this.midFreqAvgScalor = this.modulate(midFreqDownScaled, 0, 1, 0, 25);
-    this.highFreqAvgScalor = this.modulate(highFreqDownScaled, 0, 1, 0, 20);
+    this.lowFreqAvgScalor = this.modulate(this.lowFreqDownScaled, 0, 1, 0, 15);
+    this.midFreqAvgScalor = this.modulate(this.midFreqDownScaled, 0, 1, 0, 25);
+    this.highFreqAvgScalor = this.modulate(this.highFreqDownScaled, 0, 1, 0, 20);
 
     const lowerMax = this.max(lowerHalfFrequncyData);
     const upperAvg = this.avg(upperHalfFrequncyData);
@@ -72,19 +75,19 @@ export class ToolsService {
   }
 
 
-  makeRoughBall(ball, bassFr: any, treFr: any){
+  makeRoughBall(ball, low, mid, high){
     const position = ball.mesh.geometry.attributes.position;
     const vector = new THREE.Vector3();
     const time = window.performance.now() / 5;
     for (let i = 0, l = position.count; i < l; i++) {
       vector.fromBufferAttribute(position, i);
       const offset = ball.mesh.geometry.parameters.radius;
-      const amp = 3;
+      const amp = mid;
 
       vector.normalize();
       const rf = 0.1;
-      const distance = (offset + bassFr) + this.noise.noise3d((vector.x + rf * 50 * Math.sin((i + time) / l * Math.PI * 2)), (vector.y + rf * 5),
-        (vector.z + rf * 5)) * amp * treFr;
+      const distance = (offset + low) + this.noise.noise3d((vector.x + rf * 50 * Math.sin((i + time) / l * Math.PI * 2)), (vector.y + rf * 5),
+        (vector.z + rf * 5)) * amp * high;
 
       vector.multiplyScalar(distance);
       position.setX(i, vector.x);
