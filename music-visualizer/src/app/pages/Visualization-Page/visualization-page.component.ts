@@ -10,6 +10,8 @@ import { AuthService } from '../../services/auth.service';
 import {AudioService} from '../../services/audio.service';
 import {Music} from '../../classes/music';
 
+// THREE
+import * as THREE from 'three';
 // scenes
 import {PlaneSceneServiceService} from '../../scenes/plane-scene-service.service';
 import {SpotifyPlaybackSdkService} from '../../services/spotify-playback-sdk.service';
@@ -51,6 +53,8 @@ export class VisualizationPageComponent implements AfterViewInit {
   private timeout: number; // id of current timeout
   private micStream: MediaStream; // user's microphone data
   private spotifyUsed: boolean; // control spotify
+  private renderer: THREE.WebGLRenderer;
+  private canvas!: HTMLCanvasElement;
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
 
@@ -68,9 +72,14 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.audio = this.audioFile.nativeElement; // grab audio element from html
-
-    this.scene.createScene(this.rendererCanvas);
+    this.audio = this.audioFile.nativeElement;// grab audio element from html
+    this.canvas = this.rendererCanvas.nativeElement;
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas, // grabs the canvas element
+      alpha: true,    // transparent background
+      antialias: true // smooth edges
+    });
+    this.scene.createScene(this.canvas, this.renderer);
 
     setInterval(() => {
       if (!this.micUsed) {
@@ -242,8 +251,16 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   // change the current visualization scene
   async changeScene(event: any) {
-    await this.authService.setSceneCookie((event.value as number));
-    window.location.reload();
+    this.scene.ngOnDestroy();
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas, // grabs the canvas element
+      alpha: true,    // transparent background
+      antialias: true // smooth edges
+    });
+    this.scene = this.scenesAvailable[event.value];
+    await this.scene.createScene(this.canvas, this.renderer);
+    this.scene.animate();
+    // window.location.reload();
   }
 
   // change fft value based on slider input
