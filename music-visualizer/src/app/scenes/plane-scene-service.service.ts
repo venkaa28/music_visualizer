@@ -65,12 +65,13 @@ export class PlaneSceneServiceService {
     this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
     // this.renderer.setClearColor(this.scene.fog.color);
     // sets the background color to black
-    this.renderer.setClearColor(0xFFFFFF);
+    this.renderer.setClearColor(0x000000);
 
     // sets the size of the canvas
     this.renderer.setSize(window.innerWidth , window.innerHeight);
     this.textureLoader = new THREE.TextureLoader();
     // renderer.shadowMap.enabled = true;
+
 
       this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
       this.darkSky = model.scene;
@@ -201,32 +202,39 @@ export class PlaneSceneServiceService {
     return val1 + slope * this.frame;
   }
 
-  sceneAnimation = () => {
+  sceneAnimation = async () => {
 
-    if (!this.spotifyBool){
+    if (!this.spotifyBool) {
       this.tool.freqSetup();
 
       const position = this.plane.geometry.attributes.position;
 
       const vector = new THREE.Vector3();
       this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
-    }else {
+    } else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+        if (this.spotifyService.firstTimbrePreProcess === null) {
+          await this.spotifyService.getTimbrePreProcessing();
+        } else {
+          const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+          const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
+          const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+          const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+          // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+          this.tool.wavesBuffer(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2,
+            this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75,
+            segmentLoudness, 0.005, this.plane);
+        }
         //const pitchAvg = this.tool.absAvg(currSegment.pitches);
-        const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
-        const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
-        const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-        const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
-        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
-        this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
+
       }
     }
 
     // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
-    this.darkSky.rotation.y += 0.0005;
-
-    if (this.secondPlane.position.z >= 6000){
+    // this.darkSky.rotation.y += 0.0005;
+     this.secondPlane.position.z += 0.005
+    if (this.secondPlane.position.z >= 6000) {
       this.secondPlane.position.z = 0;
     }
     this.secondPlane.geometry.attributes.position.needsUpdate = true;
