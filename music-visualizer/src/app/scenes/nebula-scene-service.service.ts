@@ -47,10 +47,10 @@ export class NebulaSceneServiceService {
     }
   }
 
-  public async createScene(canvas: ElementRef<HTMLCanvasElement>): Promise<void> {
+  public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
     this.scene = new THREE.Scene();
     this.canvas = canvas.nativeElement;
-
+    this.renderer = renderer;
     /*
     PP effect that I didn't get to work
     this.composer = new EffectComposer(this.renderer);
@@ -67,12 +67,6 @@ export class NebulaSceneServiceService {
       for (let i = 0; i < 12; i++) {
         this.vectors[i] = this.nebula.emitters[i].position;
       }
-    });
-
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas, // grabs the canvas element
-      alpha: true,    // transparent background
-      antialias: true // smooth edges
     });
 
     // const nebulaRenderer = new SpriteRenderer(this.scene, THREE);

@@ -54,18 +54,14 @@ export class PlaneSceneServiceService {
     }
   }
 
-  public async createScene(canvas: ElementRef<HTMLCanvasElement>): Promise<void> {
+  public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
     this.canvasRef = canvas;
     this.scene = new THREE.Scene();
     this.group = new THREE.Group();
     this.canvas = canvas.nativeElement;
     this.loader = new GLTFLoader();
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas, // grabs the canvas element
-      alpha: true,    // transparent background
-      antialias: true // smooth edges
-    });
+    this.renderer = renderer;
     this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
     // this.renderer.setClearColor(this.scene.fog.color);
     // sets the background color to black
@@ -76,7 +72,7 @@ export class PlaneSceneServiceService {
     this.textureLoader = new THREE.TextureLoader();
     // renderer.shadowMap.enabled = true;
 
-    await this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
+      this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
       this.darkSky = model.scene;
       this.darkSky.scale.set(450, 450, 450);
       this.darkSky.rotateY(180);
@@ -260,6 +256,6 @@ export class PlaneSceneServiceService {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
-    this.createScene(this.canvasRef);
+    this.createScene(this.canvasRef, this.renderer);
   }
 }
