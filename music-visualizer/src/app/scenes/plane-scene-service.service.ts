@@ -1,6 +1,5 @@
 import {ElementRef, Injectable, NgZone} from '@angular/core';
 import * as THREE from 'three';
-import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {ToolsService} from '../services/tools.service';
 import {AudioService} from '../services/audio.service';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
@@ -20,13 +19,11 @@ export class PlaneSceneServiceService {
   }
 
 
-  private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
   private scene!: THREE.Scene;
   private group!: THREE.Group;
   private ambLight!: THREE.AmbientLight;
-  private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
   private secondPlane!: THREE.Mesh;
   private loader: GLTFLoader;
@@ -35,8 +32,6 @@ export class PlaneSceneServiceService {
   private canvasRef: ElementRef<HTMLCanvasElement>;
   public frame = 0;
   public trackProgress = 0;
-  private prevSegment: [];
-  private timreIndex = 0;
   public spotifyBool: boolean;
 
 
@@ -58,19 +53,16 @@ export class PlaneSceneServiceService {
     this.canvasRef = canvas;
     this.scene = new THREE.Scene();
     this.group = new THREE.Group();
-    this.canvas = canvas.nativeElement;
     this.loader = new GLTFLoader();
 
     this.renderer = renderer;
     this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
-    // this.renderer.setClearColor(this.scene.fog.color);
     // sets the background color to black
     this.renderer.setClearColor(0x000000);
 
     // sets the size of the canvas
     this.renderer.setSize(window.innerWidth , window.innerHeight);
     this.textureLoader = new THREE.TextureLoader();
-    // renderer.shadowMap.enabled = true;
 
 
       this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
@@ -172,11 +164,8 @@ export class PlaneSceneServiceService {
     });
 
     if(this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(state => {
-        if (!state) {
-          // console.error('User is not playing music through the Web Playback SDK');
-          // return;
-        } else {
+      this.spotifyPlayer.player?.getCurrentState().then(state => {
+        if (state) {
           this.trackProgress = state.position;
           this.sceneAnimation();
           this.renderer.render(this.scene, this.camera);
@@ -187,19 +176,6 @@ export class PlaneSceneServiceService {
       this.renderer.render(this.scene, this.camera);
     }
 
-  }
-
-  // based on x1 + at = x2
-  smoothTransition(val1: number, val2: number, duration: number): number {
-    if (this.frame > duration) {
-      this.frame = 0;
-    } else {
-      this.frame++;
-    }
-
-    const delta = val2 - val1; // the change in values
-    const slope = delta / duration; // scale to duration for smoothing
-    return val1 + slope * this.frame;
   }
 
   sceneAnimation = async () => {
@@ -239,17 +215,6 @@ export class PlaneSceneServiceService {
     }
     this.secondPlane.geometry.attributes.position.needsUpdate = true;
     this.secondPlane.updateMatrix();
-
-    // this.group.rotation.x += 0.005;
-    // this.group.rotation.z += 0.005;
-    // if (this.frame++ % 1 === 0) {
-    //   this.plane.material.color.setRGB(
-    //     this.tool.highFreqAvgScalor > 0 ? 1 / this.tool.highFreqAvgScalor * 30 : 255,
-    //     this.tool.midFreqAvgScalor > 0 ? 1 / this.tool.midFreqAvgScalor * 30 : 255,
-    //     this.tool.lowFreqAvgScalor > 0 ?  1 / this.tool.lowFreqAvgScalor * 30 : 255
-    //   );
-    // }
-
 
     this.plane.geometry.attributes.position.needsUpdate = true;
     this.plane.updateMatrix();

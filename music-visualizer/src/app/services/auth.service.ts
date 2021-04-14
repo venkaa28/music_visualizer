@@ -123,15 +123,6 @@ export class AuthService {
     return this.cookieService.check('account');
   }
 
-  async setSceneCookie(sceneIndex: number): Promise<void> {
-    await this.cookieService.set('scene', sceneIndex.toString());
-  }
-
-  async getSceneCookie(): Promise<number> {
-    var index: string = await this.cookieService.get('scene');
-    return Number(index);
-  }
-
   async setSpotifyAuthToken(token: string) {
     var expireHours: number = 1; // number of hours to expire
     var expireDate: Date = new Date; // current + offset in milliseconds
