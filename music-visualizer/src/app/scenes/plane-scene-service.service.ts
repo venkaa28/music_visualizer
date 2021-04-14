@@ -54,18 +54,14 @@ export class PlaneSceneServiceService {
     }
   }
 
-  public async createScene(canvas: ElementRef<HTMLCanvasElement>): Promise<void> {
+  public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
     this.canvasRef = canvas;
     this.scene = new THREE.Scene();
     this.group = new THREE.Group();
     this.canvas = canvas.nativeElement;
     this.loader = new GLTFLoader();
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas, // grabs the canvas element
-      alpha: true,    // transparent background
-      antialias: true // smooth edges
-    });
+    this.renderer = renderer;
     this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
     // this.renderer.setClearColor(this.scene.fog.color);
     // sets the background color to black
@@ -76,36 +72,37 @@ export class PlaneSceneServiceService {
     this.textureLoader = new THREE.TextureLoader();
     // renderer.shadowMap.enabled = true;
 
-    // await this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
-    //   this.darkSky = model.scene;
-    //   this.darkSky.scale.set(450, 450, 450);
-    //   this.darkSky.rotateY(180);
-    //   this.textureLoader.load( '../../../assets/3d_models/fantasy_sky_background/textures/Material__25__background_JPG_002_emissive.jpg',
-    //     ( newTexture ) => {
-    //
-    //     newTexture.encoding = THREE.sRGBEncoding;
-    //     newTexture.flipY = false;
-    //     newTexture.wrapS = THREE.RepeatWrapping;
-    //     newTexture.wrapT = THREE.RepeatWrapping;
-    //
-    //     this.darkSky.traverse(( child ) => {
-    //
-    //       if (child instanceof THREE.Mesh) {
-    //         // create a global var to reference later when changing textures
-    //         // apply texture
-    //
-    //         (child.material as any).map = newTexture;
-    //         (child.material as any).backside = true;
-    //         (child.material as any).needsUpdate = true;
-    //         (child.material as any).map.needsUpdate = true;
-    //
-    //       }
-    //     });
-    //
-    //   });
-    //
-    //   this.group.add(this.darkSky);
-    // });
+
+      this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
+      this.darkSky = model.scene;
+      this.darkSky.scale.set(450, 450, 450);
+      this.darkSky.rotateY(180);
+      this.textureLoader.load( '../../../assets/3d_models/fantasy_sky_background/textures/Material__25__background_JPG_002_emissive.jpg',
+        ( newTexture ) => {
+
+        newTexture.encoding = THREE.sRGBEncoding;
+        newTexture.flipY = false;
+        newTexture.wrapS = THREE.RepeatWrapping;
+        newTexture.wrapT = THREE.RepeatWrapping;
+
+        this.darkSky.traverse(( child ) => {
+
+          if (child instanceof THREE.Mesh) {
+            // create a global var to reference later when changing textures
+            // apply texture
+
+            (child.material as any).map = newTexture;
+            (child.material as any).backside = true;
+            (child.material as any).needsUpdate = true;
+            (child.material as any).map.needsUpdate = true;
+
+          }
+        });
+
+      });
+
+      this.group.add(this.darkSky);
+    });
 
     // sets a perspective camera
     this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
@@ -267,6 +264,6 @@ export class PlaneSceneServiceService {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
-    this.createScene(this.canvasRef);
+    this.createScene(this.canvasRef, this.renderer);
   }
 }
