@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {AudioService} from '../services/audio.service';
 // threejs
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import Nebula, { Rate } from 'three-nebula';
+
 
 @Injectable({
   providedIn: 'root'
@@ -146,7 +147,7 @@ export class ToolsService {
   }
 
   // set particle rate of given emitter
-  public setRate(emitter, perSecond) {
+  public setRateHelper(emitter, perSecond) {
     const json = {
       particlesMin: 1,
       particlesMax: 1,
