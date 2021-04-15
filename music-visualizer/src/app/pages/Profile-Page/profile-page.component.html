@@ -27,12 +27,10 @@
 
 
 
-      <h1 class="text-uppercase"><strong>{{this.userData.name}}</strong></h1>
+      <h2 class="text-uppercase"><strong>{{this.userData.name}}</strong></h2>
       <p> {{this.userData.email}} </p>
 
       <div style="display: flex; padding: 2%">
-        <button class="btn btn-primary btn-block" type="submit">Change name</button>
-        <p style="margin-left: 2%">　</p> <!-- this is terrible-->
         <button class="btn btn-primary btn-block" type="submit" (click)="passwordReset()">Change password</button>
         <p style="margin-left: 2%">　</p>
         <button class="btn btn-primary btn-block" type="submit"(click)="logout()">Log Out</button>
@@ -44,14 +42,15 @@
             <img src="../../../assets/icons/spotifyLogo.svg.png" style="width: 70%; height: auto">
           </a>
           <p>Link Spotify</p>
+          <p>* Spotify Premium Membership Required *</p>
         </div>
 
-        <div style="display: inline-block; width: 20%; margin: 2%;">
-          <a (click)="this.spotifyLinked = false">
-            <img src="../../../assets/icons/soundcloud-2.svg" style="width: 100%; height: auto">
-          </a>
-          <p>Link Soundcloud</p>
-        </div>
+<!--        <div style="display: inline-block; width: 20%; margin: 2%;">-->
+<!--          <a (click)="this.spotifyLinked = false">-->
+<!--            <img src="../../../assets/icons/soundcloud-2.svg" style="width: 100%; height: auto">-->
+<!--          </a>-->
+<!--          <p>Link Soundcloud</p>-->
+<!--        </div>-->
       </div>
 
     </div>
