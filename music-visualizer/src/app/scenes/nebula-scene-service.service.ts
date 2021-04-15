@@ -154,21 +154,23 @@ export class NebulaSceneServiceService {
       this.nebula.emitters[10].setPosition(new THREE.Vector3(this.vectors[10].x, this.tool.midFreqAvgScalor/2, this.vectors[10].z));
       // nobody likes high's
     } else {
-      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined' && typeof this.vectors[1] !== 'undefined') {
+      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
         if (this.lastProgress !== this.trackProgress) {
           this.lastProgress = this.trackProgress;
           const curPitches = this.spotifyService.getSegment(this.trackProgress-800).pitches;
 
           let keptIndices = this.tool.getIndicesOfMax(curPitches, 4);
 
-          for (let i = 0; i < 12; i++) {
+          for (let i = 0; i < 10; i++) {
             let loopVal = curPitches[i];
             let perSecond = 1;
 
             if (keptIndices.includes(i) || (loopVal > 0.9)) {
-              perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.04);
+              perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.3);
             }
-            this.tool.setRate(this.nebula.emitters[i], perSecond);
+
+            //this.tool.setRate(this.nebula.emitters[i], perSecond);
+            this.nebula.emitters[i].setPosition(new THREE.Vector3(loopVal * 10, curPitches[10], curPitches[11])); 
           }
         }
       }
