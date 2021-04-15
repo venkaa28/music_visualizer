@@ -53,7 +53,6 @@ export class PlaneSceneServiceService {
     this.canvasRef = canvas;
     this.scene = new THREE.Scene();
     this.group = new THREE.Group();
-    this.canvas = canvas.nativeElement;
     this.loader = new GLTFLoader();
 
     this.renderer = renderer;
@@ -153,23 +152,21 @@ export class PlaneSceneServiceService {
     });
   }
 
-  public async render(): Promise<void> {
+  public render(): void {
     this.frameId = requestAnimationFrame(() => {
       this.render();
     });
 
-    if (this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(async state => {
-        if (!state) {
-          // console.error('User is not playing music through the Web Playback SDK');
-        } else {
+    if(this.spotifyBool === true) {
+      this.spotifyPlayer.player?.getCurrentState().then(state => {
+        if (state) {
           this.trackProgress = state.position;
-          await this.sceneAnimation();
+          this.sceneAnimation();
           this.renderer.render(this.scene, this.camera);
         }
       });
-    } else {
-      await this.sceneAnimation();
+    }else {
+      this.sceneAnimation();
       this.renderer.render(this.scene, this.camera);
     }
 
@@ -195,6 +192,7 @@ export class PlaneSceneServiceService {
             this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75,
             segmentLoudness, 0.005, this.plane);
         }
+        //const pitchAvg = this.tool.absAvg(currSegment.pitches);
 
       }
     }
