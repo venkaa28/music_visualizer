@@ -27,7 +27,7 @@ export class SeaSceneService {
   private sky;
   private pivot;
   public frame = 0;
-
+  private canvasRef: ElementRef<HTMLCanvasElement>;
   private height: any;
   private width: any;
   private frameId: number = null;
@@ -57,6 +57,7 @@ export class SeaSceneService {
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
     this.canvas = canvas.nativeElement;
+    this.canvasRef = canvas;
 
     // Create the camera
     let fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH;
@@ -289,41 +290,40 @@ export class SeaSceneService {
     }
 
 
-  public animate(): void {
-    this.ngZone.runOutsideAngular(() => {
+  public async animate(): Promise<void> {
+    await this.ngZone.runOutsideAngular(async () => {
       if (document.readyState !== 'loading') {
-        this.render();
+        await this.render();
       } else {
-        window.addEventListener('DOMContentLoaded', () => {
-          this.render();
+        window.addEventListener('DOMContentLoaded', async () => {
+          await this.render();
         });
       }
-      window.addEventListener('resize', () => {
-        this.resize();
+      window.addEventListener('resize', async () => {
+        await this.resize();
       });
     });
   }
 
 
 
-  public render(): void {
+  public async render(): Promise<void> {
     this.frameId = requestAnimationFrame(() => {
       this.render();
     });
 
-    if(this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(state => {
+    if (this.spotifyBool === true) {
+      this.spotifyPlayer.player.getCurrentState().then(async state => {
         if (!state) {
           // console.error('User is not playing music through the Web Playback SDK');
-          // return;
         } else {
           this.trackProgress = state.position;
-          this.sceneAnimation();
+          await this.sceneAnimation();
           this.renderer.render(this.scene, this.camera);
         }
       });
-    }else {
-      this.sceneAnimation();
+    } else {
+      await this.sceneAnimation();
       this.renderer.render(this.scene, this.camera);
     }
   }
@@ -368,7 +368,7 @@ export class SeaSceneService {
   }
 
 
-  public resize(): void {
+  public async resize(): Promise<void> {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -376,5 +376,6 @@ export class SeaSceneService {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
+    await this.createScene(this.canvasRef, this.renderer);
   }
 }
