@@ -20,7 +20,7 @@ export class CallbackComponent implements OnInit {
       const auth_token = fragment.substring(fragment.indexOf('=') + 1, fragment.indexOf('&'));
       await this.authService.setSpotifyAuthToken(auth_token);
       this.notifierService.notify('success', 'Succesfully authenticated Spotify');
-      await this.router.navigate(['../../ProfilePage']);
+      await this.router.navigate(['../../VisualizationPage']);
     }catch (e) {
       this.notifierService.notify('error', 'Unsuccessful Spotify Authentication');
     }

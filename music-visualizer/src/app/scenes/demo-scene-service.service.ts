@@ -148,7 +148,7 @@ export class DemoSceneServiceService implements OnDestroy{
 
   async sceneAnimation() {
     // if(typeof analyzer != "undefined") {
-    const {radius} = (this.ball as any).geometry.parameters.radius;
+    const radius = 10;
     if (!this.spotifyBool) {
       this.tool.freqSetup();
 
@@ -169,10 +169,10 @@ export class DemoSceneServiceService implements OnDestroy{
       //this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75
       const maxValScalor1 = this.tool.max(this.spotifyService.firstTimbrePreProcess!);
       const maxValScalor2 = this.tool.max(this.spotifyService.brightnessTimbrePreProcess!);
-      // this.tool.makeRoughBall(this.ball,
-      //   this.tool.modulate(Math.pow(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/maxValScalor1, 0.8), 0, 1, 0, 4),
-      //   this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/maxValScalor2,
-      //   scaledAvgPitch, radius);
+      this.tool.makeRoughBall(this.ball,
+        this.tool.modulate(Math.pow(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/maxValScalor1, 0.8), 0, 1, 0, 4),
+         this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/(maxValScalor2*2),
+        scaledAvgPitch, radius);
         }
       }
     this.group.rotation.x += 0.001;
