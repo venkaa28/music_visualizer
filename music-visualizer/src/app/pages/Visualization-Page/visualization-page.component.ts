@@ -44,7 +44,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   public audioFile!: ElementRef<HTMLMediaElement>;
 
   public audio: HTMLAudioElement; // audio element of window
-  public readonly scenesAvailable = [this.planeScene, this.seaScene, this.waveScene, this.nebulaScene, this.testParticles, this.demoScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.seaScene, this.nebulaScene, this.testParticles, this.demoScene, this.waveScene]; // current scene being used
   public scene: any; // current scene to use
 
   private menuTimeout: number; // timeout in ms of menu
@@ -184,10 +184,11 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.scenesAvailable.forEach((scene) => {
         scene.spotifyBool = true;
       });
+      this.scene.animate();
       }
     );
 
-    this.scene.animate();
+
     this.toggleUploadMenu();
   }
 
