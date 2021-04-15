@@ -75,6 +75,7 @@ export class ToolsService {
   }
 
 
+
   makeRoughBall(ball, low, mid, high, radius){
     const position = ball.geometry.attributes.position;
     const vector = new THREE.Vector3();
@@ -83,7 +84,6 @@ export class ToolsService {
       vector.fromBufferAttribute(position, i);
       const offset = radius;
       const amp = mid;
-
       vector.normalize();
       const rf = 0.1;
       const distance = (offset + low) + this.noise.noise3d((vector.x + rf * 50 * Math.sin((i + time) / l * Math.PI * 2)), (vector.y + rf * 5),
