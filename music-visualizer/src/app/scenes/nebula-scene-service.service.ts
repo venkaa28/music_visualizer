@@ -4,7 +4,7 @@ import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import System from 'three-nebula';
 import * as THREE from 'three';
 import { Vector3 } from 'three';
-import Nebula, { SpriteRenderer } from 'three-nebula';
+import Nebula, { SpriteRenderer, Rate } from 'three-nebula';
 import {ToolsService} from '../services/tools.service'
 import {AudioService} from '../services/audio.service';
 import {SpotifyService} from '../services/spotify.service';
@@ -21,6 +21,7 @@ export class NebulaSceneServiceService {
     private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService) { }
 
   private canvas!: HTMLCanvasElement;
+  private canvasRef: ElementRef<HTMLCanvasElement>;
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
   private scene!: THREE.Scene;
@@ -54,26 +55,19 @@ export class NebulaSceneServiceService {
   public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
     this.scene = new THREE.Scene();
     this.canvas = canvas.nativeElement;
+    this.canvasRef = canvas;
     this.renderer = renderer;
-    /*
-    PP effect that I didn't get to work
-    this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
-    this.composer.addPass(new EffectPass(this.camera, new BloomEffect()));
-    */
 
     await Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
       this.nebulaRenderer = new SpriteRenderer(this.scene, THREE);
       this.nebula = loaded.addRenderer(this.nebulaRenderer);
-      this.vectors = new Array<Vector3>(12).fill(new Vector3(0,0,0));
+      this.vectors = new Array<Vector3>(12);
 
       // Set up the vectors for the scene
       for (let i = 0; i < 12; i++) {
         this.vectors[i] = this.nebula.emitters[i].position;
       }
     });
-
-    // const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
 
     // sets the background color to black
     this.renderer.setClearColor(0x111111);
@@ -91,49 +85,45 @@ export class NebulaSceneServiceService {
 
     // rotates the camera
     this.camera.rotation.y += 0.01;
+    console.log("finished create scene");
 
   }
 
-  public animate(): void {
-    this.ngZone.runOutsideAngular(() => {
+  public async animate(): Promise<void> {
+    await this.ngZone.runOutsideAngular(async () => {
       if (document.readyState !== 'loading') {
-        this.render();
+        await this.render();
       } else {
-        window.addEventListener('DOMContentLoaded', () => {
-          this.render();
+        window.addEventListener('DOMContentLoaded', async () => {
+          await this.render();
         });
       }
-      window.addEventListener('resize', () => {
-        this.resize();
+      window.addEventListener('resize', async () => {
+        await this.resize();
       });
     });
   }
 
-  public render(): void {
+  public async render(): Promise<void> {
     this.frameId = requestAnimationFrame(() => {
       this.render();
     });
 
-    if(this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(state => {
+    if (this.spotifyBool === true) {
+      this.spotifyPlayer.player.getCurrentState().then(async state => {
         if (!state) {
           // console.error('User is not playing music through the Web Playback SDK');
-          // return;
-          this.trackProgress = 0;
-
-          this.renderer.render(this.scene, this.camera);
-          this.sceneAnimation();
         } else {
           this.trackProgress = state.position;
-
+          await this.sceneAnimation();
           this.renderer.render(this.scene, this.camera);
-          this.sceneAnimation();
         }
       });
-    }else {
-      this.sceneAnimation();
+    } else {
+      await this.sceneAnimation();
       this.renderer.render(this.scene, this.camera);
     }
+
   }
 
   sceneAnimation = () => {
@@ -152,15 +142,10 @@ export class NebulaSceneServiceService {
       this.nebula.emitters[7].setPosition(new THREE.Vector3(this.vectors[7].x, this.tool.midFreqAvgScalor/2, this.vectors[7].z));
       this.nebula.emitters[4].setPosition(new THREE.Vector3(this.vectors[4].x, this.tool.midFreqAvgScalor/2, this.vectors[4].z));
       this.nebula.emitters[10].setPosition(new THREE.Vector3(this.vectors[10].x, this.tool.midFreqAvgScalor/2, this.vectors[10].z));
-      // nobody likes high's
     } else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined' && typeof this.vectors[1] !== 'undefined') {
-        if (this.lastProgress !== this.trackProgress) {
-          this.lastProgress = this.trackProgress;
-          const curPitches = this.spotifyService.getSegment(this.trackProgress-800).pitches;
-
+          const curPitches = this.spotifyService.getSegment(this.trackProgress).pitches;
           let keptIndices = this.tool.getIndicesOfMax(curPitches, 4);
-
           for (let i = 0; i < 12; i++) {
             let loopVal = curPitches[i];
             let perSecond = 1;
@@ -168,18 +153,23 @@ export class NebulaSceneServiceService {
             if (keptIndices.includes(i) || (loopVal > 0.9)) {
               perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.04);
             }
-            this.tool.setRate(this.nebula.emitters[i], perSecond);
+            console.log(perSecond);
+            this.tool.setRateHelper(this.nebula.emitters[i], perSecond);
           }
-        }
       }
     }
     this.nebula.update();
   }
 
-  public resize(): void {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
+  public async resize(): Promise<void> {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(width, height);
+    await this.createScene(this.canvasRef, this.renderer);
   }
+
 }
