@@ -201,7 +201,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       antialias: true // smooth edges
     });
 
-    this.scene = this.scenesAvailable[event.value];
+    this.scene = this.scenesAvailable[event];
     await this.scene.createScene(this.canvas, this.renderer);
     this.scene.animate();
   }
@@ -371,8 +371,10 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   toggleMenu() {
     let menu = document.getElementById('menu');
+    let menu1 = document.getElementById('menu1');
 
     menu.style.opacity = '1';
+    menu1.style.opacity = '1';
 
     if (typeof this.timeout !== 'undefined') {
       window.clearTimeout(this.timeout);
@@ -380,6 +382,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.timeout = window.setTimeout(() => {
       menu.style.opacity = '0';
+      menu1.style.opacity = '0';
     }, this.menuTimeout);
   }
 

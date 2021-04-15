@@ -90,6 +90,29 @@ input[type=range] {
   left: 0;
 }
 
+.overlay-top {
+  text-align: center;
+  height: 5%;
+  width: 100%;
+  opacity: 1;
+  position: fixed;
+  z-index: 1;
+  top: 0%;
+  left: 0;
+  background-color: rgba(0,0,0, 0.4);
+  overflow-x: hidden;
+  overflow-y: hidden;
+  transition: 0.2s;
+}
+
+.overlay-top-button{
+  background-color: rgba(0,0,0, 0.4);
+  border: 1px solid rgba(0,0,0, 0.4);
+  padding: 10px 24px;
+  text-align: center;
+  display: inline-block;
+}
+
 .progress {
   display: inline-block;
   width: 80%;
