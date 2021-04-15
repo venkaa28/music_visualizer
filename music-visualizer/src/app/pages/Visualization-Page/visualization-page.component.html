@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
   <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
 </header>
-<body (mousemove)="toggleMenu()">
+<body>
   <audio #audioFile id='audio-file' crossorigin="anonymous">
     <source id="audio-source" origin="http://localhost:4200" type="audio/*" src="../../../assets/music/ILLENIUM, X Ambassadors - In Your Arms (Visualizer).mp3">
   </audio>
@@ -23,62 +23,33 @@
     </div>
   </div>
 
-  <div id="upload-menu" class="glass-pane" style="width: 60%;">
-    <p style="font-size: x-large;">Select an input source to visualize:</p>
-    <div id="upload-options">
-      <!--File loader-->
-      <div class="upload-item">
-        <div class="select-button" style="background-color: rgba(255, 255, 0, 0.6);">
-          <label class="select-img" id="load-label" for="load-file">
-            <img class="select-img" src="../../../assets/icons/folder.svg">
-          </label>
-          <br>
-        </div>
+  <div id="upload-menu" style="width: 80%;">
+    <!--File loader-->
+    <label id="load-label" for="load-file">Browse your computer for an audio file</label><br>
+    <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*">
 
-        <input type="file" id="load-file" name="load-file" (change)="loadFilePath($event.target)" accept="audio/*" capture>
+    <p>OR</p>
 
-        <p class="select-text">Local files</p>
-      </div>
-
-      <div class="upload-item">
-        <div class="select-button" style="background-color: rgba(50, 100, 255, 0.6);">
-          <a id="load-mic" (click)="loadMic()" capture>
-            <img class="select-img" src="../../../assets/icons/mic.svg">
-          </a>
-        </div>
-
-        <p class="select-text">Microphone</p>
-      </div>
-
-      <div class="upload-item">
-        <div class="select-button" style="background-color: rgba(0, 255, 0, 0.6);">
-          <a id="load-spotify" (click)="loadSpotify()">
-            <img class="select-img" src="../../../assets/icons/spotify.svg">
-          </a>
-        </div>
-        <p class="select-text">Connect Spotify</p>
-      </div>
-    </div>
+    <a id="load-mic" (click)="loadMic()">
+      Use the microphone
+    </a>
   </div>
 
-  <div id="edit-menu" class="glass-pane" style="width: 0%; opacity: 0;">
+  <div id="edit-menu" style="width: 0%; opacity: 0;">
     <!--Slider controls: volume, pan-->
           <div id="slider">
-              <p>Settings</p>
-
-            <div id="scene">
-              <p style="display: inline">1</p>
-              <input id="scene-slider" type="range" min="0" max="5" value="1" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
-              <p style="display: inline">{{this.scenesAvailable.length}}</p>
-              <p class="edit-label">Scene</p>
+            <!--Scene slider: broken right now
+              <div id="scene">
+              <label for="scene-slider">Scene </label>
+              <input id="scene-slider" type="range" min="0" max="2" value="0" step="1" (change)="changeScene($event.srcElement)">
             </div>
+            -->
 
             <!--FFT slider-->
             <div id="fft">
               <p style="display: inline">0</p>
               <input id="fft-slider" type="range" min="5" max="15" value="4" step="1" (change)="changeFFT($event.srcElement)">
               <p style="display: inline">9</p>
-              <p class="edit-label">Fast Fourier Transform</p>
             </div>
 
             <!--Smoothing time constant slider-->
@@ -86,7 +57,6 @@
               <p style="display: inline">0</p>
               <input id="sc-slider" type="range" min="0" max="0.99" value="0.74" step="0.01" (change)="changeSC($event.srcElement)">
               <p style="display: inline">1</p>
-              <p class="edit-label">Smoothing Constant</p>
             </div>
 
             <!--Volume slider-->
@@ -94,7 +64,6 @@
               <img src="../../../assets/icons/volumedown.svg">
               <input id= "volume-slider" type="range" min="0" max="1" value="1" step="0.1" (input)="changeVolume($event.srcElement)">
               <img src="../../../assets/icons/volumeup.svg">
-              <p class="edit-label">Volume</p>
             </div>
 
             <!--Pan slider-->
@@ -102,7 +71,6 @@
               <p style="display: inline;">L</p>
               <input id="panner-slider" type="range" style="display: inline;" min="-1" max="1" value="0" step="0.01" (input)="changePan($event.srcElement)">
               <p style="display: inline;">R</p>
-              <p class="edit-label">Pan</p>
             </div>
           </div>
   </div>
@@ -110,7 +78,8 @@
   <!--Control info menu listed when info button is pressed-->
   <div id="info-menu" style="width: 0%;">
     <h2>Controls:</h2>
-    <p>d     : play the previous song<br>
+    <p>m     : toggle the menu<br>
+       d     : play the previous song<br>
        a     : play the next song<br>
        space : play/pause the music</p>
   </div>
@@ -118,19 +87,16 @@
   <div id="menu" class="overlay">
     <div class="overlay-content">
       <!--Song controls-->
-      <div class="controls">
+      <div class="controls" *ngIf="!micUsed">
         <!--Song title and album art (if exists)-->
         <div id="song-display">
 
           <!--Song title-->
-          <div class="song-display-container">
-            <img id="album" src={{current.album}}>
-          </div>
-
-          <div id="song-display-text" class="song-display-container">
-            <p id="song-title" class="song-text">{{this.current.name}}</p>
-            <p id="song-subtitle" class="song-text">{{this.current.artist}}</p>
-          </div>
+          <!--
+          <img id="album" style="display: inline-block" src={{current.album}}>
+          -->
+          <p id="song-title" class="song-text">{{this.current.name}}</p>
+          <p id="song-subtitle" class="song-text">{{this.current.artist}}</p>
         </div>
 
 
@@ -154,7 +120,7 @@
 
         <div id="settings">
           <!--Open music chooser menu-->
-          <button class="settings-button" style="display: inline-block;" (click)="toggleUploadMenu()">
+          <button class="settings-button" style="display: inline-block;" (click)="toggleSongMenu()">
             <img class="ui-button" src="../../../assets/icons/upload.svg">
           </button>
 
@@ -170,7 +136,7 @@
         </div>
 
         <!--Progress bar-->
-        <div id="progress-time">
+        <div id="progress-time" *ngIf="!micUsed">
           <p id="progress-timestamp" style="display: inline-block;padding: 10px;">{{timeString(progress())}}</p>
           <div class="progress" style="display: inline-block;">
             <div id="progress-bar" class="progress-bar bg-light" style="background-color: rgba(255, 255, 255, 1);width: 0%;height: 100%;"></div>
