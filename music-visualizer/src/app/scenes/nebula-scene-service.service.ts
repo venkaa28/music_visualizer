@@ -65,7 +65,7 @@ export class NebulaSceneServiceService {
     await Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
       this.nebulaRenderer = new SpriteRenderer(this.scene, THREE);
       this.nebula = loaded.addRenderer(this.nebulaRenderer);
-      this.vectors = new Array<Vector3>(12).fill(0);
+      this.vectors = new Array<Vector3>(12).fill(new Vector3(0,0,0));
 
       // Set up the vectors for the scene
       for (let i = 0; i < 12; i++) {
