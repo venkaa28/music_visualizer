@@ -12,7 +12,7 @@
   <audio #audioFile id='audio-file' crossorigin="anonymous">
     <source id="audio-source" origin="http://localhost:4200" type="audio/*" src="../../../assets/music/ILLENIUM, X Ambassadors - In Your Arms (Visualizer).mp3">
   </audio>
-  
+
   <div id="canvas-visualizer">
     <canvas #rendererCanvas id="renderCanvas"></canvas>
 
@@ -44,7 +44,7 @@
               <input id="scene-slider" type="range" min="0" max="2" value="0" step="1" (change)="changeScene($event.srcElement)">
             </div>
             -->
-            
+
             <!--FFT slider-->
             <div id="fft">
               <p style="display: inline">0</p>
@@ -65,7 +65,7 @@
               <input id= "volume-slider" type="range" min="0" max="1" value="1" step="0.1" (input)="changeVolume($event.srcElement)">
               <img src="../../../assets/icons/volumeup.svg">
             </div>
-            
+
             <!--Pan slider-->
             <div id="panner">
               <p style="display: inline;">L</p>
@@ -90,7 +90,7 @@
       <div class="controls" *ngIf="!micUsed">
         <!--Song title and album art (if exists)-->
         <div id="song-display">
-          
+
           <!--Song title-->
           <!--
           <img id="album" style="display: inline-block" src={{current.album}}>

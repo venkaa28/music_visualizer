@@ -22,7 +22,7 @@ type Dict = {[key: string]: any};
   selector: 'app-visualization-page',
   templateUrl: './visualization-page.component.html',
   styleUrls: [
-    './visualization-page.component.css', 
+    './visualization-page.component.css',
     '../../../assets/bootstrap/css/bootstrap.min.css',
     '../../../assets/fonts/font-awesome.min.css',
   ],
@@ -41,7 +41,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   public current: Music; // music object
   public readonly scenesAvailable = [this.planeScene, this.testParticles, this.demoScene]; // current scene being used
   public micUsed: boolean;
-  
+
   private scene: any; // current scene to use
   private menuTimeout: number; // timeout in ms of menu
   private timeout: number; // id of current timeout
@@ -62,7 +62,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.audio = this.audioFile.nativeElement; // grab audio element from html
-    
+
     this.scene.createScene(this.rendererCanvas);
 
     setInterval(() => {
@@ -75,7 +75,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   // listen to keyboard events, perform actions if certain keys are pressed
   keyListener(event){
     event = event || window.event; //capture the event, and ensure we have an event
-    
+
     switch (event.key) {
       case ' ': // play/pause
         this.togglePlay();
@@ -292,7 +292,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   toggleEditMenu() {
     var editBox = document.getElementById('edit-menu');
-    
+
     if (editBox.style.width === '0%') {
       editBox.style.width = '15%';
       editBox.style.opacity = '1';
