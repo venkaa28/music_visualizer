@@ -15,7 +15,7 @@ export class SeaSceneService {
               private spotifyPlayer: SpotifyPlaybackSdkService,
               private tool: ToolsService) { }
 
-  private canvas!: HTMLCanvasElement;
+  public canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
   private scene!: THREE.Scene;
@@ -114,6 +114,9 @@ export class SeaSceneService {
     this.scene.add(shadowLight);
 
 
+      // to activate the lights, just add them to the scene
+      this.scene.add(hemisphereLight);
+      this.scene.add(shadowLight);
 
     // The Sea class
     const Sea = function(){
@@ -176,63 +179,62 @@ export class SeaSceneService {
         m.receiveShadow = true;
 
         this.mesh.add(m);
-      }
-    }
 
+      }
 
     // The function to create the sky(including the cloud)
     const Sky = function(){
       // Create an empty container
       this.mesh = new THREE.Object3D();
 
-      // choose a number of clouds to be scattered in the sky
-      this.nClouds = 15;
-      this.clouds_buf = [];
-      this.clouds_amp_buf = [];
-      this.clouds_phase_buf = [];
 
-      // To distribute the clouds consistently,
-      // we need to place them according to a uniform angle
-      const stepAngle = Math.PI * 2 / this.nClouds;
+        // choose a number of clouds to be scattered in the sky
+        this.nClouds = 15;
+        this.clouds_buf = [];
+        this.clouds_amp_buf = [];
+        this.clouds_phase_buf = [];
 
-      // create the clouds
-      for(let i = 0; i < this.nClouds; i++){
-        const c = new Cloud();
+        // To distribute the clouds consistently,
+        // we need to place them according to a uniform angle
+        const stepAngle = Math.PI * 2 / this.nClouds;
 
-        // set the rotation and the position of each cloud;
-        // for that we use a bit of trigonometry
-        const a = stepAngle * i; // this is the final angle of the cloud
-        const h = 330 + Math.random() * 50; // this is the distance between the center of the axis and the cloud itself
+        // create the clouds
+        for (let i = 0; i < this.nClouds; i++) {
+          const c = new Cloud();
+
+          // set the rotation and the position of each cloud;
+          // for that we use a bit of trigonometry
+          const a = stepAngle * i; // this is the final angle of the cloud
+          const h = 330 + Math.random() * 50; // this is the distance between the center of the axis and the cloud itself
 
 
-        c.mesh.position.y = Math.sin(a) * h;
-        c.mesh.position.x = Math.cos(a) * h;
+          c.mesh.position.y = Math.sin(a) * h;
+          c.mesh.position.x = Math.cos(a) * h;
 
-        // rotate the cloud according to its position
-        c.mesh.rotation.z = a + Math.PI / 2;
 
-        // for a better result, we position the clouds
-        // at random depths inside of the scene
-        c.mesh.position.z = -400 - Math.random() * 400;
+          // rotate the cloud according to its position
+          c.mesh.rotation.z = a + Math.PI / 2;
 
-        // we also set a random scale for each cloud
-        const s = 1 + Math.random() * 2;
-        c.mesh.scale.set(s, s, s);
+          // for a better result, we position the clouds
+          // at random depths inside of the scene
+          c.mesh.position.z = -400 - Math.random() * 400;
 
-        const pivot = new THREE.Object3D();
-        pivot.position.set(0, 100, 0);
-        pivot.add(c.mesh);
+          // we also set a random scale for each cloud
+          const s = 1 + Math.random() * 2;
+          c.mesh.scale.set(s, s, s);
 
-        this.clouds_buf.push(pivot);
-        this.clouds_amp_buf.push(Math.random());
-        this.clouds_phase_buf.push(Math.random() * Math.PI * 2);
+          const pivot = new THREE.Object3D();
+          pivot.position.set(0, 100, 0);
+          pivot.add(c.mesh);
 
-        // do not forget to add the mesh of each cloud in the scene
-        this.mesh.add(pivot);
+          this.clouds_buf.push(pivot);
+          this.clouds_amp_buf.push(Math.random());
+          this.clouds_phase_buf.push(Math.random() * Math.PI * 2);
+
+          // do not forget to add the mesh of each cloud in the scene
+          this.mesh.add(pivot);
+        }
       }
-    }
-
-
 
     // Create the sky
     this.sky = new Sky();
@@ -345,73 +347,182 @@ export class SeaSceneService {
           h.position.set(startPosX + row * 4, 0, startPosZ + col * 4);
           this.hairsTop.add(h);
         }
-        hairs.add(this.hairsTop);
+      };
 
-        // create the hairs at the side of the face
-        const hairSideGeom = new THREE.BoxGeometry(12,4,2);
-        hairSideGeom.applyMatrix4(new THREE.Matrix4().makeTranslation(-6,0,0));
-        const hairSideR = new THREE.Mesh(hairSideGeom, hairMat);
-        const hairSideL = hairSideR.clone();
-        hairSideR.position.set(8, -2, 6);
-        hairSideL.position.set(8, -2, -6);
-        hairs.add(hairSideR);
-        hairs.add(hairSideL);
-
-        // create the hairs at the back of the head
-        const hairBackGeom = new THREE.BoxGeometry(2, 8, 10);
-        const hairBack = new THREE.Mesh(hairBackGeom, hairMat);
-        hairBack.position.set(-1, -4, 0)
-        hairs.add(hairBack);
-        hairs.position.set(-5,5,0);
-
-        this.mesh.add(hairs);
-
-        var glassGeom = new THREE.BoxGeometry(5,5,5);
-        var glassMat = new THREE.MeshLambertMaterial({color:Colors.brown});
-        var glassR = new THREE.Mesh(glassGeom,glassMat);
-        glassR.position.set(6,0,3);
-        var glassL = glassR.clone();
-        glassL.position.z = -glassR.position.z
-
-        var glassAGeom = new THREE.BoxGeometry(11,1,11);
-        var glassA = new THREE.Mesh(glassAGeom, glassMat);
-        this.mesh.add(glassR);
-        this.mesh.add(glassL);
-        this.mesh.add(glassA);
-
-        var earGeom = new THREE.BoxGeometry(2,3,2);
-        var earL = new THREE.Mesh(earGeom,faceMat);
-        earL.position.set(0,0,-6);
-        var earR = earL.clone();
-        earR.position.set(0,0,6);
-        this.mesh.add(earL);
-        this.mesh.add(earR);
-      }
+      // create the sky
+      this.sky = new Sky();
+      this.sky.mesh.position.y = 100;
+      this.scene.add(this.sky.mesh);
 
 
 
       // The function to move the hair
       Pilot.prototype.updateHairs = function(){
+        this.mesh = new THREE.Object3D();
 
-        // get the hair
-        var hairs = this.hairsTop.children;
+        // Create the cabin
+        const geomCockpit = new THREE.BoxGeometry(60, 50, 50, 1, 1, 1);
+        const matCockpit = new THREE.MeshPhongMaterial({color: Colors.red});
+        const cockpit = new THREE.Mesh(geomCockpit, matCockpit);
+        cockpit.castShadow = true;
+        cockpit.receiveShadow = true;
+        this.mesh.add(cockpit);
 
-        // update them according to the angle angleHairs
-        var l = hairs.length;
-        for (var i=0; i<l; i++){
-          var h = hairs[i];
-          // each hair element will scale on cyclical basis between 75% and 100% of its original size
-          h.scale.y = .75 + Math.cos(this.angleHairs+i/3)*.25;
+        // Create the engine
+        const geomEngine = new THREE.BoxGeometry(20, 50, 50, 1, 1, 1);
+        const matEngine = new THREE.MeshPhongMaterial({color: Colors.white});
+        const engine = new THREE.Mesh(geomEngine, matEngine);
+        engine.position.x = 40;
+        engine.castShadow = true;
+        engine.receiveShadow = true;
+        this.mesh.add(engine);
+
+        // Create the tail
+        const geomTailPlane = new THREE.BoxGeometry(15, 20, 5, 1, 1, 1);
+        const matTailPlane = new THREE.MeshPhongMaterial({color: Colors.red});
+        const tailPlane = new THREE.Mesh(geomTailPlane, matTailPlane);
+        tailPlane.position.set(-35, 25, 0);
+        tailPlane.castShadow = true;
+        tailPlane.receiveShadow = true;
+        this.mesh.add(tailPlane);
+
+        // Create the wing
+        const geomSideWing = new THREE.BoxGeometry(40, 8, 150, 1, 1, 1);
+        const matSideWing = new THREE.MeshPhongMaterial({color: Colors.red});
+        const sideWing = new THREE.Mesh(geomSideWing, matSideWing);
+        sideWing.castShadow = true;
+        sideWing.receiveShadow = true;
+        this.mesh.add(sideWing);
+
+        // propeller
+        const geomPropeller = new THREE.BoxGeometry(20, 10, 10, 1, 1, 1);
+        const matPropeller = new THREE.MeshPhongMaterial({color: Colors.brown});
+        this.propeller = new THREE.Mesh(geomPropeller, matPropeller);
+        this.propeller.castShadow = true;
+        this.propeller.receiveShadow = true;
+
+        // blades
+        const geomBlade = new THREE.BoxGeometry(1, 100, 20, 1, 1, 1);
+        const matBlade = new THREE.MeshPhongMaterial({color: Colors.brownDark});
+
+        const blade = new THREE.Mesh(geomBlade, matBlade);
+        blade.position.set(8, 0, 0);
+        blade.castShadow = true;
+        blade.receiveShadow = true;
+        this.propeller.add(blade);
+        this.propeller.position.set(50, 0, 0);
+        this.mesh.add(this.propeller);
+
+
+        // function to create the pilot
+        const Pilot = function () {
+          this.mesh = new THREE.Object3D();
+          this.mesh.name = 'pilot';
+
+          // angleHairs is a property used to animate the hair later
+          this.angleHairs = 0;
+
+          // Body of the pilot
+          const bodyGeom = new THREE.BoxGeometry(15, 15, 15);
+          const bodyMat = new THREE.MeshPhongMaterial({color: Colors.brown});
+          const body = new THREE.Mesh(bodyGeom, bodyMat);
+          body.position.set(2, -12, 0);
+          this.mesh.add(body);
+
+          // Face of the pilot
+          const faceGeom = new THREE.BoxGeometry(10, 10, 10);
+          const faceMat = new THREE.MeshLambertMaterial({color: Colors.pink});
+          const face = new THREE.Mesh(faceGeom, faceMat);
+          this.mesh.add(face);
+
+          // Hair element
+          const hairGeom = new THREE.BoxGeometry(4, 4, 4);
+          const hairMat = new THREE.MeshLambertMaterial({color: Colors.brown});
+          const hair = new THREE.Mesh(hairGeom, hairMat);
+          // Align the shape of the hair to its bottom boundary, that will make it easier to scale.
+          hair.geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 2, 0));
+
+          // create a container for the hair
+          const hairs = new THREE.Object3D();
+
+          // create a container for the hairs at the top
+          // of the head (the ones that will be animated)
+          this.hairsTop = new THREE.Object3D();
+
+          // create the hairs at the top of the head
+          // and position them on a 3 x 4 grid
+          for (var i = 0; i < 12; i++) {
+            const h = hair.clone();
+            const col = i % 3;
+            const row = Math.floor(i / 3);
+            const startPosZ = -4;
+            const startPosX = -4;
+            h.position.set(startPosX + row * 4, 0, startPosZ + col * 4);
+            this.hairsTop.add(h);
+          }
+          hairs.add(this.hairsTop);
+
+          // create the hairs at the side of the face
+          const hairSideGeom = new THREE.BoxGeometry(12, 4, 2);
+          hairSideGeom.applyMatrix4(new THREE.Matrix4().makeTranslation(-6, 0, 0));
+          const hairSideR = new THREE.Mesh(hairSideGeom, hairMat);
+          const hairSideL = hairSideR.clone();
+          hairSideR.position.set(8, -2, 6);
+          hairSideL.position.set(8, -2, -6);
+          hairs.add(hairSideR);
+          hairs.add(hairSideL);
+
+          // create the hairs at the back of the head
+          const hairBackGeom = new THREE.BoxGeometry(2, 8, 10);
+          const hairBack = new THREE.Mesh(hairBackGeom, hairMat);
+          hairBack.position.set(-1, -4, 0)
+          hairs.add(hairBack);
+          hairs.position.set(-5, 5, 0);
+
+          this.mesh.add(hairs);
+
+          var glassGeom = new THREE.BoxGeometry(5, 5, 5);
+          var glassMat = new THREE.MeshLambertMaterial({color: Colors.brown});
+          var glassR = new THREE.Mesh(glassGeom, glassMat);
+          glassR.position.set(6, 0, 3);
+          var glassL = glassR.clone();
+          glassL.position.z = -glassR.position.z
+
+          var glassAGeom = new THREE.BoxGeometry(11, 1, 11);
+          var glassA = new THREE.Mesh(glassAGeom, glassMat);
+          this.mesh.add(glassR);
+          this.mesh.add(glassL);
+          this.mesh.add(glassA);
+
+          var earGeom = new THREE.BoxGeometry(2, 3, 2);
+          var earL = new THREE.Mesh(earGeom, faceMat);
+          earL.position.set(0, 0, -6);
+          var earR = earL.clone();
+          earR.position.set(0, 0, 6);
+          this.mesh.add(earL);
+          this.mesh.add(earR);
         }
-        // increment the angle for the next frame
-        this.angleHairs += 0.16;
-      }
-      this.pilot = new Pilot();
-      this.pilot.mesh.position.set(-10,27,0);
-      this.mesh.add(this.pilot.mesh);
-    };
 
+        // function to move the hair
+        Pilot.prototype.updateHairs = function () {
 
+          // get the hair
+          var hairs = this.hairsTop.children;
+
+          // update them according to the angle angleHairs
+          var l = hairs.length;
+          for (var i = 0; i < l; i++) {
+            var h = hairs[i];
+            // each hair element will scale on cyclical basis between 75% and 100% of its original size
+            h.scale.y = .75 + Math.cos(this.angleHairs + i / 3) * .25;
+          }
+          // increment the angle for the next frame
+          this.angleHairs += 0.16;
+        }
+        this.pilot = new Pilot();
+        this.pilot.mesh.position.set(-10, 27, 0);
+        this.mesh.add(this.pilot.mesh);
+      };
 
     // Create the plane
     this.airplane = new AirPlane();
@@ -423,7 +534,6 @@ export class SeaSceneService {
     this.scene.add(this.pivot);
 
   }
-
 
 
   public animate(): void {
@@ -470,19 +580,25 @@ export class SeaSceneService {
   sceneAnimation = () => {
     if (!this.spotifyBool){
       this.tool.freqSetup();
-      this.tool.makeRoughBall(this.sea,
+      this.tool.makeRoughBall(this.sea.mesh,
         this.tool.modulate(Math.pow(this.tool.lowFreqDownScaled, 0.8), 0, 1, 0, 2),
         this.tool.midFreqDownScaled,
-        this.tool.highFreqDownScaled)
+        this.tool.highFreqDownScaled,
+        this.sea.mesh.geometry.parameters.radius)
+
     }else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+
         const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+        // const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
         const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
         const avgPitch = this.spotifyService.getAvgPitch(this.trackProgress);
-        this.tool.makeRoughBall(this.sea,
+        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+        // this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
+        this.tool.makeRoughBall(this.sea.mesh,
           this.tool.modulate(Math.pow(segmentLoudness/100, 0.8), 0, 1, 0, 8),
           this.tool.modulate(avgPitch, 0, 1, 0, 4),
-          scaledAvgPitch)
+          scaledAvgPitch, this.sea.mesh.geometry.parameters.radius)
       }
     }
 
@@ -494,7 +610,7 @@ export class SeaSceneService {
     this.airplane.pilot.updateHairs();
   }
 
-
+    
   public resize(): void {
     const width = window.innerWidth - 50;
     const height = window.innerHeight - 50;

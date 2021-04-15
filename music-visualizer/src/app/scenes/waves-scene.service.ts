@@ -52,16 +52,17 @@ export class WavesSceneService {
   }
 
 
-  public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
+  public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
     this.canvas = canvas.nativeElement;
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas, // grabs the canvas element
-      alpha: true,    // transparent background
-      antialias: true // smooth edges
-    });
-    this.renderer.setPixelRatio( window.devicePixelRatio );
-    this.renderer.setSize( window.innerWidth, window.innerHeight );
+    // this.renderer = new THREE.WebGLRenderer({
+    //   canvas: this.canvas, // grabs the canvas element
+    //   alpha: true,    // transparent background
+    //   antialias: true // smooth edges
+    // }
+    this.renderer = renderer;
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.loader = new GLTFLoader();
     // this.container.appendChild( this.renderer.domElement );
@@ -79,11 +80,11 @@ export class WavesSceneService {
       {
         textureWidth: 512,
         textureHeight: 512,
-        waterNormals: new THREE.TextureLoader().load( '../../../assets/3d_models/waternormals.jpg', function ( texture ) {
+        waterNormals: new THREE.TextureLoader().load('../../../assets/3d_models/waternormals.jpg', function (texture) {
 
           texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
-        } ),
+        }),
         sunDirection: new THREE.Vector3(),
         sunColor: 0xffffff,
         waterColor: 0x001e0f,
@@ -91,37 +92,37 @@ export class WavesSceneService {
         fog: this.scene.fog !== undefined
       }
     );
-    this.water.rotation.x = - Math.PI/2;
+    this.water.rotation.x = -Math.PI / 2;
 
-    this.scene.add( this.water );
+    this.scene.add(this.water);
     // Skybox
 
     this.sky = new Sky();
-    this.sky.scale.setScalar( 10000 );
-    this.scene.add( this.sky );
+    this.sky.scale.setScalar(10000);
+    this.scene.add(this.sky);
 
     const skyUniforms = this.sky.material.uniforms;
 
-    skyUniforms[ 'turbidity' ].value = 10;
-    skyUniforms[ 'rayleigh' ].value = 2;
-    skyUniforms[ 'mieCoefficient' ].value = 0.005;
-    skyUniforms[ 'mieDirectionalG' ].value = 0.8;
+    skyUniforms['turbidity'].value = 10;
+    skyUniforms['rayleigh'].value = 2;
+    skyUniforms['mieCoefficient'].value = 0.005;
+    skyUniforms['mieDirectionalG'].value = 0.8;
 
 
-
-    this.pmremGenerator = new THREE.PMREMGenerator( this.renderer );
+    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
 
     this.updateSun(this.sun, this.water, this.scene, this.pmremGenerator);
     // "Shark" (https://skfb.ly/6YsQn) by Greg is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-    this.loader.load('../../../assets/3d_models/shark/scene.gltf', (model) => {
+    await this.loader.load('../../../assets/3d_models/shark/scene.gltf', (model) => {
       this.shark = model.scene;
       this.shark.scale.set(5, 5, 5);
       this.shark.rotateY(180);
-      this.scene.add( this.shark );
+      this.scene.add(this.shark);
     });
-    const geometry = new THREE.BoxGeometry( 30, 30, 30 );
-    const material = new THREE.MeshStandardMaterial( { roughness: 0 } );
-    this.mesh = new THREE.Mesh( geometry, material );
+    console.log("shark set.")
+    const geometry = new THREE.BoxGeometry(30, 30, 30);
+    const material = new THREE.MeshStandardMaterial({roughness: 0});
+    this.mesh = new THREE.Mesh(geometry, material);
 
 
     // const controls = new OrbitControls( this.camera, this.renderer.domElement );
@@ -280,6 +281,6 @@ export class WavesSceneService {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
-    this.createScene(this.canvasRef);
+    this.createScene(this.canvasRef, this.renderer);
   }
 }

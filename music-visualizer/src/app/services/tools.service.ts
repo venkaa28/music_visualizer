@@ -75,15 +75,15 @@ export class ToolsService {
   }
 
 
-  makeRoughBall(ball, low, mid, high){
-    const position = ball.mesh.geometry.attributes.position;
+
+  makeRoughBall(ball, low, mid, high, radius){
+    const position = ball.geometry.attributes.position;
     const vector = new THREE.Vector3();
     const time = window.performance.now() / 5;
     for (let i = 0, l = position.count; i < l; i++) {
       vector.fromBufferAttribute(position, i);
-      const offset = ball.mesh.geometry.parameters.radius;
+      const offset = radius;
       const amp = mid;
-
       vector.normalize();
       const rf = 0.1;
       const distance = (offset + low) + this.noise.noise3d((vector.x + rf * 50 * Math.sin((i + time) / l * Math.PI * 2)), (vector.y + rf * 5),
@@ -94,10 +94,10 @@ export class ToolsService {
       position.setY(i, vector.y);
       position.setZ(i, vector.z);
     }
-    ball.mesh.geometry.attributes.position.needsUpdate = true;
-    ball.mesh.geometry.computeVertexNormals();
-    ball.mesh.geometry.computeFaceNormals();
-    ball.mesh.updateMatrix();
+    ball.geometry.attributes.position.needsUpdate = true;
+    ball.geometry.computeVertexNormals();
+    ball.geometry.computeFaceNormals();
+    ball.updateMatrix();
   };
 
   // Helper methods
