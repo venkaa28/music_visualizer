@@ -45,7 +45,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   public audio: HTMLAudioElement; // audio element of window
   public current: Music; // music object
-  public readonly scenesAvailable = [this.planeScene, this.nebulaScene, this.seaScene, this.waveScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.nebulaScene, this.seaScene,this.testParticles, this.waveScene]; // current scene being used
   public micUsed: boolean;
 
   private scene: any; // current scene to use
@@ -197,7 +197,6 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.audioService.stopMic();
 
-    this.scene.createScene(this.rendererCanvas);
     this.spotifyPlaybackService.addSpotifyPlaybackSdk(this.scene).then(() => {
       this.scenesAvailable.forEach((scene) => {
         scene.spotifyBool = true;
