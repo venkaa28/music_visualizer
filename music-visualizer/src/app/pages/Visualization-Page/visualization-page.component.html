@@ -66,10 +66,9 @@
           <div id="slider">
               <p>Settings</p>
 
-            <!--Scene slider: broken right now-->
             <div id="scene">
               <p style="display: inline">1</p>
-              <input id="scene-slider" type="range" min="0" max="3" value="1" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
+              <input id="scene-slider" type="range" min="0" max="5" value="1" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
               <p style="display: inline">{{this.scenesAvailable.length}}</p>
               <p class="edit-label">Scene</p>
             </div>

@@ -118,16 +118,8 @@ export class SeaSceneService {
     // this.canvas.style.backgroundColor = '#add8e6';
       // Listen to the screen: if the user resizes it
       // we have to update the camera and the renderer size
-      window.addEventListener('resize', handleWindowResize, false);
 
-      function handleWindowResize() {
-        // update height and width of the renderer and the camera
-        HEIGHT = window.innerHeight;
-        WIDTH = window.innerWidth;
-        this.renderer.setSize(WIDTH, HEIGHT);
-        this.camera.aspect = WIDTH / HEIGHT;
-        this.camera.updateProjectionMatrix();
-      }
+
 
 
       var hemisphereLight, shadowLight;
@@ -599,19 +591,26 @@ export class SeaSceneService {
       this.tool.freqSetup();
 
       // this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
-      this.tool.makeRoughBall(this.sea, this.modulate(Math.pow(this.tool.lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(this.tool.upperAvgFr, 0, 1, 0, 4))
+      this.tool.makeRoughBall(this.sea.mesh,
+        this.tool.modulate(Math.pow(this.tool.lowFreqDownScaled, 0.8), 0, 1, 0, 2),
+        this.tool.midFreqDownScaled,
+        this.tool.highFreqDownScaled,
+        this.sea.mesh.geometry.parameters.radius)
 
     }else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
 
-        // const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+        const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
         // const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
         const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
         //const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
         const avgPitch = this.spotifyService.getAvgPitch(this.trackProgress);
         // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
         // this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
-        this.tool.makeRoughBall(this.sea, this.modulate(Math.pow(segmentLoudness/100, 0.8), 0, 1, 0, 8), this.modulate(avgPitch, 0, 1, 0, 4))
+        this.tool.makeRoughBall(this.sea.mesh,
+          this.tool.modulate(Math.pow(segmentLoudness/100, 0.8), 0, 1, 0, 8),
+          this.tool.modulate(avgPitch, 0, 1, 0, 4),
+          scaledAvgPitch, this.sea.mesh.geometry.parameters.radius)
       }
     }
 
@@ -625,26 +624,6 @@ export class SeaSceneService {
     // this.sky.moveClouds(0.01);
     this.airplane.pilot.updateHairs();
   }
-  // for re-use
-
-  fractionate(val: number, minVal: number, maxVal: number) {
-    return (val - minVal) / (maxVal - minVal);
-  }
-
-  modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number) {
-    const fr = this.fractionate(val, minVal, maxVal);
-    const delta = outMax - outMin;
-    return outMin + (fr * delta);
-  }
-
-  avg = (arr) => {
-    const total = arr.reduce((sum, b) => sum + b);
-    return (total / arr.length);
-  }
-
-  max = (arr) => arr.reduce((a, b) => Math.max(a, b));
-
-
   public resize(): void {
     const width = window.innerWidth - 50;
     const height = window.innerHeight - 50;
