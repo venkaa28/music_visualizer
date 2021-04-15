@@ -192,7 +192,7 @@ export class TestParticlesService {
 
   }
 
-  public async resize(): Promise<void> {
+  public resize(): void {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -200,7 +200,7 @@ export class TestParticlesService {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
-    await this.createScene(this.canvasRef, this.renderer);
+    this.createScene(this.canvasRef, this.renderer);
   }
 
 }

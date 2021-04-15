@@ -15,6 +15,7 @@ import scene3 from './rainbow.json';
   providedIn: 'root'
 })
 export class NebulaSceneServiceService {
+  private nebulaRenderer: SpriteRenderer;
 
   constructor(private ngZone: NgZone, public audioService: AudioService, private tool: ToolsService,
     private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService) { }
@@ -37,6 +38,8 @@ export class NebulaSceneServiceService {
 
   public ngOnDestroy = (): void => {
     if (this.frameId != null) {
+      // this.nebulaRenderer.remove();
+
       cancelAnimationFrame(this.frameId);
     }
   }
@@ -44,6 +47,7 @@ export class NebulaSceneServiceService {
   public cancelAnimation(): void {
     if (this.frameId != null) {
       cancelAnimationFrame(this.frameId);
+      // this.nebulaRenderer.remove();
     }
   }
 
@@ -59,9 +63,9 @@ export class NebulaSceneServiceService {
     */
 
     await Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
-      const nebulaRenderer = new SpriteRenderer(this.scene, THREE);
-      this.nebula = loaded.addRenderer(nebulaRenderer);
-      this.vectors = new Array<Vector3>(12);
+      this.nebulaRenderer = new SpriteRenderer(this.scene, THREE);
+      this.nebula = loaded.addRenderer(this.nebulaRenderer);
+      this.vectors = new Array<Vector3>(12).fill(0);
 
       // Set up the vectors for the scene
       for (let i = 0; i < 12; i++) {
@@ -93,10 +97,10 @@ export class NebulaSceneServiceService {
   public animate(): void {
     this.ngZone.runOutsideAngular(() => {
       if (document.readyState !== 'loading') {
-        this.render(this.nebula);
+        this.render();
       } else {
         window.addEventListener('DOMContentLoaded', () => {
-          this.render(this.nebula);
+          this.render();
         });
       }
       window.addEventListener('resize', () => {
@@ -105,9 +109,9 @@ export class NebulaSceneServiceService {
     });
   }
 
-  public render(nebula): void {
+  public render(): void {
     this.frameId = requestAnimationFrame(() => {
-      this.render(nebula);
+      this.render();
     });
 
     if(this.spotifyBool === true) {
@@ -115,10 +119,15 @@ export class NebulaSceneServiceService {
         if (!state) {
           // console.error('User is not playing music through the Web Playback SDK');
           // return;
+          this.trackProgress = 0;
+
+          this.renderer.render(this.scene, this.camera);
+          this.sceneAnimation();
         } else {
           this.trackProgress = state.position;
-          this.sceneAnimation();
+
           this.renderer.render(this.scene, this.camera);
+          this.sceneAnimation();
         }
       });
     }else {
@@ -146,7 +155,6 @@ export class NebulaSceneServiceService {
       // nobody likes high's
     } else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined' && typeof this.vectors[1] !== 'undefined') {
-
         if (this.lastProgress !== this.trackProgress) {
           this.lastProgress = this.trackProgress;
           const curPitches = this.spotifyService.getSegment(this.trackProgress-800).pitches;
