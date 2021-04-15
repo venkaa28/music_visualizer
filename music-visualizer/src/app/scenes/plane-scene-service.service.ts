@@ -26,7 +26,6 @@ export class PlaneSceneServiceService {
   private scene!: THREE.Scene;
   private group!: THREE.Group;
   private ambLight!: THREE.AmbientLight;
-  private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
   private secondPlane!: THREE.Mesh;
   private loader: GLTFLoader;
@@ -35,11 +34,7 @@ export class PlaneSceneServiceService {
   private canvasRef: ElementRef<HTMLCanvasElement>;
   public frame = 0;
   public trackProgress = 0;
-  private prevSegment: [];
-  private timreIndex = 0;
   public spotifyBool: boolean;
-
-
   private frameId: number = null;
 
   public ngOnDestroy = (): void => {
@@ -54,29 +49,23 @@ export class PlaneSceneServiceService {
     }
   }
 
-  public async createScene(canvas: ElementRef<HTMLCanvasElement>): Promise<void> {
+  public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
     this.canvasRef = canvas;
     this.scene = new THREE.Scene();
     this.group = new THREE.Group();
-    this.canvas = canvas.nativeElement;
     this.loader = new GLTFLoader();
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas, // grabs the canvas element
-      alpha: true,    // transparent background
-      antialias: true // smooth edges
-    });
+    this.renderer = renderer;
     this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
-    // this.renderer.setClearColor(this.scene.fog.color);
     // sets the background color to black
-    this.renderer.setClearColor(0xFFFFFF);
+    this.renderer.setClearColor(0x000000);
 
     // sets the size of the canvas
     this.renderer.setSize(window.innerWidth , window.innerHeight);
     this.textureLoader = new THREE.TextureLoader();
-    // renderer.shadowMap.enabled = true;
 
-    await this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
+      //loading in dark sky 3d model
+      this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
       this.darkSky = model.scene;
       this.darkSky.scale.set(450, 450, 450);
       this.darkSky.rotateY(180);
@@ -91,19 +80,13 @@ export class PlaneSceneServiceService {
         this.darkSky.traverse(( child ) => {
 
           if (child instanceof THREE.Mesh) {
-            // create a global var to reference later when changing textures
-            // apply texture
-
             (child.material as any).map = newTexture;
             (child.material as any).backside = true;
             (child.material as any).needsUpdate = true;
             (child.material as any).map.needsUpdate = true;
-
           }
         });
-
       });
-
       this.group.add(this.darkSky);
     });
 
@@ -116,14 +99,14 @@ export class PlaneSceneServiceService {
     this.camera.lookAt(0, 0, 0);
     // adds the camera to the scene
     this.scene.add(this.camera);
-
-
+    //creating the plane that responds to the music
     const planeGeometry = new THREE.PlaneGeometry(1600, 1600, 100, 100);
     const planeMaterial = new THREE.MeshLambertMaterial({
       color: 0x25E0EC,
       side: THREE.DoubleSide,
       wireframe: true
     });
+    //creating the plane that sits below and moves infinitely
     const secondPlaneGeometry = new THREE.PlaneGeometry(1600, 15000, 100, 100);
     const secondPlaneMaterial = new THREE.MeshLambertMaterial({
       color: 0x696969,
@@ -146,11 +129,11 @@ export class PlaneSceneServiceService {
     // adding ambient lighting to the scene
     this.ambLight = new THREE.AmbientLight(0xaaaaaa, 1);
     this.scene.add(this.ambLight);
-
+    //adding directional light
     const directionalLight = new THREE.DirectionalLight(0xffeedd);
     directionalLight.position.set(0, 0, 1);
     this.scene.add(directionalLight);
-
+    //adding the group to the scene
     this.scene.add(this.group);
   }
 
@@ -175,11 +158,8 @@ export class PlaneSceneServiceService {
     });
 
     if(this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(state => {
-        if (!state) {
-          // console.error('User is not playing music through the Web Playback SDK');
-          // return;
-        } else {
+      this.spotifyPlayer.player?.getCurrentState().then(state => {
+        if (state) {
           this.trackProgress = state.position;
           this.sceneAnimation();
           this.renderer.render(this.scene, this.camera);
@@ -192,67 +172,45 @@ export class PlaneSceneServiceService {
 
   }
 
-  // based on x1 + at = x2
-  smoothTransition(val1: number, val2: number, duration: number): number {
-    if (this.frame > duration) {
-      this.frame = 0;
-    } else {
-      this.frame++;
-    }
+  sceneAnimation = async () => {
 
-    const delta = val2 - val1; // the change in values
-    const slope = delta / duration; // scale to duration for smoothing
-    return val1 + slope * this.frame;
-  }
-
-  sceneAnimation = () => {
-
-    if (!this.spotifyBool){
+    if (!this.spotifyBool) {
       this.tool.freqSetup();
 
-      const position = this.plane.geometry.attributes.position;
-
-      const vector = new THREE.Vector3();
       this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
-    }else {
+    } else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+        if (this.spotifyService.firstTimbrePreProcess === null) {
+          await this.spotifyService.getTimbrePreProcessing();
+        } else {
+          const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+          const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
+          const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+          const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+          // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+          this.tool.wavesBuffer(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2,
+            this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75,
+            segmentLoudness, 0.005, this.plane);
+        }
         //const pitchAvg = this.tool.absAvg(currSegment.pitches);
-        const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
-        const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
-        const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-        const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
-        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
-        this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
+
       }
     }
-
-    // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
     this.darkSky.rotation.y += 0.0005;
-
-    if (this.secondPlane.position.z >= 6000){
+     this.secondPlane.position.z += 0.05;
+    if (this.secondPlane.position.z >= 6000) {
       this.secondPlane.position.z = 0;
     }
     this.secondPlane.geometry.attributes.position.needsUpdate = true;
     this.secondPlane.updateMatrix();
-
-    // this.group.rotation.x += 0.005;
-    // this.group.rotation.z += 0.005;
-    // if (this.frame++ % 1 === 0) {
-    //   this.plane.material.color.setRGB(
-    //     this.tool.highFreqAvgScalor > 0 ? 1 / this.tool.highFreqAvgScalor * 30 : 255,
-    //     this.tool.midFreqAvgScalor > 0 ? 1 / this.tool.midFreqAvgScalor * 30 : 255,
-    //     this.tool.lowFreqAvgScalor > 0 ?  1 / this.tool.lowFreqAvgScalor * 30 : 255
-    //   );
-    // }
-
 
     this.plane.geometry.attributes.position.needsUpdate = true;
     this.plane.updateMatrix();
   }
 
 
-  public resize(): void {
+  public async resize(): Promise<void> {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -260,6 +218,6 @@ export class PlaneSceneServiceService {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
-    this.createScene(this.canvasRef);
+    await this.createScene(this.canvasRef, this.renderer);
   }
 }

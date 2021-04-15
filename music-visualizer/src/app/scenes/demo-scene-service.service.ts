@@ -1,14 +1,30 @@
-import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
+import {ElementRef, Injectable, NgZone, OnDestroy} from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from "../services/audio.service";
+import {SpotifyService} from "../services/spotify.service";
+import {SpotifyPlaybackSdkService} from "../services/spotify-playback-sdk.service";
+import {ToolsService} from "../services/tools.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class DemoSceneServiceService implements OnDestroy{
 
+  constructor(private ngZone: NgZone, public audioService: AudioService,
+              private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService,
+              public tool: ToolsService) {
+    this.icosahedronGeometry = new THREE.IcosahedronGeometry(10, 10);
+    this.lambertMaterial = new THREE.MeshLambertMaterial({
+      color: 0xff00ee,
+      wireframe: true
+    });
+
+    this.ball = new THREE.Mesh(this.icosahedronGeometry, this.lambertMaterial);
+  }
+
   private canvas!: HTMLCanvasElement;
+  private canvasRef: ElementRef<HTMLCanvasElement>;
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
   private scene!: THREE.Scene;
@@ -18,6 +34,10 @@ export class DemoSceneServiceService implements OnDestroy{
   private noise = new SimplexNoise();
   private plane!: THREE.Mesh;
   private plane2!: THREE.Mesh;
+  public spotifyBool: boolean;
+  public trackProgress = 0;
+  public icosahedronGeometry: THREE.BufferGeometry;
+  public lambertMaterial: THREE.MeshLambertMaterial;
 
   private frameId: number = null;
 
@@ -33,17 +53,14 @@ export class DemoSceneServiceService implements OnDestroy{
     }
   }
 
-  public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
+  public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
 
     this.scene = new THREE.Scene();
     this.group = new THREE.Group();
     this.canvas = canvas.nativeElement;
+    this.canvasRef = canvas;
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas,
-      alpha: true,    // transparent background
-      antialias: true // smooth edges
-    });
+    this.renderer = renderer;
     this.renderer.setClearColor(0x000000);
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -71,14 +88,8 @@ export class DemoSceneServiceService implements OnDestroy{
     this.plane2.position.set(0, -30, 0);
     //this.group.add(this.plane2);
 
-    const icosahedronGeometry = new THREE.IcosahedronGeometry(10, 10);
-    const lambertMaterial = new THREE.MeshLambertMaterial({
-      color: 0xff00ee,
-      wireframe: true
-    });
 
-    this.ball = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
-    this.ball.position.set(0, 0, 0);
+    this.ball.position.set(0,0,0);
     this.group.add(this.ball);
 
 
@@ -98,59 +109,78 @@ export class DemoSceneServiceService implements OnDestroy{
     this.scene.add(this.group);
   }
 
-  public animate(): void {
-    this.ngZone.runOutsideAngular(() => {
+  public async animate(): Promise<void> {
+    await this.ngZone.runOutsideAngular(async () => {
       if (document.readyState !== 'loading') {
-        this.render();
+        await this.render();
       } else {
-        window.addEventListener('DOMContentLoaded', () => {
-          this.render();
+        window.addEventListener('DOMContentLoaded', async () => {
+          await this.render();
         });
       }
-      window.addEventListener('resize', () => {
-        this.resize();
+      window.addEventListener('resize', async () => {
+        await this.resize();
       });
     });
   }
 
-  public render(): void {
+  public async render(): Promise<void> {
     this.frameId = requestAnimationFrame(() => {
       this.render();
     });
 
-    this.sceneAnimation();
+    if (this.spotifyBool === true) {
+      this.spotifyPlayer.player.getCurrentState().then(async state => {
+        if (!state) {
+          // console.error('User is not playing music through the Web Playback SDK');
+        } else {
+          this.trackProgress = state.position;
+          await this.sceneAnimation();
+          this.renderer.render(this.scene, this.camera);
+        }
+      });
+    } else {
+      await this.sceneAnimation();
+      this.renderer.render(this.scene, this.camera);
+    }
 
-    this.renderer.render(this.scene, this.camera);
   }
 
-  sceneAnimation = () => {
+  async sceneAnimation() {
     // if(typeof analyzer != "undefined") {
-    this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
+    const {radius} = (this.ball as any).geometry.parameters.radius;
+    if (!this.spotifyBool) {
+      this.tool.freqSetup();
 
-    const lowerHalfArray = this.audioService.dataArray.slice(0, (this.audioService.dataArray.length / 2) - 1);
-    const upperHalfArray = this.audioService.dataArray.slice((this.audioService.dataArray.length / 2) - 1, this.audioService.dataArray.length - 1);
-
-    const overallAvg = this.avg(this.audioService.dataArray);
-    const lowerMax = this.max(lowerHalfArray);
-    const lowerAvg = this.avg(lowerHalfArray);
-    const upperMax = this.max(upperHalfArray);
-    const upperAvg = this.avg(upperHalfArray);
-
-    const lowerMaxFr = lowerMax / lowerHalfArray.length;
-    const lowerAvgFr = lowerAvg / lowerHalfArray.length;
-    const upperMaxFr = upperMax / upperHalfArray.length;
-    const upperAvgFr = upperAvg / upperHalfArray.length;
-
-    //this.makeRoughGround(this.plane, this.modulate(upperAvgFr, 0, 1, 0.5, 4));
-    //this.makeRoughGround(this.plane2, this.modulate(lowerMaxFr, 0, 1, 0.5, 4));
-
-    this.makeRoughBall(this.ball, this.modulate(Math.pow(lowerMaxFr, 0.8), 0, 1, 0, 8), this.modulate(upperAvgFr, 0, 1, 0, 4));
+      this.tool.makeRoughBall(this.ball,
+        this.tool.modulate(Math.pow(this.tool.lowFreqDownScaled, 0.8), 0, 1, 0, 4),
+        this.tool.midFreqDownScaled,
+        this.tool.highFreqDownScaled, radius);
+    } else {
+      if (this.spotifyService.firstTimbrePreProcess === null) {
+        await this.spotifyService.getTimbrePreProcessing();
+      } else {
+      const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+      const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
+      const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+      const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+      // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+      //this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2
+      //this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75
+      const maxValScalor1 = this.tool.max(this.spotifyService.firstTimbrePreProcess!);
+      const maxValScalor2 = this.tool.max(this.spotifyService.brightnessTimbrePreProcess!);
+      // this.tool.makeRoughBall(this.ball,
+      //   this.tool.modulate(Math.pow(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/maxValScalor1, 0.8), 0, 1, 0, 4),
+      //   this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/maxValScalor2,
+      //   scaledAvgPitch, radius);
+        }
+      }
     this.group.rotation.x += 0.001;
     this.group.rotation.y += 0.001;
 
   }
 
-  public resize(): void {
+  public async resize(): Promise<void> {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -158,101 +188,7 @@ export class DemoSceneServiceService implements OnDestroy{
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
+    await this.createScene(this.canvasRef, this.renderer);
   }
-
-  makeRoughBall = (mesh: any, bassFr: any, treFr: any) => {
-    const position = mesh.geometry.attributes.position;
-    const vector = new THREE.Vector3();
-    for (let i = 0,  l = position.count; i < l; i++){
-      vector.fromBufferAttribute(position, i);
-      const offset = mesh.geometry.parameters.radius;
-      const amp = 5;
-      const time = window.performance.now();
-      vector.normalize();
-      const rf = 0.00001;
-      const distance = (offset + bassFr ) + this.noise.noise3d((vector.x + time * rf * 5), (vector.y +  time * rf * 6),
-        (vector.z + time * rf * 7)) * amp * treFr;
-      vector.multiplyScalar(distance);
-      position.setX(i, vector.x);
-      position.setY(i, vector.y);
-      position.setZ(i, vector.z);
-      // mesh.geometry.attributes.position.needsUpdate = true;
-      // mesh.geometry.computeVertexNormals();
-      // mesh.geometry.computeFaceNormals();
-      // mesh.updateMatrix();
-    }
-    // mesh.geometry.vertices.forEach(function (vertex, i) {
-    //     let offset = mesh.geometry.parameters.radius;
-    //     let amp = 7;
-    //     let time = window.performance.now();
-    //     vertex.normalize();
-    //     let rf = 0.00001;
-    //     let distance = (offset + bassFr ) + noise.noise3D(vertex.x + time *rf*7, vertex.y +  time*rf*8, vertex.z + time*rf*9) * amp * treFr;
-    //     vertex.multiplyScalar(distance);
-    // });
-    mesh.geometry.attributes.position.needsUpdate = true;
-    mesh.geometry.computeVertexNormals();
-    mesh.geometry.computeFaceNormals();
-    mesh.updateMatrix();
-    // mesh.geometry.verticesNeedUpdate = true;
-    // mesh.geometry.normalsNeedUpdate = true;
-    // mesh.geometry.computeVertexNormals();
-    // mesh.geometry.computeFaceNormals();
-  }
-
-  makeRoughGround = (mesh: any, distortionFr: any) => {
-    const position = mesh.geometry.attributes.position;
-    const vector = new THREE.Vector3();
-    for (let i = 0,  l = position.count; i < l; i++){
-      vector.fromBufferAttribute(position, i);
-      const amp = 1;
-      const time = Date.now();
-      const distance = (this.noise.noise(vector.x + time * 0.0003, vector.y + time * 0.0001) + 0) * distortionFr * amp;
-      vector.z = distance;
-      // position.setX(i, vector.x);
-      // position.setY(i, vector.y);
-      position.setZ(i, vector.z);
-      // mesh.geometry.attributes.position.needsUpdate = true;
-      // mesh.updateMatrix();
-    }
-    // mesh.geometry.setAttribute("position", position);
-    // mesh.geometry.vertices.forEach(function (vertex, i) {
-    //     let amp = 2;
-    //     let time = Date.now();
-    //     let distance = (noise.noise2D(vertex.x + time * 0.0003, vertex.y + time * 0.0001) + 0) * distortionFr * amp;
-    //     vertex.z = distance;
-    // });
-    mesh.geometry.attributes.position.needsUpdate = true;
-    // mesh.geometry.computeVertexNormals();
-    // mesh.geometry.computeFaceNormals();
-    mesh.updateMatrix();
-    // mesh.geometry.verticesNeedUpdate = true;
-    // mesh.geometry.normalsNeedUpdate = true;
-    // mesh.geometry.computeVertexNormals();
-    // mesh.geometry.computeFaceNormals();
-  }
-
-
-
-  constructor(private ngZone: NgZone, public audioService: AudioService) { }
-
-  // some helper functions here
-
-  fractionate(val: number, minVal: number, maxVal: number) {
-    return (val - minVal) / (maxVal - minVal);
-  }
-
-  modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number) {
-    const fr = this.fractionate(val, minVal, maxVal);
-    const delta = outMax - outMin;
-    return outMin + (fr * delta);
-  }
-
-  avg = (arr) => {
-    const total = arr.reduce((sum, b) => sum + b);
-    return (total / arr.length);
-  }
-
-  max = (arr) => arr.reduce((a, b) => Math.max(a, b));
 
 }

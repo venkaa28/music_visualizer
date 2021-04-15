@@ -69,13 +69,13 @@
             <!--Scene slider: broken right now-->
             <div id="scene">
               <p style="display: inline">1</p>
-              <input id="scene-slider" type="range" min="0" max="3" value="1" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
+              <input id="scene-slider" type="range" min="0" max="5" value="0" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
               <p style="display: inline">{{this.scenesAvailable.length}}</p>
               <p class="edit-label">Scene</p>
             </div>
 
             <!--FFT slider-->
-            <div id="fft">
+            <div id="fft" *ngIf="!this.scene?.spotifyBool">
               <p style="display: inline">0</p>
               <input id="fft-slider" type="range" min="5" max="15" value="4" step="1" (change)="changeFFT($event.srcElement)">
               <p style="display: inline">9</p>
@@ -83,7 +83,7 @@
             </div>
 
             <!--Smoothing time constant slider-->
-            <div id="sc">
+            <div id="sc" *ngIf="!this.scene?.spotifyBool">
               <p style="display: inline">0</p>
               <input id="sc-slider" type="range" min="0" max="0.99" value="0.74" step="0.01" (change)="changeSC($event.srcElement)">
               <p style="display: inline">1</p>
@@ -99,7 +99,7 @@
             </div>
 
             <!--Pan slider-->
-            <div id="panner">
+            <div id="panner" *ngIf="!this.scene?.spotifyBool">
               <p style="display: inline;">L</p>
               <input id="panner-slider" type="range" style="display: inline;" min="-1" max="1" value="0" step="0.01" (input)="changePan($event.srcElement)">
               <p style="display: inline;">R</p>
@@ -125,12 +125,12 @@
 
           <!--Song title-->
           <div class="song-display-container">
-            <img id="album" src={{current.album}}>
+            <img id="album" src="../../../assets/icons/disc.svg">
           </div>
 
           <div id="song-display-text" class="song-display-container">
-            <p id="song-title" class="song-text">{{this.current.name}}</p>
-            <p id="song-subtitle" class="song-text">{{this.current.artist}}</p>
+            <p id="song-title" class="song-text">Unknown</p>
+            <p id="song-subtitle" class="song-text">Unknown</p>
           </div>
         </div>
 
@@ -144,7 +144,7 @@
 
           <!--Play/Pause button-->
           <button (click)="togglePlay()">
-            <img class="custom-icon-play" src={{playPauseIcon()}}>
+            <img id="play" class="custom-icon-play" src={{playPauseIcon()}}>
           </button>
 
           <!--Skip button-->
