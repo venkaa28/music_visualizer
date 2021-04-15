@@ -1,8 +1,7 @@
-import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
+import { Injectable, ElementRef, NgZone } from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
-import {GLTF, GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
 import {ToolsService} from '../services/tools.service'
 import {SpotifyPlaybackSdkService} from "../services/spotify-playback-sdk.service";
 import {SpotifyService} from "../services/spotify.service";
@@ -23,10 +22,6 @@ export class SeaSceneService {
   private hemisphereLight;
   private shadowLight;
   private noise = new SimplexNoise();
-  private plane!: THREE.Mesh;
-  private cylinder: THREE.Mesh;
-  private loader: GLTFLoader;
-  private textureLoader: THREE.TextureLoader;
   private sea;
   private airplane;
   private sky;
@@ -35,13 +30,7 @@ export class SeaSceneService {
 
   private height: any;
   private width: any;
-  private c1: 0xf7d9aa;
-  private aspectRatio: number;
-  private fieldOfView: number;
-  private nearPlane: number;
-  private farPlane: number;
   private frameId: number = null;
-  private cylinderGeometry: any;
   public spotifyBool: boolean;
   public trackProgress = 0;
 
@@ -54,7 +43,7 @@ export class SeaSceneService {
 
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
 
-    // define the colors
+    // Define the colors
     const Colors = {
       red: 0xf25346,
       white: 0xd8d0d1,
@@ -64,28 +53,20 @@ export class SeaSceneService {
       blue: 0x68c3c0,
     };
 
-    this.canvas = canvas.nativeElement;
 
-    // background color
+
+    // Create the scene and set the background color
+    this.scene = new THREE.Scene();
+    this.scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
+    this.canvas = canvas.nativeElement;
     this.canvas.style.backgroundColor = '#add8e6';
 
 
-    // create the scene
-    var fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH;
-    // Get the width and the height of the screen,
-    // use them to set up the aspect ratio of the camera
-    // and the size of the renderer.
-    HEIGHT = window.innerHeight;
-    WIDTH = window.innerWidth;
-
-    // Create the scene
-    this.scene = new THREE.Scene();
-
-    // Add a fog effect to the scene; same color as the
-    // background color used in the style sheet
-    this.scene.fog = new THREE.Fog(0xf7d9aa, 100, 950);
 
     // Create the camera
+    var fieldOfView, aspectRatio, nearPlane, farPlane, HEIGHT, WIDTH;
+    HEIGHT = window.innerHeight;
+    WIDTH = window.innerWidth;
     aspectRatio = WIDTH / HEIGHT;
     fieldOfView = 60;
     nearPlane = 1;
@@ -96,69 +77,30 @@ export class SeaSceneService {
       nearPlane,
       farPlane
     );
-
     // Set the position of the camera
     this.camera.position.x = 0;
     this.camera.position.z = 200;
     this.camera.position.y = 100;
 
+
+
     // Create the renderer
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      // Allow transparency to show the gradient background
-      // we defined in the CSS
       alpha: true,
-
-      // Activate the anti-aliasing; this is less performant,
-      // but, as our project is low-poly based, it should be fine :)
       antialias: true
     });
-
-    // Define the size of the renderer; in this case,
-    // it will fill the entire screen
     this.renderer.setSize(WIDTH, HEIGHT);
-
-    // Enable shadow rendering
     this.renderer.shadowMap.enabled = true;
 
-    // Add the DOM element of the renderer to the
-    // container we created in the HTML
-    // container = document.getElementById('world');
-    // container.appendChild(this.renderer.domElement);
 
 
-
-
-    // Listen to the screen: if the user resizes it
-    // we have to update the camera and the renderer size
-    window.addEventListener('resize', handleWindowResize, false);
-
-    function handleWindowResize() {
-      // update height and width of the renderer and the camera
-      HEIGHT = window.innerHeight;
-      WIDTH = window.innerWidth;
-      this.renderer.setSize(WIDTH, HEIGHT);
-      this.camera.aspect = WIDTH / HEIGHT;
-      this.camera.updateProjectionMatrix();
-    }
-
-
+    // Create the light
     var hemisphereLight, shadowLight;
-    // A hemisphere light is a gradient colored light;
-    // the first parameter is the sky color, the second parameter is the ground color,
-    // the third parameter is the intensity of the light
     hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9);
-
-    // A directional light shines from a specific direction.
-    // It acts like the sun, that means that all the rays produced are parallel.
     shadowLight = new THREE.DirectionalLight(0xffffff, .9);
-
-    // Set the direction of the light
     shadowLight.position.set(150, 100, 350);
-
-    // Allow shadow casting
     shadowLight.castShadow = true;
-
     // define the visible area of the projected shadow
     shadowLight.shadow.camera.left = -400;
     shadowLight.shadow.camera.right = 400;
@@ -166,124 +108,79 @@ export class SeaSceneService {
     shadowLight.shadow.camera.bottom = -400;
     shadowLight.shadow.camera.near = 1;
     shadowLight.shadow.camera.far = 1000;
-
-    // define the resolution of the shadow; the higher the better,
-    // but also the more expensive and less performant
     shadowLight.shadow.mapSize.width = 2048;
     shadowLight.shadow.mapSize.height = 2048;
-
-    // to activate the lights, just add them to the scene
     this.scene.add(hemisphereLight);
     this.scene.add(shadowLight);
 
 
 
-
-
-    // the function to create the sea
+    // The Sea class
     const Sea = function(){
-      // const geom = new THREE.CylinderGeometry(60, 60, 80, 40, 10);
       const geom = new THREE.SphereGeometry(50, 50, 50);
-      // const geom = new THREE.IcosahedronGeometry(50, 100);
-
-      // const geom = new THREE.IcosahedronGeometry(50, 10);
       const lambertMaterial = new THREE.MeshLambertMaterial({
         color: Colors.blue,
         transparent: true,
         opacity: 0.9,
-        // wireframe: true
       });
-
-      // this.ball = new THREE.Mesh(geom, lambertMaterial);
-      // const lambertMaterial = new THREE.MeshLambertMaterial({
-      //   color: 0xff00ee,
-      //   wireframe: true
-      // });
-
-      // const geom = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
-      // geom.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
 
       const position = geom.attributes.position;
       const l = position.count;
       const v = new THREE.Vector3();
-
+      // old positions
       this.waves = [];
-
       this.noise = new SimplexNoise();
 
       for (let i = 0; i < l; i++){
-        // var v = geom.vertices[i];
         v.fromBufferAttribute(position, i);
-
         this.waves.push({y: v.y,
           x: v.x,
           z: v.z,
         });
       };
-      // const mat = new THREE.MeshPhongMaterial({
-      //   color: Colors.blue,
-      //   transparent: true,
-      //   opacity: .8,
-      // });
 
       this.mesh = new THREE.Mesh(geom, lambertMaterial);
       this.mesh.receiveShadow = true;
-
     };
 
 
-    // create the sea
+
+    // Create the sea
     this.sea = new Sea();
-    // push it a little bit at the bottom of the scene
     this.sea.mesh.position.y = 100;
-    // add the mesh of the sea to the scene
     this.scene.add(this.sea.mesh);
 
 
-    // the function to create the cloud
+
+    // The cloud class
     const Cloud = function(){
-      // Create an empty container that will hold the different parts of the cloud
       this.mesh = new THREE.Object3D();
-
-      // create a cube geometry;
-      // this shape will be duplicated to create the cloud
       const geom = new THREE.BoxGeometry(20,20,20);
-
-      // create a material; a simple white material will do the trick
       const mat = new THREE.MeshPhongMaterial({
         color: Colors.white,
       });
 
-      // duplicate the geometry a random number of times
       const nBlocs = 3 + Math.floor(Math.random() * 3);
       for (let i = 0; i < nBlocs; i++ ){
-
-        // create the mesh by cloning the geometry
         const m = new THREE.Mesh(geom, mat);
-
-        // set the position and the rotation of each cube randomly
         m.position.x = i * 15;
         m.position.y = Math.random() * 10;
         m.position.z = Math.random() * 10;
         m.rotation.z = Math.random() * Math.PI * 2;
         m.rotation.y = Math.random() * Math.PI * 2;
 
-        // set the size of the cube randomly
         const s = .1 + Math.random() * .9;
         m.scale.set(s, s, s);
 
-        // allow each cube to cast and to receive shadows
         m.castShadow = true;
         m.receiveShadow = true;
 
-        // add the cube to the container we first created
         this.mesh.add(m);
       }
     }
 
 
-
-    // the function to create the sky
+    // The function to create the sky(including the cloud)
     const Sky = function(){
       // Create an empty container
       this.mesh = new THREE.Object3D();
@@ -307,9 +204,7 @@ export class SeaSceneService {
         const a = stepAngle * i; // this is the final angle of the cloud
         const h = 330 + Math.random() * 50; // this is the distance between the center of the axis and the cloud itself
 
-        // Trigonometry!!! I hope you remember what you've learned in Math :)
-        // in case you don't:
-        // we are simply converting polar coordinates (angle, distance) into Cartesian coordinates (x, y)
+
         c.mesh.position.y = Math.sin(a) * h;
         c.mesh.position.x = Math.cos(a) * h;
 
@@ -337,24 +232,17 @@ export class SeaSceneService {
       }
     }
 
-    Sky.prototype.moveClouds = function(angle){
-      const time = window.performance.now() * .001;
-      for (let i = 0; i < this.nClouds; i++) {
-        this.clouds_buf[i].rotation.z += angle * this.clouds_amp_buf[i];
-        // this.clouds_buf[i].position.z = -400 - 200 * Math.sin(this.clouds_phase_buf[i]);
-        // this.clouds_phase_buf[i] += 0.01 * 1 / this.nClouds * Math.PI * 2;
-      }
-    };
 
-    // create the sky
+
+    // Create the sky
     this.sky = new Sky();
     this.sky.mesh.position.y = 100;
     this.scene.add(this.sky.mesh);
 
 
-    // function to create the plane
-    const AirPlane = function() {
 
+    // The airplane class
+    const AirPlane = function() {
       this.mesh = new THREE.Object3D();
 
       // Create the cabin
@@ -500,7 +388,9 @@ export class SeaSceneService {
         this.mesh.add(earR);
       }
 
-      // function to move the hair
+
+
+      // The function to move the hair
       Pilot.prototype.updateHairs = function(){
 
         // get the hair
@@ -522,53 +412,19 @@ export class SeaSceneService {
     };
 
 
-    // create the plane
+
+    // Create the plane
     this.airplane = new AirPlane();
     this.airplane.mesh.scale.set(.25, .25, .25);
-
-
     this.pivot = new THREE.Object3D();
     this.pivot.position.set(0, 100, 0);
     this.pivot.add(this.airplane.mesh);
     this.airplane.mesh.position.y = 95;
-
     this.scene.add(this.pivot);
 
-
-    // create the lights
-    // A hemisphere light is a gradient colored light;
-    // the first parameter is the sky color, the second parameter is the ground color,
-    // the third parameter is the intensity of the light
-    this.hemisphereLight = new THREE.HemisphereLight(0xaaaaaa, 0x000000, .9)
-
-    // A directional light shines from a specific direction.
-    // It acts like the sun, that means that all the rays produced are parallel.
-    this.shadowLight = new THREE.DirectionalLight(0xffffff, .9);
-
-    // Set the direction of the light
-    this.shadowLight.position.set(150, 350, 350);
-
-    // Allow shadow casting
-    this.shadowLight.castShadow = true;
-
-    // define the visible area of the projected shadow
-    this.shadowLight.shadow.camera.left = -400;
-    this.shadowLight.shadow.camera.right = 400;
-    this.shadowLight.shadow.camera.top = 400;
-    this.shadowLight.shadow.camera.bottom = -400;
-    this.shadowLight.shadow.camera.near = 1;
-    this.shadowLight.shadow.camera.far = 1000;
-
-    // define the resolution of the shadow; the higher the better,
-    // but also the more expensive and less performant
-    this.shadowLight.shadow.mapSize.width = 2048;
-    this.shadowLight.shadow.mapSize.height = 2048;
-
-    // to activate the lights, just add them to the scene
-    this.scene.add(hemisphereLight);
-    this.scene.add(shadowLight);
-
   }
+
+
 
   public animate(): void {
     this.ngZone.runOutsideAngular(() => {
@@ -584,6 +440,8 @@ export class SeaSceneService {
       });
     });
   }
+
+
 
   public render(): void {
     this.frameId = requestAnimationFrame(() => {
@@ -607,63 +465,34 @@ export class SeaSceneService {
     }
   }
 
+
+
   sceneAnimation = () => {
-
-
     if (!this.spotifyBool){
       this.tool.freqSetup();
-
-      // this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
       this.tool.makeRoughBall(this.sea,
-        this.modulate(Math.pow(this.tool.lowFreqDownScaled, 0.8), 0, 1, 0, 2),
+        this.tool.modulate(Math.pow(this.tool.lowFreqDownScaled, 0.8), 0, 1, 0, 2),
         this.tool.midFreqDownScaled,
         this.tool.highFreqDownScaled)
-
     }else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
-
         const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
-        // const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
         const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-        //const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
         const avgPitch = this.spotifyService.getAvgPitch(this.trackProgress);
-        // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
-        // this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
         this.tool.makeRoughBall(this.sea,
-          this.modulate(Math.pow(segmentLoudness/100, 0.8), 0, 1, 0, 8),
-          this.modulate(avgPitch, 0, 1, 0, 4),
+          this.tool.modulate(Math.pow(segmentLoudness/100, 0.8), 0, 1, 0, 8),
+          this.tool.modulate(avgPitch, 0, 1, 0, 4),
           scaledAvgPitch)
       }
     }
-
 
     this.airplane.propeller.rotation.x += 0.3;
     this.airplane.mesh.rotation.x += -0.1;
     this.pivot.rotation.z -= 0.01;
     this.sea.mesh.rotation.z += .005;
-    // this.sea.mesh.rotation.y += .005;
     this.sky.mesh.rotation.z += .01;
-    // this.sky.moveClouds(0.01);
     this.airplane.pilot.updateHairs();
   }
-  // for re-use
-
-  fractionate(val: number, minVal: number, maxVal: number) {
-    return (val - minVal) / (maxVal - minVal);
-  }
-
-  modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number) {
-    const fr = this.fractionate(val, minVal, maxVal);
-    const delta = outMax - outMin;
-    return outMin + (fr * delta);
-  }
-
-  avg = (arr) => {
-    const total = arr.reduce((sum, b) => sum + b);
-    return (total / arr.length);
-  }
-
-  max = (arr) => arr.reduce((a, b) => Math.max(a, b));
 
 
   public resize(): void {
