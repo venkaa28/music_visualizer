@@ -1,5 +1,6 @@
 import {ElementRef, Injectable, NgZone} from '@angular/core';
 import * as THREE from 'three';
+import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {ToolsService} from '../services/tools.service';
 import {AudioService} from '../services/audio.service';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
@@ -19,6 +20,7 @@ export class PlaneSceneServiceService {
   }
 
 
+  private canvas!: HTMLCanvasElement;
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
   private scene!: THREE.Scene;
@@ -33,8 +35,6 @@ export class PlaneSceneServiceService {
   public frame = 0;
   public trackProgress = 0;
   public spotifyBool: boolean;
-
-
   private frameId: number = null;
 
   public ngOnDestroy = (): void => {
@@ -64,7 +64,7 @@ export class PlaneSceneServiceService {
     this.renderer.setSize(window.innerWidth , window.innerHeight);
     this.textureLoader = new THREE.TextureLoader();
 
-
+      //loading in dark sky 3d model
       this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
       this.darkSky = model.scene;
       this.darkSky.scale.set(450, 450, 450);
@@ -80,19 +80,13 @@ export class PlaneSceneServiceService {
         this.darkSky.traverse(( child ) => {
 
           if (child instanceof THREE.Mesh) {
-            // create a global var to reference later when changing textures
-            // apply texture
-
             (child.material as any).map = newTexture;
             (child.material as any).backside = true;
             (child.material as any).needsUpdate = true;
             (child.material as any).map.needsUpdate = true;
-
           }
         });
-
       });
-
       this.group.add(this.darkSky);
     });
 
@@ -105,14 +99,14 @@ export class PlaneSceneServiceService {
     this.camera.lookAt(0, 0, 0);
     // adds the camera to the scene
     this.scene.add(this.camera);
-
-
+    //creating the plane that responds to the music
     const planeGeometry = new THREE.PlaneGeometry(1600, 1600, 100, 100);
     const planeMaterial = new THREE.MeshLambertMaterial({
       color: 0x25E0EC,
       side: THREE.DoubleSide,
       wireframe: true
     });
+    //creating the plane that sits below and moves infinitely
     const secondPlaneGeometry = new THREE.PlaneGeometry(1600, 15000, 100, 100);
     const secondPlaneMaterial = new THREE.MeshLambertMaterial({
       color: 0x696969,
@@ -135,11 +129,11 @@ export class PlaneSceneServiceService {
     // adding ambient lighting to the scene
     this.ambLight = new THREE.AmbientLight(0xaaaaaa, 1);
     this.scene.add(this.ambLight);
-
+    //adding directional light
     const directionalLight = new THREE.DirectionalLight(0xffeedd);
     directionalLight.position.set(0, 0, 1);
     this.scene.add(directionalLight);
-
+    //adding the group to the scene
     this.scene.add(this.group);
   }
 
@@ -183,9 +177,6 @@ export class PlaneSceneServiceService {
     if (!this.spotifyBool) {
       this.tool.freqSetup();
 
-      const position = this.plane.geometry.attributes.position;
-
-      const vector = new THREE.Vector3();
       this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
     } else {
       if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
@@ -205,11 +196,9 @@ export class PlaneSceneServiceService {
 
       }
     }
-
-    // this.group.rotation.y += 0.005;
     this.plane.rotation.z += 0.005;
-    // this.darkSky.rotation.y += 0.0005;
-     this.secondPlane.position.z += 0.005
+    this.darkSky.rotation.y += 0.0005;
+     this.secondPlane.position.z += 0.05;
     if (this.secondPlane.position.z >= 6000) {
       this.secondPlane.position.z = 0;
     }
@@ -221,7 +210,7 @@ export class PlaneSceneServiceService {
   }
 
 
-  public resize(): void {
+  public async resize(): Promise<void> {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -229,6 +218,6 @@ export class PlaneSceneServiceService {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height);
-    this.createScene(this.canvasRef, this.renderer);
+    await this.createScene(this.canvasRef, this.renderer);
   }
 }

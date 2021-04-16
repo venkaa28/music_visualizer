@@ -102,7 +102,7 @@ export class SpotifyPlaybackSdkService {
         this.spotifyService.segmentEnd = 0;
         this.spotifyService.sectionEnd = 0;
         this.spotifyService.avgSegmentDuration = 0;
-        
+
         var htmlAlbum = (document.getElementById('album') as HTMLMediaElement)
         htmlAlbum.src = this.album;
         this.spotifyService.firstTimbrePreProcess = null;
@@ -111,7 +111,7 @@ export class SpotifyPlaybackSdkService {
         document.getElementById('song-subtitle').textContent = this.artist;
         (document.getElementById('play') as HTMLMediaElement).src = paused ? '../../assets/icons/play.svg' : '../../assets/icons/pause.svg';
 
-        scene.animate();
+        // scene.animate();
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });
       // player is ready

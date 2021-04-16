@@ -27,7 +27,7 @@
 
 
 
-      <h1 class="text-uppercase"><strong>{{this.userData.name}}</strong></h1>
+      <h2 class="text-uppercase"><strong>{{this.userData.name}}</strong></h2>
       <p> {{this.userData.email}} </p>
 
       <div style="display: flex; padding: 2%">
@@ -42,21 +42,15 @@
             <img src="../../../assets/icons/spotifyLogo.svg.png" style="width: 70%; height: auto">
           </a>
           <p>Link Spotify</p>
+          <p>* Spotify Premium Membership Required *</p>
         </div>
 
-        <div style="display: inline-block; width: 20%; margin: 2%;">
-          <a (click)="this.spotifyLinked = false">
-            <img src="../../../assets/icons/soundcloud-2.svg" style="width: 100%; height: auto">
-          </a>
-          <p>Link SoundCloud</p>
-        </div>
-
-        <div style="display: inline-block; width: 20%; margin: 2%;">
-          <a (click)="this.spotifyLinked = false">
-            <img src="../../../assets/icons/youtubeLogo.png" style="width: 100%; height: auto">
-          </a>
-          <p>Link YouTube</p>
-        </div>
+<!--        <div style="display: inline-block; width: 20%; margin: 2%;">-->
+<!--          <a (click)="this.spotifyLinked = false">-->
+<!--            <img src="../../../assets/icons/soundcloud-2.svg" style="width: 100%; height: auto">-->
+<!--          </a>-->
+<!--          <p>Link Soundcloud</p>-->
+<!--        </div>-->
       </div>
 
     </div>

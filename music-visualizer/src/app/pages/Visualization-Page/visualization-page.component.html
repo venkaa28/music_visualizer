@@ -67,12 +67,12 @@
               <p>Settings</p>
 
             <!--Scene slider: broken right now-->
-            <div id="scene">
-              <p style="display: inline">1</p>
-              <input id="scene-slider" type="range" min="0" max="3" value="0" step="1" (change)="changeScene($event.srcElement)" style="display: inline">
-              <p style="display: inline">{{this.scenesAvailable.length}}</p>
-              <p class="edit-label">Scene</p>
-            </div>
+<!--            <div id="scene">-->
+<!--              <p style="display: inline">1</p>-->
+<!--              <input id="scene-slider" type="range" min="0" max="5" value="0" step="1" (change)="changeScene($event.srcElement)" style="display: inline">-->
+<!--              <p style="display: inline">{{this.scenesAvailable.length}}</p>-->
+<!--              <p class="edit-label">Scene</p>-->
+<!--            </div>-->
 
             <!--FFT slider-->
             <div id="fft" *ngIf="!this.scene?.spotifyBool">
@@ -114,6 +114,17 @@
     <p>d     : play the previous song<br>
        a     : play the next song<br>
        space : play/pause the music</p>
+  </div>
+
+  <div id="menu1" class="overlay-top">
+    <div class="overlay-content">
+        <button class="overlay-top-button" (click)="changeScene(0)">Plane Scene</button>
+        <button class="overlay-top-button" (click)="changeScene(1)">Sea Scene</button>
+        <button class="overlay-top-button" (click)="changeScene(2)">Nebula Scene</button>
+        <button class="overlay-top-button" (click)="changeScene(3)">Particle Cloud Scene</button>
+        <button class="overlay-top-button" (click)="changeScene(4)">Sphere Scene</button>
+        <button class="overlay-top-button" (click)="changeScene(5)">Ocean Scene</button>
+    </div>
   </div>
 
   <div id="menu" class="overlay">

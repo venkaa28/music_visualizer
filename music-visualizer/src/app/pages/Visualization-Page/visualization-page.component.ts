@@ -44,9 +44,9 @@ export class VisualizationPageComponent implements AfterViewInit {
   public audioFile!: ElementRef<HTMLMediaElement>;
 
   public audio: HTMLAudioElement; // audio element of window
-  public readonly scenesAvailable = [this.planeScene, this.nebulaScene, this.seaScene, this.waveScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.seaScene, this.nebulaScene, this.testParticles, this.demoScene, this.waveScene]; // current scene being used
   public scene: any; // current scene to use
-  
+
   private menuTimeout: number; // timeout in ms of menu
   private timeout: number; // id of current timeout
   private micStream: MediaStream; // user's microphone data
@@ -151,7 +151,7 @@ export class VisualizationPageComponent implements AfterViewInit {
           scene.spotifyBool = false;
         });
       });
-      
+
       await this.spotifySDK.player.removeListener('player_state_changed');
       await this.spotifySDK.player.removeListener('ready');
       this.spotifySDK.player.disconnect();
@@ -184,10 +184,11 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.scenesAvailable.forEach((scene) => {
         scene.spotifyBool = true;
       });
+      this.scene.animate();
       }
     );
 
-    this.scene.animate();
+
     this.toggleUploadMenu();
   }
 
@@ -200,7 +201,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       antialias: true // smooth edges
     });
 
-    this.scene = this.scenesAvailable[event.value];
+    this.scene = this.scenesAvailable[event];
     await this.scene.createScene(this.canvas, this.renderer);
     this.scene.animate();
   }
@@ -370,8 +371,10 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   toggleMenu() {
     let menu = document.getElementById('menu');
+    let menu1 = document.getElementById('menu1');
 
     menu.style.opacity = '1';
+    menu1.style.opacity = '1';
 
     if (typeof this.timeout !== 'undefined') {
       window.clearTimeout(this.timeout);
@@ -379,6 +382,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.timeout = window.setTimeout(() => {
       menu.style.opacity = '0';
+      menu1.style.opacity = '0';
     }, this.menuTimeout);
   }
 
