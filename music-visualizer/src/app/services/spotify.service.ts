@@ -35,7 +35,7 @@ export class SpotifyService {
   getAuth() {
     let tempURL = "https://accounts.spotify.com/authorize?";
     tempURL += 'client_id=' + environment.clientId + '&';
-    tempURL += 'redirect_uri=' + 'https://music-visualizer-b2ae6.web.app/' + '&';
+    tempURL += 'redirect_uri=' + 'https://music-visualizer-b2ae6.web.app/Callback' + '&';
     tempURL += 'scope=' + 'streaming%20user-read-email%20user-read-private%20user-read-playback-state%20user-modify-playback-state%20user-read-currently-playing' + '&';
     tempURL += 'response_type=token';
     window.location.href = tempURL;
