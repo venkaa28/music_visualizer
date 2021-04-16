@@ -150,16 +150,16 @@ export class NebulaSceneServiceService {
 
           let keptIndices = this.tool.getIndicesOfMax(curPitches, 4);
 
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < 12; i++) {
             let loopVal = curPitches[i];
             let perSecond = 1;
 
             if (keptIndices.includes(i) || (loopVal > 0.9)) {
-              perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.3);
+              perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.0004);
             }
 
-            //this.tool.setRate(this.nebula.emitters[i], perSecond);
-            this.nebula.emitters[i].setPosition(new THREE.Vector3(loopVal * 10, curPitches[10], curPitches[11])); 
+            this.tool.setRateHelper(this.nebula.emitters[i], perSecond);
+            //this.nebula.emitters[i].setPosition(new THREE.Vector3(loopVal * 10, curPitches[10], curPitches[11])); 
           }
         }
       }
