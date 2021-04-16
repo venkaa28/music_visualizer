@@ -71,12 +71,12 @@ input[type=range] {
 
 .overlay {
   text-align: center;
-  height: 12%;
+  height: 10%;
   width: 100%;
   opacity: 1;
   position: fixed;
   z-index: 1;
-  top: 88%;
+  top: 90%;
   left: 0;
   background-color: rgba(0,0,0, 0.4);
   overflow-x: hidden;
@@ -88,6 +88,29 @@ input[type=range] {
   color: white;
   top: 0;
   left: 0;
+}
+
+.overlay-top {
+  text-align: center;
+  height: 5%;
+  width: 100%;
+  opacity: 1;
+  position: fixed;
+  z-index: 1;
+  top: 0%;
+  left: 0;
+  background-color: rgba(0,0,0, 0.4);
+  overflow-x: hidden;
+  overflow-y: hidden;
+  transition: 0.2s;
+}
+
+.overlay-top-button{
+  background-color: rgba(0,0,0, 0.4);
+  border: 1px solid rgba(0,0,0, 0.4);
+  padding: 10px 24px;
+  text-align: center;
+  display: inline-block;
 }
 
 .progress {
@@ -183,7 +206,6 @@ input[type=range] {
   bottom: 12%;
   left: 85%;
   text-align: center;
-  color: black;
   padding: 1%;
   opacity: 0;
   width: 0%;
@@ -237,7 +259,7 @@ input[type=range] {
   position: absolute;
   width: 100%;
   margin: 0;
-  top: 75%;
+  top: 70%;
 }
 
 #settings {

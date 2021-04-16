@@ -52,7 +52,7 @@ export class WavesSceneService {
   }
 
 
-  public createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): void {
+  public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
     this.canvas = canvas.nativeElement;
 
     // this.renderer = new THREE.WebGLRenderer({
@@ -113,7 +113,7 @@ export class WavesSceneService {
 
     this.updateSun(this.sun, this.water, this.scene, this.pmremGenerator);
     // "Shark" (https://skfb.ly/6YsQn) by Greg is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
-      this.loader.load('../../../assets/3d_models/shark/scene.gltf', (model) => {
+    await this.loader.load('../../../assets/3d_models/shark/scene.gltf', (model) => {
       this.shark = model.scene;
       this.shark.scale.set(5, 5, 5);
       this.shark.rotateY(180);
