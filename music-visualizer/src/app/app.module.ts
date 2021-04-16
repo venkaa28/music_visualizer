@@ -7,7 +7,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 // firebase
 import firebase from 'firebase';
-import { firebaseConfig } from './firebase';
+import { firebaseConfig } from '../environments/environment';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
