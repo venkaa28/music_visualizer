@@ -8,6 +8,7 @@ import { AngularFireDatabaseModule} from '@angular/fire/database';
 import { AngularFireAuthModule} from '@angular/fire/auth';
 import { firebaseConfig } from '../../firebase';
 import { NotifierService, NotifierModule } from 'angular-notifier';
+import { Router } from '@angular/router';
 describe('ProfilePageComponent', () => {
   let component: ProfilePageComponent;
   let fixture: ComponentFixture<ProfilePageComponent>;
@@ -41,5 +42,15 @@ describe('ProfilePageComponent', () => {
       expect(component.userData.email).toBe('hustzmx@gmail.com');
       expect(component.userData.name).toBe('zmx');
     }
+  });
+
+  it ('test logout', () => {
+    component.logout();
+    expect(component.router.url).toBe("http://localhost:4200/");
+  });
+
+  it('test goBackToVisualPage', () => {
+    component.goBackToVisualPage();
+    expect(component.router.url).toBe("http://localhost:4200/VisualizationPage");
   });
 });
