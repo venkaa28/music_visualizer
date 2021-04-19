@@ -18,11 +18,12 @@ import { NotifierService } from 'angular-notifier';
 })
 export class LoginPageComponent implements OnInit {
   public minLength: number = 6; // minimum password length, firebase requires min of 6 char
+  private useCookies = false;
 
   // The form group used for form validation
   public loginForm: FormGroup = this.formBuilder.group({
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(this.minLength)])
+    password: new FormControl('', [Validators.required, Validators.minLength(this.minLength)]),
   });
 
   // prints error msg if email invalid, nothing if valid
@@ -35,11 +36,15 @@ export class LoginPageComponent implements OnInit {
     return this.loginForm.get('password')?.hasError('minlength') ? `Passwords must be at least ${this.minLength} characters long` : '';
   }
 
+  updateCookieUsage(event) {
+    this.useCookies = event.srcElement.value;
+  }
+
   // called when submit button is clicked, authenticates user on firebase and routes to next page
   // if valid user
   async login() {
     // login user with provided email and password
-    this.authService.loginUser(this.loginForm.get('email')?.value, this.loginForm.get('password')?.value)
+    this.authService.loginUser(this.loginForm.get('email')?.value, this.loginForm.get('password')?.value, this.useCookies)
     .then(async () => {
       // navigate to Visualization Page
       await this.router.navigate(['../../VisualizationPage']);

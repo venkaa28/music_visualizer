@@ -21,27 +21,16 @@ export class ProfilePageComponent implements OnInit {
   // until we get the api hooked up
   public spotifyLinked: boolean;
 
-  getUserCookie() {
-    return this.cookieService.get('account');
-  }
-
-  getUserData(): void {
-    const cookie = this.cookieService.get('account');
-    if (cookie !== '') {
-      const rawJSON = JSON.parse(cookie);
-      this.userData.email = rawJSON.email;
-      this.userData.name = rawJSON.name;
-    }
-  }
-
   constructor(public router: Router, private authService: AuthService, private cookieService: CookieService, private spotifyService: SpotifyService, 
              private readonly notifierService: NotifierService) {
               this.userData = this.authService.getUser();
             }
 
   ngOnInit(): void {
-    this.getUserData();
-    this.spotifyLinked = false;
+    this.spotifyLinked = this.cookieService.check('spotify');
+    if (this.spotifyLinked) {
+      document.getElementById('');
+    }
   }
 
   async passwordReset(): Promise<void> {
@@ -71,5 +60,17 @@ export class ProfilePageComponent implements OnInit {
 
   async authorizeSpotify() {
     this.spotifyService.getAuth();
+  }
+
+  isSpotifyAuthorized() {
+    return this.authService.isSpotifyAuthorized();
+  }
+
+  spotifyText() {
+    if (this.authService.isSpotifyAuthorized()) {
+      return 'Spotify is connected';
+    }
+
+    return 'Log in with Spotify';
   }
 }

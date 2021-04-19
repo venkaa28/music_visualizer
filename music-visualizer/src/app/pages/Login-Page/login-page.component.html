@@ -23,22 +23,25 @@
 
     <!--Email form-->
     <div class="form-group">
-      <label for="email"></label>
+      <input style="display: inline-block;" class="form-control" type="email" id="email" name="email" formControlName="email" placeholder="Email" required>
       <!--Display required asterisk '*' next to email form label if invalid password-->
-      <mat-error *ngIf="this.loginForm.get('email')?.invalid && (this.loginForm.get('email')?.dirty || this.loginForm.get('email')?.touched)">*</mat-error> <br>
-      <input class="form-control" type="email" id="email" name="email" formControlName="email" placeholder="Email" required><br>
+      <mat-error style="display: inline-block;" *ngIf="this.loginForm.get('email')?.invalid && (this.loginForm.get('email')?.dirty || this.loginForm.get('email')?.touched)">*</mat-error>
       <!--Display required message under email form if invalid password-->
-      <mat-error *ngIf="this.loginForm.get('email')?.invalid && (this.loginForm.get('email')?.dirty || this.loginForm.get('email')?.touched)">{{getEmailMessage()}}</mat-error> <br>
+      <mat-error *ngIf="this.loginForm.get('email')?.invalid && (this.loginForm.get('email')?.dirty || this.loginForm.get('email')?.touched)">{{getEmailMessage()}}</mat-error>
     </div>
 
     <!--Password form-->
     <div class="form-group">
-      <label for="pwd"></label>
+      <input style="display: inline-block;" class="form-control" formControlName="password" type="password" id="pwd" name="pwd" placeholder="Password">
       <!--Display required asterisk '*' next to password form label if invalid password-->
-      <mat-error *ngIf="this.loginForm.get('password')?.invalid && (this.loginForm.get('password')?.dirty || this.loginForm.get('password')?.touched)">*</mat-error><br>
-      <input class="form-control" formControlName="password" type="password" id="pwd" name="pwd" placeholder="Password"><br>
+      <mat-error style="display: inline-block;" *ngIf="this.loginForm.get('password')?.invalid && (this.loginForm.get('password')?.dirty || this.loginForm.get('password')?.touched)">*</mat-error>
       <!--Display required message under password form if invalid password-->
-      <mat-error *ngIf="this.loginForm.get('password')?.invalid && (this.loginForm.get('password')?.dirty || this.loginForm.get('password')?.touched)">{{getPasswordMessage()}}</mat-error><br>
+      <mat-error *ngIf="this.loginForm.get('password')?.invalid && (this.loginForm.get('password')?.dirty || this.loginForm.get('password')?.touched)">{{getPasswordMessage()}}</mat-error>
+    </div>
+
+    <div style="text-align: left;">
+      <input style="display: inline-block; width: auto !important; margin-right: 1%;" type="checkbox" (change)="updateCookieUsage($event)">
+      <p style="display: inline-block;">Remember me?</p>
     </div>
 
     <!--Submit button-->

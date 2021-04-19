@@ -178,6 +178,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       await this.router.navigate(['../ProfilePage']);
     }
 
+    this.audioService.stopFile();
     this.audioService.stopMic();
 
     await this.spotifySDK.addSpotifyPlaybackSdk(this.scene).then(() => {

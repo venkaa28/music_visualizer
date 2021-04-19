@@ -18,6 +18,7 @@ export class RegisterPageComponent implements OnInit {
   public user: User = new User();
   public signUpForm: FormGroup = new FormGroup({});
   public minLength: number = 6;
+  private useCookies: boolean;
   private dict: Dict = {};
 
   checkPasswords(): null | { notSame: true } {
@@ -40,6 +41,10 @@ export class RegisterPageComponent implements OnInit {
    return this.signUpForm.get('password')?.value !== this.signUpForm.get('verifyPassword')?.value ? 'Passwords must match': '';
   }
 
+  updateCookieUsage(event) {
+    this.useCookies = event.srcElement.value;
+  }
+
   async signup() {
     this.dict = {
       'email': this.signUpForm.get('email')?.value,
@@ -49,7 +54,7 @@ export class RegisterPageComponent implements OnInit {
     if( this.signUpForm.get('password')?.value != this.signUpForm.get('verifyPassword')?.value ){
       window.alert('Error Passwords do not match');
     } else {
-      this.authService.signUpUser(this.signUpForm.get('email')?.value, this.signUpForm.get('password')?.value, this.dict)
+      this.authService.signUpUser(this.signUpForm.get('email')?.value, this.signUpForm.get('password')?.value, this.dict, this.useCookies)
       .then(async () => {
         await this.router.navigate(['../../IntroductionPage']);
       }).catch((error) => {

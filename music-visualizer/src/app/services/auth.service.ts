@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   // log the user into firebase, store data as a cookie
-  async loginUser(email: string, password: string): Promise<void> {
+  async loginUser(email: string, password: string, cookies: boolean): Promise<void> {
     // sign into auth service
     await this.ngFireAuth.signInWithEmailAndPassword(email, password).catch((error) => {
       console.log(error); // log the error
@@ -36,18 +36,24 @@ export class AuthService {
     })
 
     const uid = email.replace(/[@.]/g, '_'); // get id string to access account info from rtdb
-    var userDict: Dict = {}; // used to store user data from firebase
 
     return new Promise(async (resolve, reject) => {
       // Get stored user data from realtime database
       await firebase.database().ref('accounts/' + uid).on('value', async (snapshot) => {
         // make sure account exists
         if (snapshot.exists()) {
-          userDict.email = snapshot.val().email; // grab email
-          userDict.name = snapshot.val().name; // grab user's name
+          this.userData.email = snapshot.val().email; // grab email
+          this.userData.name = snapshot.val().name; // grab user's name
           
-          // convert json dict to string and set as account cookie
-          this.cookieService.set('account', JSON.stringify(userDict));
+          if (cookies) {
+            var userDict: Dict = {}; // used to store user data from firebase
+
+            userDict.email = this.userData.email;
+            userDict.name = this.userData.name;
+
+            // convert json dict to string and set as account cookie
+            this.cookieService.set('account', JSON.stringify(userDict));
+          }
           
           resolve();
         } else {
@@ -58,7 +64,7 @@ export class AuthService {
   }
 
   // sign up the user and add account to firebase
-  async signUpUser(email: string, password: string, userDict: Dict): Promise<void> {
+  async signUpUser(email: string, password: string, userDict: Dict, cookie: boolean): Promise<void> {
     // create user account in fire auth
     await this.ngFireAuth.createUserWithEmailAndPassword(email, password).catch((error) => {
       console.log(error);
@@ -74,8 +80,13 @@ export class AuthService {
       // store user data in rtdb
       await firebase.database().ref('accounts').child(uid).set(userDict);
 
-      // convert data to json string and store it as a cookie
-      this.cookieService.set('account', JSON.stringify(userDict));
+      this.userData.email = userDict.email;
+      this.userData.name = userDict.name;
+
+      if (cookie) {
+        // convert data to json string and store it as a cookie
+        this.cookieService.set('account', JSON.stringify(userDict));
+      }
 
       resolve();
     });
@@ -90,6 +101,8 @@ export class AuthService {
   logOutUser(): Promise<void> {
     // clear cookies
     this.cookieService.deleteAll();
+    // clear local user data
+    this.userData = new User();
     // sign out from fire auth
     return this.ngFireAuth.signOut();
   }
@@ -103,8 +116,6 @@ export class AuthService {
     if (this.cookieService.check('account')) {
       userCookie = this.cookieService.get('account');
       this.userData = JSON.parse(userCookie);
-    } else {
-      this.userData = null;
     }
 
     // get spotify token if it exists
@@ -120,16 +131,7 @@ export class AuthService {
 
   // use cookies to see if user is logged in
   getLoggedIn() {
-    return this.cookieService.check('account');
-  }
-
-  async setSceneCookie(sceneIndex: number): Promise<void> {
-    await this.cookieService.set('scene', sceneIndex.toString());
-  }
-
-  async getSceneCookie(): Promise<number> {
-    var index: string = await this.cookieService.get('scene');
-    return Number(index);
+    return (this.userData.email === '') ? this.cookieService.check('account') : true;
   }
 
   async setSpotifyAuthToken(token: string) {
@@ -138,5 +140,9 @@ export class AuthService {
     expireDate.setHours(expireDate.getHours() + expireHours);
 
     await this.cookieService.set('spotify', token, {path: '/', sameSite: 'Lax', expires: expireDate}); // set token cookie
+  }
+
+  isSpotifyAuthorized() {
+    return this.cookieService.check('spotify');
   }
 }

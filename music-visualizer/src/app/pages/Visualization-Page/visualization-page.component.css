@@ -203,6 +203,7 @@ input[type=range] {
 
 #edit-menu {
   position: absolute;
+  color: black !important;
   bottom: 12%;
   left: 85%;
   text-align: center;

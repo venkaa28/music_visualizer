@@ -134,12 +134,13 @@ export class AudioService {
 
   stopMic() {
     if (typeof this.micStream !== 'undefined') {
-      this.micStream.getAudioTracks().forEach(track => {
-        track.stop();
-        this.micStream.removeTrack(track);
-      });
-
       this.micTrack.disconnect();
+    }
+  }
+
+  stopFile() {
+    if (typeof this.fileTrack !== 'undefined') {
+      this.fileTrack.disconnect();
     }
   }
 
@@ -148,11 +149,13 @@ export class AudioService {
 
     // initialize the track if it doesn't exist
     if (typeof this.micTrack === 'undefined') {
-      this.micStream = stream;
-      this.micTrack = this.context.createMediaStreamSource(this.micStream);
+      this.micTrack = this.context.createMediaStreamSource(stream);
     } else {
       this.stopMic();
     }
+
+    this.stopFile();
+    this.micStream = stream;
 
     // set nodes here
     this.gainNode = this.context.createGain(); // reset volume
@@ -164,7 +167,6 @@ export class AudioService {
     .connect(this.gainNode)
     .connect(this.panNode)
     .connect(this.analyzer)
-    .connect(this.context.destination);
 
     this.analyzer.smoothingTimeConstant = this.smoothConstant; // set smoothing time constant
     this.analyzer.fftSize = this.fftSize; // set fft
@@ -182,7 +184,7 @@ export class AudioService {
     if (typeof this.fileTrack === 'undefined') {
       this.fileTrack = this.context.createMediaElementSource(song);
     } else {
-      this.fileTrack.disconnect();
+      this.stopFile();
     }
 
     this.stopMic();
