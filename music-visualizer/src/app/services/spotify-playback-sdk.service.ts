@@ -43,6 +43,11 @@ export class SpotifyPlaybackSdkService {
     });
 
     document.head.appendChild(script);
+
+    if (this.player !== null) {
+      this.player.disconnect();
+    }
+
     window.onSpotifyWebPlaybackSDKReady = () => {
       console.log('The Web Playback SDK is ready. We have access to Spotify.Player');
       this.player = new Spotify.Player({
