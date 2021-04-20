@@ -175,7 +175,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     // TODO: error handle not token cookie
     await this.audioService.pause();
     if (this.authService.getUser().spotifyAPIKey == null) {
-      await this.router.navigate(['../ProfilePage']);
+      await this.profilePage();
     }
 
     this.audioService.stopFile();
@@ -205,6 +205,13 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.scene = this.scenesAvailable[event];
     await this.scene.createScene(this.canvas, this.renderer);
     this.scene.animate();
+  }
+
+  async profilePage() {
+    this.audioService.hardStop();
+    //(document.getElementById('audio-file') as HTMLMediaElement).src = '';
+    //(document.getElementById('audio-source') as HTMLMediaElement).src = '';
+    await this.router.navigate(['../ProfilePage']);
   }
 
   /**************************************Audio controls**************************************/

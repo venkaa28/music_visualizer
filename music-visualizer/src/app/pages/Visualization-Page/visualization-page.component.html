@@ -10,7 +10,7 @@
 </header>
 <body (mousemove)="toggleMenu()">
   <audio #audioFile id='audio-file' crossorigin="anonymous">
-    <source id="audio-source" origin="http://localhost:4200" type="audio/*" src="../../../assets/music/ILLENIUM, X Ambassadors - In Your Arms (Visualizer).mp3">
+    <source id="audio-source" origin="https://localhost:4200" type="audio/*" src="">
   </audio>
 
   <div id="canvas-visualizer">
@@ -150,7 +150,7 @@
           </button>
 
           <!--Profile Page Button-->
-          <button class="settings-button" style="display: inline-block;" routerLink="../ProfilePage">
+          <button class="settings-button" style="display: inline-block;" (click)="profilePage()">
             <img class="ui-button" src="../../../assets/icons/profile.svg">
           </button>
 
