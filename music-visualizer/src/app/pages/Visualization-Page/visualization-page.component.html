@@ -95,14 +95,14 @@
   </div>
 
   <!--Control info menu listed when info button is pressed-->
-  <div id="menu1" class="overlay-top">
+  <div id="menu1" class="overlay-top glass-pane">
     <div class="overlay-content">
-        <button class="overlay-top-button" (click)="changeScene(0)">Plane Scene</button>
-        <button class="overlay-top-button" (click)="changeScene(1)">Sea Scene</button>
-        <button class="overlay-top-button" (click)="changeScene(2)">Nebula Scene</button>
-        <button class="overlay-top-button" (click)="changeScene(3)">Particle Cloud Scene</button>
-        <button class="overlay-top-button" (click)="changeScene(4)">Sphere Scene</button>
-        <button class="overlay-top-button" (click)="changeScene(5)">Ocean Scene</button>
+        <button id="otb0" (click)="changeScene(0)" disabled>Mesh Scene</button>
+        <button id="otb1" (click)="changeScene(1)">Plane Scene</button>
+        <button id="otb2" (click)="changeScene(2)">Nebula Scene</button>
+        <button id="otb3" (click)="changeScene(3)">Particle Cloud Scene</button>
+        <button id="otb4" (click)="changeScene(4)">Sphere Scene</button>
+        <button id="otb5" (click)="changeScene(5)">Ocean Scene</button>
     </div>
   </div>
 

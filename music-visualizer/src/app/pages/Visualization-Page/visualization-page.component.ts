@@ -53,6 +53,9 @@ export class VisualizationPageComponent implements AfterViewInit {
   private renderer: THREE.WebGLRenderer;
   private canvas!: HTMLCanvasElement;
 
+  private lastButton: number;
+  private pageUsed: boolean;
+
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
 
               public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
@@ -60,6 +63,8 @@ export class VisualizationPageComponent implements AfterViewInit {
               public waveScene: WavesSceneService, private spotifyAPI: SpotifyService) {
     // initialize variables
     this.menuTimeout = 2000;
+    this.lastButton = 0;
+    this.pageUsed = false;
 
     // TODO: scroll text on hover
   }
@@ -113,8 +118,6 @@ export class VisualizationPageComponent implements AfterViewInit {
     let element = event as HTMLInputElement; // get filelist from html
     let file = element.files[0];
 
-    console.log('file');
-
     if (typeof file === 'undefined') {
       console.log('no change');
       return;
@@ -132,25 +135,23 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.spotifySDK.player.disconnect();
     }
 
-    console.log('file');
-
     this.audio.src = URL.createObjectURL(file); // set source to be the file in the html
     this.audioService.loadSong(this.audio);
-
-    console.log('file');
 
     document.getElementById('song-title').textContent = file.name;
     document.getElementById('song-subtitle').textContent = 'Local File';
     let htmlAlbum = (document.getElementById('album') as HTMLMediaElement);
     htmlAlbum.src = '../../../assets/icons/disc.svg';
 
-    console.log('file');
+    if (!this.pageUsed) {
+      document.documentElement.style.setProperty('--text-color', 'white');
+      document.documentElement.style.setProperty('--image-invert', 'invert(100%)');
+      this.pageUsed = true;
+    }
 
     this.scene.animate();
     this.toggleUploadMenu();
     await this.audioService.play();
-
-    console.log('file');
   }
 
   async loadMic() {
@@ -178,6 +179,12 @@ export class VisualizationPageComponent implements AfterViewInit {
     document.getElementById('song-title').textContent = 'Microphone';
     document.getElementById('song-subtitle').textContent = 'You';
 
+    if (!this.pageUsed) {
+      document.documentElement.style.setProperty('--text-color', 'white');
+      document.documentElement.style.setProperty('--image-invert', 'invert(100%)');
+      this.pageUsed = true;
+    }
+
     this.scene.animate();
     this.toggleUploadMenu();
   }
@@ -191,6 +198,12 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.audioService.stopFile();
     this.audioService.stopMic();
+
+    if (!this.pageUsed) {
+      document.documentElement.style.setProperty('--text-color', 'white');
+      document.documentElement.style.setProperty('--image-invert', 'invert(100%)');
+      this.pageUsed = true;
+    }
 
     await this.spotifySDK.addSpotifyPlaybackSdk().then(() => {
       this.scenesAvailable.forEach((scene) => {
@@ -212,6 +225,10 @@ export class VisualizationPageComponent implements AfterViewInit {
       alpha: true,    // transparent background
       antialias: true // smooth edges
     });
+
+    (document.getElementById(`otb${this.lastButton}`) as HTMLButtonElement).disabled = false;    
+    (document.getElementById(`otb${event}`) as HTMLButtonElement).disabled = true;
+    this.lastButton = event;
 
     this.scene = this.scenesAvailable[event];
     await this.scene.createScene(this.canvas, this.renderer);
