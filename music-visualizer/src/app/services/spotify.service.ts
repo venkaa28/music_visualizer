@@ -72,18 +72,14 @@ export class SpotifyService {
   getSegment(trackProgress) {
     if (this.segmentEnd === 0) {
       this.segmentIndex = 0;
+    }
 
-      while (this.analysis['segments'][this.segmentIndex]['start'] * 1000 <= trackProgress) {
+    if (trackProgress >= this.segmentEnd) {
+      while (this.analysis['segments'][this.segmentIndex]!['start'] * 1000 < trackProgress && this.segmentIndex < this.analysis['segments'].length) {
         this.segmentIndex++;
       }
 
-      this.segmentEnd = this.analysis['segments'][this.segmentIndex]['start'] + this.analysis['segments'][this.segmentIndex]['duration'];
-    } else if (trackProgress >= this.segmentEnd) {
-      while (this.analysis['segments'][this.segmentIndex]['start'] * 1000 <= trackProgress) {
-        this.segmentIndex++;
-      }
-
-      this.segmentEnd = this.analysis['segments'][this.segmentIndex]['start'] + this.analysis['segments'][this.segmentIndex]['duration'];
+      this.segmentEnd = (this.analysis['segments'][this.segmentIndex]!['start'] + this.analysis['segments'][this.segmentIndex]['duration']) * 1000;
     }
 
     return this.analysis['segments'][this.segmentIndex];
@@ -149,19 +145,21 @@ export class SpotifyService {
     return (1 - segDuration) / 100;
   }
 
-  async getTimbrePreProcessing() {
-    const avgSegmentDuration = this.getAvgSegmentDuration();
-    const numPerSeg = avgSegmentDuration/0.0167;
-    this.firstTimbrePreProcess = [];
-    this.brightnessTimbrePreProcess = [];
-    for (let i = 0; i < this.analysis['segments'].length-1; i++) {
-      const dist1 = this.analysis['segments'][i].timbre[0]- this.analysis['segments'][i+1].timbre[0];
-      const dist2 = this.analysis['segments'][i].timbre[1]- this.analysis['segments'][i+1].timbre[1];
-      for(let j = 1; j <= numPerSeg; j++){
-        this.firstTimbrePreProcess.push((dist1 / numPerSeg*j) + this.analysis['segments'][i].timbre[0]);
-        this.brightnessTimbrePreProcess.push((dist2 / numPerSeg*j) + this.analysis['segments'][i].timbre[1]);
+  async getTimbrePreProcessing(): Promise<void> {
+    return new Promise( () => {
+      const avgSegmentDuration = this.getAvgSegmentDuration();
+      const numPerSeg = avgSegmentDuration/0.0167;
+      this.firstTimbrePreProcess = [];
+      this.brightnessTimbrePreProcess = [];
+      for (let i = 0; i < this.analysis['segments'].length-1; i++) {
+        const dist1 = this.analysis['segments'][i].timbre[0]- this.analysis['segments'][i+1].timbre[0];
+        const dist2 = this.analysis['segments'][i].timbre[1]- this.analysis['segments'][i+1].timbre[1];
+        for(let j = 1; j <= numPerSeg; j++){
+          this.firstTimbrePreProcess.push((dist1 / numPerSeg*j) + this.analysis['segments'][i].timbre[0]);
+          this.brightnessTimbrePreProcess.push((dist2 / numPerSeg*j) + this.analysis['segments'][i].timbre[1]);
+        }
       }
-    }
+    });
   }
 
   eucDistance(a, b) {

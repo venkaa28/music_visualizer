@@ -113,7 +113,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     let element = event as HTMLInputElement; // get filelist from html
     let file = element.files[0];
 
+    console.log('file');
+
     if (typeof file === 'undefined') {
+      console.log('no change');
       return;
     }
 
@@ -129,17 +132,25 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.spotifySDK.player.disconnect();
     }
 
+    console.log('file');
+
     this.audio.src = URL.createObjectURL(file); // set source to be the file in the html
     this.audioService.loadSong(this.audio);
+
+    console.log('file');
 
     document.getElementById('song-title').textContent = file.name;
     document.getElementById('song-subtitle').textContent = 'Local File';
     let htmlAlbum = (document.getElementById('album') as HTMLMediaElement);
     htmlAlbum.src = '../../../assets/icons/disc.svg';
 
+    console.log('file');
+
     this.scene.animate();
     this.toggleUploadMenu();
     await this.audioService.play();
+
+    console.log('file');
   }
 
   async loadMic() {
@@ -181,7 +192,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.audioService.stopFile();
     this.audioService.stopMic();
 
-    await this.spotifySDK.addSpotifyPlaybackSdk(this.scene).then(() => {
+    await this.spotifySDK.addSpotifyPlaybackSdk().then(() => {
       this.scenesAvailable.forEach((scene) => {
         scene.spotifyBool = true;
       });
@@ -209,6 +220,11 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   async profilePage() {
     this.audioService.hardStop();
+    
+    if (this.spotifySDK.player !== null) {
+      this.spotifySDK.player.disconnect();
+    }
+
     //(document.getElementById('audio-file') as HTMLMediaElement).src = '';
     //(document.getElementById('audio-source') as HTMLMediaElement).src = '';
     await this.router.navigate(['../ProfilePage']);
@@ -356,7 +372,7 @@ export class VisualizationPageComponent implements AfterViewInit {
     let outputTime = ''; // string used for output
 
     // convert minutes to string
-    if (secondsTotal > 60) {
+    if (secondsTotal >= 60) {
       outputTime += Math.floor(secondsTotal / 60);
       secondsTotal = secondsTotal % 60;
     } else {

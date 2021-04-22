@@ -39,7 +39,6 @@ input[type=range] {
                                     Classes
 ******************************************************************************/
 .controls {
-  color: white;
   position: absolute;
   margin: 0;
   width: 100%;
@@ -54,7 +53,7 @@ input[type=range] {
 .custom-icon-play {
   width: 50px;
   height: 50px;
-  margin: 10px;
+  margin: 5px;
 }
 
 .edit-label {
@@ -78,14 +77,16 @@ input[type=range] {
   z-index: 1;
   top: 90%;
   left: 0;
-  background-color: rgba(0,0,0, 0.4);
   overflow-x: hidden;
   overflow-y: hidden;
   transition: 0.2s;
 }
 
+.overlay img {
+  filter: invert(100%);
+}
+
 .overlay-content {
-  color: white;
   top: 0;
   left: 0;
 }
@@ -115,12 +116,12 @@ input[type=range] {
 
 .progress {
   display: inline-block;
-  width: 80%;
-  top: 0px;
+  width: 60%;
+  top: 0;
   border-radius: 15px !important;
   background-color: rgba(127, 127, 127, 0.7) !important;
   color: rgb(0, 123, 255);
-  height: 9px !important;
+  height: 5px !important;
 }
 
 .select-button {

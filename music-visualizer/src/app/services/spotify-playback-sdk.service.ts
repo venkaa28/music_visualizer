@@ -33,7 +33,7 @@ export class SpotifyPlaybackSdkService {
     this.player = null;
   }
 
-  async addSpotifyPlaybackSdk(scene: any) {
+  async addSpotifyPlaybackSdk() {
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
     script.type = 'text/javascript';
@@ -115,8 +115,6 @@ export class SpotifyPlaybackSdkService {
         document.getElementById('song-title').textContent = this.title;
         document.getElementById('song-subtitle').textContent = this.artist;
         (document.getElementById('play') as HTMLMediaElement).src = paused ? '../../assets/icons/play.svg' : '../../assets/icons/pause.svg';
-
-        // scene.animate();
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });
       // player is ready

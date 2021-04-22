@@ -161,15 +161,12 @@ export class PlaneSceneServiceService {
       this.spotifyPlayer.player?.getCurrentState().then(state => {
         if (state) {
           this.trackProgress = state.position;
-          this.sceneAnimation();
-          this.renderer.render(this.scene, this.camera);
         }
       });
-    }else {
-      this.sceneAnimation();
-      this.renderer.render(this.scene, this.camera);
     }
 
+    this.sceneAnimation();
+    this.renderer.render(this.scene, this.camera);
   }
 
   sceneAnimation = async () => {
@@ -183,11 +180,16 @@ export class PlaneSceneServiceService {
         if (this.spotifyService.firstTimbrePreProcess === null) {
           await this.spotifyService.getTimbrePreProcessing();
         } else {
-          const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
-          const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
-          const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-          const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+          const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress - 800);
           // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
+
+          if (this.frame++ % 50 === 0) {
+            console.log('1: ' + typeof(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2)
+            + '; 2: ' + typeof (this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75)
+            + '; 3: ' + typeof segmentLoudness
+            + '; 4: ' + typeof this.plane);
+          }
+
           this.tool.wavesBuffer(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2,
             this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75,
             segmentLoudness, 0.005, this.plane);
