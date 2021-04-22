@@ -143,6 +143,13 @@ export class VisualizationPageComponent implements AfterViewInit {
     let htmlAlbum = (document.getElementById('album') as HTMLMediaElement);
     htmlAlbum.src = '../../../assets/icons/disc.svg';
 
+    (document.getElementById('forward-button') as HTMLButtonElement).disabled = false;
+    (document.getElementById('play-button') as HTMLButtonElement).disabled = false;
+    (document.getElementById('rewind-button') as HTMLButtonElement).disabled = false;
+    
+    (document.getElementById('forward-image') as HTMLImageElement).src = '../../../assets/icons/icons8-forward-10-48.png';
+    (document.getElementById('rewind-image') as HTMLImageElement).src = '../../../assets/icons/icons8-replay-10-48.png';
+
     if (!this.pageUsed) {
       document.documentElement.style.setProperty('--text-color', 'white');
       document.documentElement.style.setProperty('--image-invert', 'invert(100%)');
@@ -176,8 +183,15 @@ export class VisualizationPageComponent implements AfterViewInit {
       });
     }
 
+    (document.getElementById('forward-button') as HTMLButtonElement).disabled = true;
+    (document.getElementById('play-button') as HTMLButtonElement).disabled = true;
+    (document.getElementById('rewind-button') as HTMLButtonElement).disabled = true;
+
     document.getElementById('song-title').textContent = 'Microphone';
     document.getElementById('song-subtitle').textContent = 'You';
+
+    (document.getElementById('forward-image') as HTMLImageElement).src = '../../../assets/icons/forward.svg';
+    (document.getElementById('rewind-image') as HTMLImageElement).src = '../../../assets/icons/rewind.svg';
 
     if (!this.pageUsed) {
       document.documentElement.style.setProperty('--text-color', 'white');
@@ -198,6 +212,13 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.audioService.stopFile();
     this.audioService.stopMic();
+
+    (document.getElementById('forward-button') as HTMLButtonElement).disabled = false;
+    (document.getElementById('play-button') as HTMLButtonElement).disabled = false;
+    (document.getElementById('rewind-button') as HTMLButtonElement).disabled = false;
+
+    (document.getElementById('forward-image') as HTMLImageElement).src = '../../../assets/icons/forward.svg';
+    (document.getElementById('rewind-image') as HTMLImageElement).src = '../../../assets/icons/rewind.svg';
 
     if (!this.pageUsed) {
       document.documentElement.style.setProperty('--text-color', 'white');

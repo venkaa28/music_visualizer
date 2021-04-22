@@ -128,18 +128,18 @@
         <!--Button controls: rewind, play/pause, skip-->
         <div id="button" style="display: inline-block;">
           <!--Rewind button-->
-          <button (click)="rewindSong()">
-            <img class="custom-icon" src="../../../assets/icons/rewind.svg">
+          <button id="rewind-button" (click)="rewindSong()">
+            <img id="rewind-image" class="custom-icon" src="../../../assets/icons/rewind.svg">
           </button>
 
           <!--Play/Pause button-->
-          <button (click)="togglePlay()">
+          <button id="play-button" (click)="togglePlay()">
             <img id="play" class="custom-icon-play" src={{playPauseIcon()}}>
           </button>
 
           <!--Skip button-->
-          <button (click)="nextSong()">
-            <img class="custom-icon" src="../../../assets/icons/forward.svg">
+          <button id="forward-button" (click)="nextSong()">
+            <img id="forward-image" class="custom-icon" src="../../../assets/icons/forward.svg">
           </button>
         </div>
 
