@@ -106,64 +106,71 @@ export class NebulaSceneServiceService implements OnDestroy{
   }
 
   public async render(): Promise<void> {
-    this.frameId = requestAnimationFrame(() => {
-      this.render();
-    });
-
-    if (this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(async state => {
-        if (!state) {
-          // console.error('User is not playing music through the Web Playback SDK');
-        } else {
-          this.trackProgress = state.position;
-        }
+    return new Promise(async (resolve, reject) => {
+      this.frameId = requestAnimationFrame(() => {
+        this.render();
       });
-    }
 
-    this.sceneAnimation();
-    this.renderer.render(this.scene, this.camera);
+      if (this.spotifyBool === true) {
+        this.spotifyPlayer.player.getCurrentState().then(async state => {
+          if (!state) {
+            // console.error('User is not playing music through the Web Playback SDK');
+          } else {
+            this.trackProgress = state.position;
+          }
+        });
+      }
 
+      await this.sceneAnimation();
+      this.renderer.render(this.scene, this.camera);
+
+      resolve();
+    });
   }
 
-  sceneAnimation = () => {
+  async sceneAnimation(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.spotifyBool){
+        this.tool.freqSetup();
 
-    if (!this.spotifyBool){
-      this.tool.freqSetup();
+        // set emitter position based on low/mid/high frequency scalor
 
-      // set emitter position based on low/mid/high frequency scalor
+        this.nebula.emitters[0].setPosition(new THREE.Vector3(this.vectors[0].x, -this.tool.lowFreqAvgScalor/2, this.vectors[0].z));
+        this.nebula.emitters[6].setPosition(new THREE.Vector3(this.vectors[6].x, -this.tool.lowFreqAvgScalor/2, this.vectors[6].z));
+        this.nebula.emitters[3].setPosition(new THREE.Vector3(this.vectors[3].x, -this.tool.lowFreqAvgScalor/2, this.vectors[3].z));
+        this.nebula.emitters[9].setPosition(new THREE.Vector3(this.vectors[9].x, -this.tool.lowFreqAvgScalor/2, this.vectors[9].z));
 
-      this.nebula.emitters[0].setPosition(new THREE.Vector3(this.vectors[0].x, -this.tool.lowFreqAvgScalor/2, this.vectors[0].z));
-      this.nebula.emitters[6].setPosition(new THREE.Vector3(this.vectors[6].x, -this.tool.lowFreqAvgScalor/2, this.vectors[6].z));
-      this.nebula.emitters[3].setPosition(new THREE.Vector3(this.vectors[3].x, -this.tool.lowFreqAvgScalor/2, this.vectors[3].z));
-      this.nebula.emitters[9].setPosition(new THREE.Vector3(this.vectors[9].x, -this.tool.lowFreqAvgScalor/2, this.vectors[9].z));
+        this.nebula.emitters[1].setPosition(new THREE.Vector3(this.vectors[1].x, this.tool.midFreqAvgScalor/2, this.vectors[1].z));
+        this.nebula.emitters[7].setPosition(new THREE.Vector3(this.vectors[7].x, this.tool.midFreqAvgScalor/2, this.vectors[7].z));
+        this.nebula.emitters[4].setPosition(new THREE.Vector3(this.vectors[4].x, this.tool.midFreqAvgScalor/2, this.vectors[4].z));
+        this.nebula.emitters[10].setPosition(new THREE.Vector3(this.vectors[10].x, this.tool.midFreqAvgScalor/2, this.vectors[10].z));
+      } else {
+        if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+          if (this.lastProgress !== this.trackProgress) {
+            this.lastProgress = this.trackProgress;
+            const curPitches = this.spotifyService.getSegment(this.trackProgress-800).pitches;
 
-      this.nebula.emitters[1].setPosition(new THREE.Vector3(this.vectors[1].x, this.tool.midFreqAvgScalor/2, this.vectors[1].z));
-      this.nebula.emitters[7].setPosition(new THREE.Vector3(this.vectors[7].x, this.tool.midFreqAvgScalor/2, this.vectors[7].z));
-      this.nebula.emitters[4].setPosition(new THREE.Vector3(this.vectors[4].x, this.tool.midFreqAvgScalor/2, this.vectors[4].z));
-      this.nebula.emitters[10].setPosition(new THREE.Vector3(this.vectors[10].x, this.tool.midFreqAvgScalor/2, this.vectors[10].z));
-    } else {
-      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
-        if (this.lastProgress !== this.trackProgress) {
-          this.lastProgress = this.trackProgress;
-          const curPitches = this.spotifyService.getSegment(this.trackProgress-800).pitches;
+            let keptIndices = this.tool.getIndicesOfMax(curPitches, 4);
 
-          let keptIndices = this.tool.getIndicesOfMax(curPitches, 4);
+            for (let i = 0; i < 12; i++) {
+              let loopVal = curPitches[i];
+              let perSecond = 1;
 
-          for (let i = 0; i < 12; i++) {
-            let loopVal = curPitches[i];
-            let perSecond = 1;
+              if (keptIndices.includes(i) || (loopVal > 0.9)) {
+                perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.0004);
+              }
 
-            if (keptIndices.includes(i) || (loopVal > 0.9)) {
-              perSecond = Math.max(((1 - loopVal) ** 4) / 2, 0.0004);
+              this.tool.setRateHelper(this.nebula.emitters[i], perSecond);
+              //this.nebula.emitters[i].setPosition(new THREE.Vector3(loopVal * 10, curPitches[10], curPitches[11])); 
             }
-
-            this.tool.setRateHelper(this.nebula.emitters[i], perSecond);
-            //this.nebula.emitters[i].setPosition(new THREE.Vector3(loopVal * 10, curPitches[10], curPitches[11])); 
           }
         }
       }
-    }
-    this.nebula.update();
+
+      this.nebula.update();
+
+      resolve();
+    });
   }
 
   public async resize(): Promise<void> {

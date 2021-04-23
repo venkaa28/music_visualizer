@@ -162,65 +162,70 @@ export class WavesSceneService implements OnDestroy {
     });
   }
 
-  public render(): void {
-    this.frameId = requestAnimationFrame(() => {
-      this.render();
-    });
-
-    if(this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(state => {
-        if (!state) {
-          // console.error('User is not playing music through the Web Playback SDK');
-          // return;
-        } else {
-          this.trackProgress = state.position;
-        }
+  public async render(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      this.frameId = requestAnimationFrame(() => {
+        this.render();
       });
-    }
-    
-    this.sceneAnimation();
-    this.renderer.render(this.scene, this.camera);
+
+      if(this.spotifyBool === true) {
+        this.spotifyPlayer.player.getCurrentState().then(state => {
+          if (!state) {
+            // console.error('User is not playing music through the Web Playback SDK');
+            // return;
+          } else {
+            this.trackProgress = state.position;
+          }
+        });
+      }
+      
+      await this.sceneAnimation();
+      this.renderer.render(this.scene, this.camera);
+
+      resolve();
+    });
   }
 
-  async sceneAnimation() {
-    if (!this.spotifyBool){
-      this.tool.freqSetup();
+  async sceneAnimation(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      if (!this.spotifyBool){
+        this.tool.freqSetup();
 
-      const time = performance.now() * 0.001;
-      const vec3 = new Vector3();
-      const pos = this.water.geometry.attributes.position;
-      vec3.fromBufferAttribute(pos, 1700);
+        const vec3 = new Vector3();
+        const pos = this.water.geometry.attributes.position;
+        vec3.fromBufferAttribute(pos, 1700);
 
-      //this.shark.position.y = Math.sin( time ) * .25 + this.tool.midFreqAvgScalor;
+        //this.shark.position.y = Math.sin( time ) * .25 + this.tool.midFreqAvgScalor;
 
-      this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
+        this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
 
-      this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.water);
-    } else {
-      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
-        if (this.spotifyService.firstTimbrePreProcess === null) {
-          await this.spotifyService.getTimbrePreProcessing();
-        } else {
-          //const pitchAvg = this.tool.absAvg(currSegment.pitches);
-          const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
-          const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
-          const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-          const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
+        this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.water);
+      } else {
+        if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+          if (this.spotifyService.firstTimbrePreProcess === null) {
+            await this.spotifyService.getTimbrePreProcessing();
+          } else {
+            //const pitchAvg = this.tool.absAvg(currSegment.pitches);
+            const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+            const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
+            const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
+            const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
 
-          const time = performance.now() * 0.001;
+            //this.shark.position.y = Math.sin( time ) * 20 + 5;
+            this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
 
-          //this.shark.position.y = Math.sin( time ) * 20 + 5;
-          this.water.material.uniforms[ 'time' ].value += 10.0 / 60.0;
-
-          this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.water);
+            this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.water);
+          }
         }
       }
-    }
 
-    this.updateSun(this.sun, this.water, this.scene, this.pmremGenerator);
-    
-    this.water.geometry.attributes.position.needsUpdate = true;
-    this.water.updateMatrix();
+      this.updateSun(this.sun, this.water, this.scene, this.pmremGenerator);
+      
+      this.water.geometry.attributes.position.needsUpdate = true;
+      this.water.updateMatrix();
+
+      resolve();
+    });
   }
 
   public resize(): void {

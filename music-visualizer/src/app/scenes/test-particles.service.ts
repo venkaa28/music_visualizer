@@ -121,22 +121,26 @@ export class TestParticlesService implements OnDestroy {
   }
 
   public async render(): Promise<void> {
-    this.frameId = requestAnimationFrame(() => {
-      this.render();
-    });
-
-    if (this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(async state => {
-        if (!state) {
-          // console.error('User is not playing music through the Web Playback SDK');
-        } else {
-          this.trackProgress = state.position;
-        }
+    return new Promise(async (resolve, reject) => {
+      this.frameId = requestAnimationFrame(() => {
+        this.render();
       });
-    }
-    
-    await this.sceneAnimation();
-    this.renderer.render(this.scene, this.camera);
+
+      if (this.spotifyBool === true) {
+        this.spotifyPlayer.player.getCurrentState().then(async state => {
+          if (!state) {
+            // console.error('User is not playing music through the Web Playback SDK');
+          } else {
+            this.trackProgress = state.position;
+          }
+        });
+      }
+      
+      await this.sceneAnimation();
+      this.renderer.render(this.scene, this.camera);
+
+      resolve();
+    });
   }
 
   async sceneAnimation(): Promise<void> {

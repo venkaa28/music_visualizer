@@ -306,61 +306,64 @@ export class SeaSceneService implements OnDestroy{
 
 
   public async render(): Promise<void> {
-    this.frameId = requestAnimationFrame(() => {
-      this.render();
-    });
-
-    if (this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(async state => {
-        if (!state) {
-          // console.error('User is not playing music through the Web Playback SDK');
-        } else {
-          this.trackProgress = state.position;
-        }
+    return new Promise(async (resolve, reject) => {
+      this.frameId = requestAnimationFrame(() => {
+        this.render();
       });
-    }
-    
-    this.sceneAnimation();
-    this.renderer.render(this.scene, this.camera);
+
+      if (this.spotifyBool === true) {
+        this.spotifyPlayer.player.getCurrentState().then(async state => {
+          if (!state) {
+            // console.error('User is not playing music through the Web Playback SDK');
+          } else {
+            this.trackProgress = state.position;
+          }
+        });
+      }
+      
+      await this.sceneAnimation();
+      this.renderer.render(this.scene, this.camera);
+
+      resolve();
+    });
   }
 
 
 
-  sceneAnimation = () => {
-    if (!this.spotifyBool){
-      this.tool.freqSetup();
-      this.tool.makeRoughBall(this.sea.mesh,
-        this.tool.modulate(Math.pow(this.tool.lowFreqDownScaled, 0.8), 0, 1, 0, 2),
-        this.tool.midFreqDownScaled,
-        this.tool.highFreqDownScaled,
-        this.sea.mesh.geometry.parameters.radius)
+  async sceneAnimation(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.spotifyBool){
+        this.tool.freqSetup();
+        this.tool.makeRoughBall(this.sea.mesh,
+          this.tool.modulate(Math.pow(this.tool.lowFreqDownScaled, 0.8), 0, 1, 0, 2),
+          this.tool.midFreqDownScaled,
+          this.tool.highFreqDownScaled,
+          this.sea.mesh.geometry.parameters.radius)
 
-    }else {
-      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
-        if (this.spotifyService.firstTimbrePreProcess === null) {
-          this.spotifyService.getTimbrePreProcessing();
-        } else {
-          const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
-          // const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
-          const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-          const avgPitch = this.spotifyService.getAvgPitch(this.trackProgress);
-          // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
-          // this.tool.wavesBuffer(timbreAvg * 2, scaledAvgPitch, segmentLoudness, timeScalar, this.plane);
-          const maxValScalar1 = this.tool.max(this.spotifyService.firstTimbrePreProcess);
-          const maxValScalar2 = this.tool.max(this.spotifyService.brightnessTimbrePreProcess);
-          this.tool.makeRoughBall(this.sea.mesh,
-            this.tool.modulate(Math.pow(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] / maxValScalar1, 0.8), 0, 1, 0, 4),
-            this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] / maxValScalar2,
-            scaledAvgPitch, this.sea.mesh.geometry.parameters.radius)
+      } else {
+        if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+          if (this.spotifyService.firstTimbrePreProcess === null) {
+            this.spotifyService.getTimbrePreProcessing();
+          } else {
+            const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+            const maxValScalar1 = this.tool.max(this.spotifyService.firstTimbrePreProcess);
+            const maxValScalar2 = this.tool.max(this.spotifyService.brightnessTimbrePreProcess);
+            this.tool.makeRoughBall(this.sea.mesh,
+              this.tool.modulate(Math.pow(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] / maxValScalar1, 0.8), 0, 1, 0, 4),
+              this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] / maxValScalar2,
+              scaledAvgPitch, this.sea.mesh.geometry.parameters.radius)
+          }
         }
       }
-    }
 
-    this.airplane.propeller.rotation.x += 0.3;
-    this.airplane.mesh.rotation.x += -0.1;
-    this.pivot.rotation.z -= 0.01;
-    this.sea.mesh.rotation.z += .005;
-    this.sky.mesh.rotation.z += .01;
+      this.airplane.propeller.rotation.x += 0.3;
+      this.airplane.mesh.rotation.x += -0.1;
+      this.pivot.rotation.z -= 0.01;
+      this.sea.mesh.rotation.z += .005;
+      this.sky.mesh.rotation.z += .01;
+
+      resolve();
+    });
   }
 
 

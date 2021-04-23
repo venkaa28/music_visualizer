@@ -1,6 +1,5 @@
 import {ElementRef, Injectable, NgZone, OnDestroy} from '@angular/core';
 import * as THREE from 'three';
-import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {ToolsService} from '../services/tools.service';
 import {AudioService} from '../services/audio.service';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader';
@@ -155,53 +154,60 @@ export class PlaneSceneServiceService implements OnDestroy{
     });
   }
 
-  public render(): void {
-    this.frameId = requestAnimationFrame(() => {
-      this.render();
-    });
-
-    if(this.spotifyBool === true) {
-      this.spotifyPlayer.player?.getCurrentState().then(state => {
-        if (state) {
-          this.trackProgress = state.position;
-        }
+  public async render(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      this.frameId = requestAnimationFrame(() => {
+        this.render();
       });
-    }
 
-    this.sceneAnimation();
-    this.renderer.render(this.scene, this.camera);
+      if(this.spotifyBool === true) {
+        this.spotifyPlayer.player?.getCurrentState().then(state => {
+          if (state) {
+            this.trackProgress = state.position;
+          }
+        });
+      }
+
+      await this.sceneAnimation();
+      this.renderer.render(this.scene, this.camera);
+
+      resolve();
+    });
   }
 
-  sceneAnimation = async () => {
+  async sceneAnimation(): Promise<void> {
+    return new Promise(async (resolve, reject) =>  {
+      if (!this.spotifyBool) {
+        this.tool.freqSetup();
 
-    if (!this.spotifyBool) {
-      this.tool.freqSetup();
-
-      this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
-    } else {
-      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
-        if (this.spotifyService.firstTimbrePreProcess === null) {
-          await this.spotifyService.getTimbrePreProcessing();
-        } else {
-          const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress - 800);
-          this.tool.wavesBuffer(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2,
-            this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75,
-            segmentLoudness, 0.005, this.plane);
+        this.tool.wavesBuffer(1 + this.tool.lowFreqAvgScalor, this.tool.midFreqAvgScalor, this.tool.highFreqAvgScalor, 0.001, this.plane);
+      } else {
+        if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+          if (this.spotifyService.firstTimbrePreProcess === null) {
+            await this.spotifyService.getTimbrePreProcessing();
+          } else {
+            const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress - 800);
+            this.tool.wavesBuffer(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2,
+              this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75,
+              segmentLoudness, 0.005, this.plane);
+          }
+          //const pitchAvg = this.tool.absAvg(currSegment.pitches);
         }
-        //const pitchAvg = this.tool.absAvg(currSegment.pitches);
       }
-    }
-    this.plane.rotation.z += 0.005;
-    this.darkSky.rotation.y += 0.0005;
-     this.secondPlane.position.z += 0.05;
-    if (this.secondPlane.position.z >= 6000) {
-      this.secondPlane.position.z = 0;
-    }
-    this.secondPlane.geometry.attributes.position.needsUpdate = true;
-    this.secondPlane.updateMatrix();
+      this.plane.rotation.z += 0.005;
+      this.darkSky.rotation.y += 0.0005;
+      this.secondPlane.position.z += 0.05;
+      if (this.secondPlane.position.z >= 6000) {
+        this.secondPlane.position.z = 0;
+      }
+      this.secondPlane.geometry.attributes.position.needsUpdate = true;
+      this.secondPlane.updateMatrix();
 
-    this.plane.geometry.attributes.position.needsUpdate = true;
-    this.plane.updateMatrix();
+      this.plane.geometry.attributes.position.needsUpdate = true;
+      this.plane.updateMatrix();
+    
+      resolve();
+    });
   }
 
 
