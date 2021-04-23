@@ -1,7 +1,6 @@
 import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 // import Rate from 'three-nebula/src/initializer/Rate.js'
 // import {DEFAULT_EMITTER_RATE} from 'three-nebula/src/emitter/constants.js';
-import System from 'three-nebula';
 import * as THREE from 'three';
 import { Vector3 } from 'three';
 import Nebula, { SpriteRenderer, Rate } from 'three-nebula';
@@ -14,7 +13,7 @@ import scene3 from './rainbow.json';
 @Injectable({
   providedIn: 'root'
 })
-export class NebulaSceneServiceService {
+export class NebulaSceneServiceService implements OnDestroy{
   private nebulaRenderer: SpriteRenderer;
 
   constructor(private ngZone: NgZone, public audioService: AudioService, private tool: ToolsService,
@@ -43,6 +42,9 @@ export class NebulaSceneServiceService {
 
       cancelAnimationFrame(this.frameId);
     }
+
+    document.removeEventListener('DOMContentLoaded', this.render);
+    document.removeEventListener('resize', this.resize);
   }
 
   public cancelAnimation(): void {
@@ -53,40 +55,43 @@ export class NebulaSceneServiceService {
   }
 
   public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
-    this.scene = new THREE.Scene();
-    this.canvas = canvas.nativeElement;
-    this.canvasRef = canvas;
-    this.renderer = renderer;
+    return new Promise(async (resolve, reject) => {
+      this.scene = new THREE.Scene();
+      this.canvas = canvas.nativeElement;
+      this.canvasRef = canvas;
+      this.renderer = renderer;
 
-    await Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
-      this.nebulaRenderer = new SpriteRenderer(this.scene, THREE);
-      this.nebula = loaded.addRenderer(this.nebulaRenderer);
-      this.vectors = new Array<Vector3>(12);
+      await Nebula.fromJSONAsync(scene3, THREE).then(loaded => {
+        this.nebulaRenderer = new SpriteRenderer(this.scene, THREE);
+        this.nebula = loaded.addRenderer(this.nebulaRenderer);
+        this.vectors = new Array<Vector3>(12);
 
-      // Set up the vectors for the scene
-      for (let i = 0; i < 12; i++) {
-        this.vectors[i] = this.nebula.emitters[i].position;
-      }
+        // Set up the vectors for the scene
+        for (let i = 0; i < 12; i++) {
+          this.vectors[i] = this.nebula.emitters[i].position;
+        }
+      });
+
+      // sets the background color to black
+      this.renderer.setClearColor(0x111111);
+
+      // sets the size of the canvas
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      // sets a perspective camera
+      this.camera = new THREE.PerspectiveCamera(65, (window.innerWidth) / (window.innerHeight), 0.1, 1000);
+      // lets the camera at position x, y, z
+      this.camera.position.set(0, 80, 50);
+      // set the camera to look at the center of the scene
+      this.camera.lookAt(this.scene.position);
+      // adds the camera to the scene
+      this.scene.add(this.camera);
+
+      // rotates the camera
+      this.camera.rotation.y += 0.01;
+      console.log("finished create scene");
+
+      resolve();
     });
-
-    // sets the background color to black
-    this.renderer.setClearColor(0x111111);
-
-    // sets the size of the canvas
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    // sets a perspective camera
-    this.camera = new THREE.PerspectiveCamera(65, (window.innerWidth) / (window.innerHeight), 0.1, 1000);
-    // lets the camera at position x, y, z
-    this.camera.position.set(0, 80, 50);
-    // set the camera to look at the center of the scene
-    this.camera.lookAt(this.scene.position);
-    // adds the camera to the scene
-    this.scene.add(this.camera);
-
-    // rotates the camera
-    this.camera.rotation.y += 0.01;
-    console.log("finished create scene");
-
   }
 
   public async animate(): Promise<void> {
@@ -94,13 +99,9 @@ export class NebulaSceneServiceService {
       if (document.readyState !== 'loading') {
         await this.render();
       } else {
-        window.addEventListener('DOMContentLoaded', async () => {
-          await this.render();
-        });
+        window.addEventListener('DOMContentLoaded', this.render);
       }
-      window.addEventListener('resize', async () => {
-        await this.resize();
-      });
+      window.addEventListener('resize', this.resize);
     });
   }
 
@@ -115,14 +116,12 @@ export class NebulaSceneServiceService {
           // console.error('User is not playing music through the Web Playback SDK');
         } else {
           this.trackProgress = state.position;
-          await this.sceneAnimation();
-          this.renderer.render(this.scene, this.camera);
         }
       });
-    } else {
-      await this.sceneAnimation();
-      this.renderer.render(this.scene, this.camera);
     }
+
+    this.sceneAnimation();
+    this.renderer.render(this.scene, this.camera);
 
   }
 

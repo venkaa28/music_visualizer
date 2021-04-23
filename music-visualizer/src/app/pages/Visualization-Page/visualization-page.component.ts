@@ -57,7 +57,6 @@ export class VisualizationPageComponent implements AfterViewInit {
   private pageUsed: boolean;
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
-
               public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
               private spotifySDK: SpotifyPlaybackSdkService, public nebulaScene: NebulaSceneServiceService, public seaScene: SeaSceneService,
               public waveScene: WavesSceneService, private spotifyAPI: SpotifyService) {
@@ -156,7 +155,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.pageUsed = true;
     }
 
-    this.scene.animate();
+    await this.scene.animate();
     this.toggleUploadMenu();
     await this.audioService.play();
   }
@@ -199,7 +198,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.pageUsed = true;
     }
 
-    this.scene.animate();
+    await this.scene.animate();
     this.toggleUploadMenu();
   }
 
@@ -230,17 +229,19 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.scenesAvailable.forEach((scene) => {
         scene.spotifyBool = true;
       });
-      this.scene.animate();
       }
     );
 
-
+    await this.scene.animate();
     this.toggleUploadMenu();
   }
 
   // change the current visualization scene
   async changeScene(event: any) {
-    this.scene.ngOnDestroy();
+    this.scenesAvailable.forEach((scene) => scene.ngOnDestroy());
+
+    this.renderer.clear();
+
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas, // grabs the canvas element
       alpha: true,    // transparent background
@@ -253,7 +254,7 @@ export class VisualizationPageComponent implements AfterViewInit {
 
     this.scene = this.scenesAvailable[event];
     await this.scene.createScene(this.canvas, this.renderer);
-    this.scene.animate();
+    await this.scene.animate();
   }
 
   async profilePage() {

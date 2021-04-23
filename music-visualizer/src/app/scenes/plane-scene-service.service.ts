@@ -1,4 +1,4 @@
-import {ElementRef, Injectable, NgZone} from '@angular/core';
+import {ElementRef, Injectable, NgZone, OnDestroy} from '@angular/core';
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {ToolsService} from '../services/tools.service';
@@ -11,7 +11,7 @@ import {SpotifyPlaybackSdkService} from '../services/spotify-playback-sdk.servic
 @Injectable({
   providedIn: 'root'
 })
-export class PlaneSceneServiceService {
+export class PlaneSceneServiceService implements OnDestroy{
 
 
   constructor(private ngZone: NgZone, public audioService: AudioService,
@@ -41,6 +41,9 @@ export class PlaneSceneServiceService {
     if (this.frameId != null) {
       cancelAnimationFrame(this.frameId);
     }
+
+    document.removeEventListener('DOMContentLoaded', this.render);
+    document.removeEventListener('resize', this.resize);
   }
 
   public cancelAnimation() {
@@ -50,91 +53,95 @@ export class PlaneSceneServiceService {
   }
 
   public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
-    this.canvasRef = canvas;
-    this.scene = new THREE.Scene();
-    this.group = new THREE.Group();
-    this.loader = new GLTFLoader();
+    return new Promise((resolve, reject) => {
+      this.canvasRef = canvas;
+      this.scene = new THREE.Scene();
+      this.group = new THREE.Group();
+      this.loader = new GLTFLoader();
 
-    this.renderer = renderer;
-    this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
-    // sets the background color to black
-    this.renderer.setClearColor(0x000000);
+      this.renderer = renderer;
+      this.scene.fog = new THREE.FogExp2(0x11111f, 0.00025);
+      // sets the background color to black
+      this.renderer.setClearColor(0x000000);
 
-    // sets the size of the canvas
-    this.renderer.setSize(window.innerWidth , window.innerHeight);
-    this.textureLoader = new THREE.TextureLoader();
+      // sets the size of the canvas
+      this.renderer.setSize(window.innerWidth , window.innerHeight);
+      this.textureLoader = new THREE.TextureLoader();
 
-      //loading in dark sky 3d model
-      this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
-      this.darkSky = model.scene;
-      this.darkSky.scale.set(450, 450, 450);
-      this.darkSky.rotateY(180);
-      this.textureLoader.load( '../../../assets/3d_models/fantasy_sky_background/textures/Material__25__background_JPG_002_emissive.jpg',
-        ( newTexture ) => {
+        //loading in dark sky 3d model
+        this.loader.load('../../../assets/3d_models/fantasy_sky_background/scene.gltf', (model) => {
+        this.darkSky = model.scene;
+        this.darkSky.scale.set(450, 450, 450);
+        this.darkSky.rotateY(180);
+        this.textureLoader.load( '../../../assets/3d_models/fantasy_sky_background/textures/Material__25__background_JPG_002_emissive.jpg',
+          ( newTexture ) => {
 
-        newTexture.encoding = THREE.sRGBEncoding;
-        newTexture.flipY = false;
-        newTexture.wrapS = THREE.RepeatWrapping;
-        newTexture.wrapT = THREE.RepeatWrapping;
+          newTexture.encoding = THREE.sRGBEncoding;
+          newTexture.flipY = false;
+          newTexture.wrapS = THREE.RepeatWrapping;
+          newTexture.wrapT = THREE.RepeatWrapping;
 
-        this.darkSky.traverse(( child ) => {
+          this.darkSky.traverse(( child ) => {
 
-          if (child instanceof THREE.Mesh) {
-            (child.material as any).map = newTexture;
-            (child.material as any).backside = true;
-            (child.material as any).needsUpdate = true;
-            (child.material as any).map.needsUpdate = true;
-          }
+            if (child instanceof THREE.Mesh) {
+              (child.material as any).map = newTexture;
+              (child.material as any).backside = true;
+              (child.material as any).needsUpdate = true;
+              (child.material as any).map.needsUpdate = true;
+            }
+          });
         });
+        this.group.add(this.darkSky);
       });
-      this.group.add(this.darkSky);
+
+      // sets a perspective camera
+      this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
+      // lets the camera at position x, y, z
+      this.camera.position.set(-10, 425, -1300);
+      // set the camera to look at the center of the scene
+      // this.camera.lookAt(this.scene.position);
+      this.camera.lookAt(0, 0, 0);
+      // adds the camera to the scene
+      this.scene.add(this.camera);
+      //creating the plane that responds to the music
+      const planeGeometry = new THREE.PlaneGeometry(1600, 1600, 100, 100);
+      const planeMaterial = new THREE.MeshLambertMaterial({
+        color: 0x25E0EC,
+        side: THREE.DoubleSide,
+        wireframe: true
+      });
+      //creating the plane that sits below and moves infinitely
+      const secondPlaneGeometry = new THREE.PlaneGeometry(1600, 15000, 100, 100);
+      const secondPlaneMaterial = new THREE.MeshLambertMaterial({
+        color: 0x696969,
+        side: THREE.DoubleSide,
+        wireframe: true
+      });
+
+      this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      this.plane.rotation.x = -0.5 * Math.PI;
+
+      this.plane.position.set(0, -30, 400);
+
+      this.secondPlane = new THREE.Mesh(secondPlaneGeometry, secondPlaneMaterial);
+      this.secondPlane.rotation.x = -0.5 * Math.PI;
+
+      this.secondPlane.position.set(0, -180, 0);
+
+      this.group.add(this.plane);
+      this.group.add(this.secondPlane);
+      // adding ambient lighting to the scene
+      this.ambLight = new THREE.AmbientLight(0xaaaaaa, 1);
+      this.scene.add(this.ambLight);
+      //adding directional light
+      const directionalLight = new THREE.DirectionalLight(0xffeedd);
+      directionalLight.position.set(0, 0, 1);
+      this.scene.add(directionalLight);
+      //adding the group to the scene
+      this.scene.add(this.group);
+
+      resolve();
     });
-
-    // sets a perspective camera
-    this.camera = new THREE.PerspectiveCamera(80, (window.innerWidth) / (window.innerHeight), 1, 7000);
-    // lets the camera at position x, y, z
-    this.camera.position.set(-10, 425, -1300);
-    // set the camera to look at the center of the scene
-    // this.camera.lookAt(this.scene.position);
-    this.camera.lookAt(0, 0, 0);
-    // adds the camera to the scene
-    this.scene.add(this.camera);
-    //creating the plane that responds to the music
-    const planeGeometry = new THREE.PlaneGeometry(1600, 1600, 100, 100);
-    const planeMaterial = new THREE.MeshLambertMaterial({
-      color: 0x25E0EC,
-      side: THREE.DoubleSide,
-      wireframe: true
-    });
-    //creating the plane that sits below and moves infinitely
-    const secondPlaneGeometry = new THREE.PlaneGeometry(1600, 15000, 100, 100);
-    const secondPlaneMaterial = new THREE.MeshLambertMaterial({
-      color: 0x696969,
-      side: THREE.DoubleSide,
-      wireframe: true
-    });
-
-    this.plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    this.plane.rotation.x = -0.5 * Math.PI;
-
-    this.plane.position.set(0, -30, 400);
-
-    this.secondPlane = new THREE.Mesh(secondPlaneGeometry, secondPlaneMaterial);
-    this.secondPlane.rotation.x = -0.5 * Math.PI;
-
-    this.secondPlane.position.set(0, -180, 0);
-
-    this.group.add(this.plane);
-    this.group.add(this.secondPlane);
-    // adding ambient lighting to the scene
-    this.ambLight = new THREE.AmbientLight(0xaaaaaa, 1);
-    this.scene.add(this.ambLight);
-    //adding directional light
-    const directionalLight = new THREE.DirectionalLight(0xffeedd);
-    directionalLight.position.set(0, 0, 1);
-    this.scene.add(directionalLight);
-    //adding the group to the scene
-    this.scene.add(this.group);
   }
 
   public animate(): void {
@@ -142,13 +149,9 @@ export class PlaneSceneServiceService {
       if (document.readyState !== 'loading') {
         this.render();
       } else {
-        window.addEventListener('DOMContentLoaded', () => {
-          this.render();
-        });
+        window.addEventListener('DOMContentLoaded', this.render);
       }
-      window.addEventListener('resize', () => {
-        this.resize();
-      });
+      window.addEventListener('resize', this.resize);
     });
   }
 
@@ -181,21 +184,11 @@ export class PlaneSceneServiceService {
           await this.spotifyService.getTimbrePreProcessing();
         } else {
           const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress - 800);
-          // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
-
-          if (this.frame++ % 50 === 0) {
-            console.log('1: ' + typeof(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2)
-            + '; 2: ' + typeof (this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75)
-            + '; 3: ' + typeof segmentLoudness
-            + '; 4: ' + typeof this.plane);
-          }
-
           this.tool.wavesBuffer(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2,
             this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75,
             segmentLoudness, 0.005, this.plane);
         }
         //const pitchAvg = this.tool.absAvg(currSegment.pitches);
-
       }
     }
     this.plane.rotation.z += 0.005;

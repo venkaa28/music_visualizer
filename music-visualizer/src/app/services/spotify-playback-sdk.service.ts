@@ -78,43 +78,41 @@ export class SpotifyPlaybackSdkService {
           ' please try reloading your browser and authenticating Spotify again');
       });
 
-      this.player.addListener('player_state_changed', ({
-                                                    position,
-                                                    duration,
-                                                    paused,
-                                                    track_window: { current_track },
-                                                  }) => {
-        this.title = current_track.name;
+      this.player.addListener('player_state_changed', ({ position, duration, paused, track_window: { current_track } }): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
+          this.title = current_track.name;
 
-        this.artist = '';
-        current_track.artists.forEach((value) => {
-          this.artist += value.name + ', ';
+          this.artist = '';
+          current_track.artists.forEach((value) => {
+            this.artist += value.name + ', ';
+          });
+          this.artist = this.artist.slice(0, this.artist.length - 2);
+          this.spotifyService.trackDuration = duration;
+          this.album = current_track.album.images[0].url;
+
+          this.currTrackID = current_track.id;
+
+          try {
+            this.spotifyService.getTrackAnalysisData(this.currTrackID);
+            this.spotifyService.getTrackFeatureData(this.currTrackID);
+          } catch (e) {
+            this.notifierService.notify('error', e + ' Please try reloading the application' +
+              ' or authenticate spotify again');
+          }
+
+          this.spotifyService.segmentEnd = 0;
+          this.spotifyService.sectionEnd = 0;
+          this.spotifyService.avgSegmentDuration = 0;
+
+          var htmlAlbum = (document.getElementById('album') as HTMLMediaElement)
+          htmlAlbum.src = this.album;
+          document.getElementById('song-title').textContent = this.title;
+          document.getElementById('song-subtitle').textContent = this.artist;
+          (document.getElementById('play') as HTMLMediaElement).src = paused ? '../../assets/icons/play.svg' : '../../assets/icons/pause.svg';
+          await this.spotifyService.getTimbrePreProcessing();
+
+          resolve();
         });
-        this.artist = this.artist.slice(0, this.artist.length - 2);
-        this.spotifyService.trackDuration = duration;
-        this.album = current_track.album.images[0].url;
-
-        this.currTrackID = current_track.id;
-
-        try {
-          this.spotifyService.getTrackAnalysisData(this.currTrackID);
-          this.spotifyService.getTrackFeatureData(this.currTrackID);
-        } catch (e) {
-          this.notifierService.notify('error', e + ' Please try reloading the application' +
-            ' or authenticate spotify again');
-        }
-
-        this.spotifyService.segmentEnd = 0;
-        this.spotifyService.sectionEnd = 0;
-        this.spotifyService.avgSegmentDuration = 0;
-
-        var htmlAlbum = (document.getElementById('album') as HTMLMediaElement)
-        htmlAlbum.src = this.album;
-        this.spotifyService.firstTimbrePreProcess = null;
-        this.spotifyService.brightnessTimbrePreProcess = null;
-        document.getElementById('song-title').textContent = this.title;
-        document.getElementById('song-subtitle').textContent = this.artist;
-        (document.getElementById('play') as HTMLMediaElement).src = paused ? '../../assets/icons/play.svg' : '../../assets/icons/pause.svg';
       });
      // this.player.addListener('player_state_changed', state => { track_window: { current_track } });
       // player is ready
