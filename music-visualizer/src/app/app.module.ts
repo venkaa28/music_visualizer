@@ -6,12 +6,10 @@ import { HttpClientModule } from '@angular/common/http';
 
 
 // firebase
-import firebase from 'firebase';
 import { firebaseConfig } from '../environments/environment';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
-import { AngularFireStorageModule } from '@angular/fire/storage';
 
 // pages
 import { AppRoutingModule } from './app-routing.module';
@@ -30,7 +28,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DoBootstrap } from "@angular/core";
 import { AuthService } from './services/auth.service'
 import { AudioService } from './services/audio.service';
 import { CallbackComponent } from './pages/callback/callback.component';
@@ -59,7 +56,6 @@ import { CookieService } from 'ngx-cookie-service';
     AngularFireModule.initializeApp(firebaseConfig),
     AngularFireAuthModule,
     AngularFireDatabaseModule,
-    AngularFireStorageModule,
 
     BrowserModule,
     CommonModule,

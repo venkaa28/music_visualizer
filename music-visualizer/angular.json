@@ -74,7 +74,9 @@
             "sslCert": "./src/server.crt",
             "sslKey": "./src/server.key",
             "browserTarget": "music-visualizer:build",
-            "proxyConfig": "./src/proxy.config.json"
+            "proxyConfig": "./src/proxy.config.json",
+            "sslKey": "./src/server.key",
+            "sslCert": "./src/server.crt"
           },
           "configurations": {
             "production": {
