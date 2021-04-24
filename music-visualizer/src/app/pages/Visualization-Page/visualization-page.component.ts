@@ -5,23 +5,23 @@ import { NotifierService } from 'angular-notifier';
 
 // firebase
 // general libs
+import * as THREE from 'three';
+
 // local lib
 import { AuthService } from '../../services/auth.service';
-import {AudioService} from '../../services/audio.service';
+import { AudioService } from '../../services/audio.service';
 
-// THREE
-import * as THREE from 'three';
 // scenes
-import {PlaneSceneServiceService} from '../../scenes/plane-scene-service.service';
-import {SpotifyPlaybackSdkService} from '../../services/spotify-playback-sdk.service';
-import {TestParticlesService} from '../../scenes/test-particles.service';
-import {DemoSceneServiceService} from '../../scenes/demo-scene-service.service';
-import {NebulaSceneServiceService} from '../../scenes/nebula-scene-service.service';
+import { PlaneSceneServiceService } from '../../scenes/plane-scene-service.service';
+import { SpotifyPlaybackSdkService } from '../../services/spotify-playback-sdk.service';
+import { TestParticlesService } from '../../scenes/test-particles.service';
+import { DemoSceneServiceService } from '../../scenes/demo-scene-service.service';
+import { NebulaSceneServiceService } from '../../scenes/nebula-scene-service.service';
 import { SeaSceneService } from 'src/app/scenes/sea-scene-service.service';
 import { WavesSceneService } from 'src/app/scenes/waves-scene.service';
 import { SpotifyService } from 'src/app/services/spotify.service';
 
-
+// typedef dictionary type
 type Dict = {[key: string]: any};
 
 @Component({
@@ -34,27 +34,26 @@ type Dict = {[key: string]: any};
   ],
   host: {
     '(document:keypress)': 'keyListener($event)'
-  }
+  } // key listener
 })
 export class VisualizationPageComponent implements AfterViewInit {
-
   @ViewChild('rendererCanvas', {static: true})
-  public rendererCanvas!: ElementRef<HTMLCanvasElement>;
+  public rendererCanvas!: ElementRef<HTMLCanvasElement>; // html canvas to render three scene to
   @ViewChild('audioFile', {read: ElementRef})
-  public audioFile!: ElementRef<HTMLMediaElement>;
+  public audioFile!: ElementRef<HTMLMediaElement>; // html audio to playback local and mic audio
 
   public audio: HTMLAudioElement; // audio element of window
-  public readonly scenesAvailable = [this.planeScene, this.seaScene, this.nebulaScene, this.testParticles, this.demoScene, this.waveScene]; // current scene being used
+  public readonly scenesAvailable = [this.planeScene, this.seaScene, this.nebulaScene, this.testParticles, this.demoScene, this.waveScene]; // list of available scenes
   public scene: any; // current scene to use
 
   private menuTimeout: number; // timeout in ms of menu
   private timeout: number; // id of current timeout
   private micStream: MediaStream; // user's microphone data
-  private renderer: THREE.WebGLRenderer;
-  private canvas!: HTMLCanvasElement;
+  private renderer: THREE.WebGLRenderer; // global three renderer
+  private canvas!: HTMLCanvasElement; // dereference rendererCanvas to use in the renderer
 
-  private lastButton: number;
-  private pageUsed: boolean;
+  private lastButton: number; // keep track of which button to enable
+  private pageUsed: boolean; // if page used, invert color scheme
 
   constructor(private authService: AuthService, private router: Router, public audioService: AudioService, public demoScene: DemoSceneServiceService,
               public testParticles: TestParticlesService, public planeScene: PlaneSceneServiceService, private readonly notifierService: NotifierService,
@@ -64,33 +63,33 @@ export class VisualizationPageComponent implements AfterViewInit {
     this.menuTimeout = 2000;
     this.lastButton = 0;
     this.pageUsed = false;
-
-    // TODO: scroll text on hover
   }
 
   async ngAfterViewInit(): Promise<void> {
-    this.scene = this.scenesAvailable[0];
-    this.audio = this.audioFile.nativeElement;// grab audio element from html
-    this.canvas = this.rendererCanvas.nativeElement;
+    this.scene = this.scenesAvailable[0]; // set default scene
+    this.audio = this.audioFile.nativeElement; // grab audio element from html
+    this.canvas = this.rendererCanvas.nativeElement; // dereference to get canvas
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas, // grabs the canvas element
       alpha: true,    // transparent background
       antialias: true // smooth edges
     });
 
+    // clear the spotify bool of each scene
     this.scenesAvailable.forEach((scene) => {
       scene.spotifyBool = false;
     });
 
     await this.scene.createScene(this.canvas, this.renderer);
 
+    // update time text every 100 ms
     setInterval(() => {
       this.progress();
     }, 100);
   }
 
   // listen to keyboard events, perform actions if certain keys are pressed
-  async keyListener(event) {
+  public async keyListener(event: any): Promise<void> {
     event = event || window.event; // capture the event, and ensure we have an event
 
     switch (event.key) {
@@ -112,181 +111,186 @@ export class VisualizationPageComponent implements AfterViewInit {
 
   /**************************************Loading functions**************************************/
 
-  // load song from local file
-  async loadFilePath(event: any) {
-    let element = event as HTMLInputElement; // get filelist from html
-    let file = element.files[0];
-
-    if (typeof file === 'undefined') {
-      console.log('no change');
-      return;
-    }
-
-    if (this.scene.spotifyBool) {
-      this.spotifySDK.player.pause().then(() => {
-        this.scenesAvailable.forEach((scene) => {
-          scene.spotifyBool = false;
-        });
-      });
-
-      await this.spotifySDK.player.removeListener('player_state_changed');
-      await this.spotifySDK.player.removeListener('ready');
-      this.spotifySDK.player.disconnect();
-    }
-
-    this.audio.src = URL.createObjectURL(file); // set source to be the file in the html
-    this.audioService.loadSong(this.audio);
-
-    document.getElementById('song-title').textContent = file.name;
-    document.getElementById('song-subtitle').textContent = 'Local File';
-    let htmlAlbum = (document.getElementById('album') as HTMLMediaElement);
-    htmlAlbum.src = '../../../assets/icons/disc.svg';
-
-    (document.getElementById('forward-button') as HTMLButtonElement).disabled = false;
-    (document.getElementById('play-button') as HTMLButtonElement).disabled = false;
-    (document.getElementById('rewind-button') as HTMLButtonElement).disabled = false;
-    
-    (document.getElementById('forward-image') as HTMLImageElement).src = '../../../assets/icons/icons8-forward-10-48.png';
-    (document.getElementById('rewind-image') as HTMLImageElement).src = '../../../assets/icons/icons8-replay-10-48.png';
-
-    if (!this.pageUsed) {
-      document.documentElement.style.setProperty('--text-color', 'white');
-      document.documentElement.style.setProperty('--image-invert', 'invert(100%)');
-      this.pageUsed = true;
-    }
-
-    await this.scene.animate();
-    this.toggleUploadMenu();
-    await this.audioService.play();
-  }
-
-  async loadMic() {
+  private async stopAllAudio(): Promise<void> {
+    // stop audio playback
     await this.audioService.pause();
 
-    if (this.scene.spotifyBool) {
-      this.spotifySDK.player.pause().then(() => {
-        this.scenesAvailable.forEach((scene) => {
-          scene.spotifyBool = false;
-        });
-      });
-
-      await this.spotifySDK.player.removeListener('player_state_changed');
-      await this.spotifySDK.player.removeListener('ready');
-      this.spotifySDK.player.disconnect();
-    }
-
-    if (typeof this.micStream === 'undefined') {
-      await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      .then((stream) => {
-        this.audioService.loadMic(stream); // load the audio into the audio context
-      });
-    }
-
-    (document.getElementById('forward-button') as HTMLButtonElement).disabled = true;
-    (document.getElementById('play-button') as HTMLButtonElement).disabled = true;
-    (document.getElementById('rewind-button') as HTMLButtonElement).disabled = true;
-
-    document.getElementById('song-title').textContent = 'Microphone';
-    document.getElementById('song-subtitle').textContent = 'You';
-
-    (document.getElementById('forward-image') as HTMLImageElement).src = '../../../assets/icons/forward.svg';
-    (document.getElementById('rewind-image') as HTMLImageElement).src = '../../../assets/icons/rewind.svg';
-
-    if (!this.pageUsed) {
-      document.documentElement.style.setProperty('--text-color', 'white');
-      document.documentElement.style.setProperty('--image-invert', 'invert(100%)');
-      this.pageUsed = true;
-    }
-
-    await this.scene.animate();
-    this.toggleUploadMenu();
-  }
-
-  async loadSpotify() {
-    // TODO: error handle not token cookie
-    await this.audioService.pause();
-    if (this.authService.getUser().spotifyAPIKey == null) {
-      await this.profilePage();
-    }
-
+    // stop audio service
     this.audioService.stopFile();
     this.audioService.stopMic();
 
-    (document.getElementById('forward-button') as HTMLButtonElement).disabled = false;
-    (document.getElementById('play-button') as HTMLButtonElement).disabled = false;
-    (document.getElementById('rewind-button') as HTMLButtonElement).disabled = false;
+    // reset spotify bool for all scenes, and disconnect spotify
+    if (this.scene.spotifyBool) {
+      this.spotifySDK.player.pause().then(() => {
+        this.scenesAvailable.forEach((scene) => {
+          scene.spotifyBool = false;
+        });
+      });
 
-    (document.getElementById('forward-image') as HTMLImageElement).src = '../../../assets/icons/forward.svg';
-    (document.getElementById('rewind-image') as HTMLImageElement).src = '../../../assets/icons/rewind.svg';
+      await this.spotifySDK.player.removeListener('player_state_changed');
+      await this.spotifySDK.player.removeListener('ready');
+      this.spotifySDK.player.disconnect();
+    }
 
+    // invert color if page was originally unused
     if (!this.pageUsed) {
       document.documentElement.style.setProperty('--text-color', 'white');
       document.documentElement.style.setProperty('--image-invert', 'invert(100%)');
       this.pageUsed = true;
     }
+  }
 
-    await this.spotifySDK.addSpotifyPlaybackSdk().then(() => {
-      this.scenesAvailable.forEach((scene) => {
-        scene.spotifyBool = true;
-      });
+  // load song from local file
+  public async loadFilePath(event: any): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      let element = event as HTMLInputElement; // get filelist from html
+      let file = element.files[0];
+
+      // don't do anything if the user cancels
+      if (typeof file === 'undefined') {
+        console.log('no change');
+        return;
       }
-    );
 
-    await this.scene.animate();
-    this.toggleUploadMenu();
+      await this.stopAllAudio();
+
+      this.audio.src = URL.createObjectURL(file); // set source to be the file in the html
+      this.audioService.loadSong(this.audio);
+
+      document.getElementById('song-title').textContent = file.name; // set song name
+      document.getElementById('song-subtitle').textContent = 'Local File'; // set song artists
+      let htmlAlbum = (document.getElementById('album') as HTMLMediaElement);
+      htmlAlbum.src = '../../../assets/icons/disc.svg'; // set album art to default disc svg      
+
+      this.setControls(false, true);
+
+      await this.scene.animate(); // animate scene
+      this.toggleUploadMenu(); // get rid of upload menu
+      await this.audioService.play(); // play audio
+
+      resolve();
+    });
+  }
+
+  // use mic stream as audio input
+  public async loadMic(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      await this.stopAllAudio();
+
+      // get microphone, or else already have permissions so just use stream
+      if (typeof this.micStream === 'undefined') {
+        await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        .then((stream) => {
+          this.audioService.loadMic(stream); // load the audio into the audio context
+        });
+      }
+
+      // set song title and author
+      document.getElementById('song-title').textContent = 'Microphone';
+      document.getElementById('song-subtitle').textContent = 'You';
+
+      let htmlAlbum = (document.getElementById('album') as HTMLMediaElement);
+      htmlAlbum.src = '../../../assets/icons/disc.svg'; // set album art to default disc svg
+      
+      this.setControls(true, false);
+
+      await this.scene.animate(); // animate scene
+      this.toggleUploadMenu(); // get rid of menu
+
+      resolve();
+    });
+  }
+
+  public async loadSpotify(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      // TODO: error handle not token cookie
+
+      // reroute to profile page if user doesn't have spotify connected
+      if (this.authService.getUser().spotifyAPIKey == null) {
+        await this.profilePage();
+      }
+
+      await this.stopAllAudio();
+      this.setControls(false, false);
+
+      // open spotify device listener, and set spotify bool to true for all scenes
+      await this.spotifySDK.addSpotifyPlaybackSdk().then(() => {
+        this.scenesAvailable.forEach((scene) => {
+          scene.spotifyBool = true;
+        });
+        }
+      );
+
+      await this.scene.animate(); // animate scene
+      this.toggleUploadMenu(); // get rid of upload menu
+
+      resolve();
+    });
   }
 
   // change the current visualization scene
-  async changeScene(event: any) {
-    this.scenesAvailable.forEach((scene) => scene.ngOnDestroy());
+  public async changeScene(event: any): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      // close scene
+      this.scenesAvailable.forEach((scene) => scene.ngOnDestroy());
 
-    this.renderer.clear();
+      // clear renderer
+      this.renderer.clear();
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas, // grabs the canvas element
-      alpha: true,    // transparent background
-      antialias: true // smooth edges
+      // reset renderer
+      this.renderer = new THREE.WebGLRenderer({
+        canvas: this.canvas, // grabs the canvas element
+        alpha: true,    // transparent background
+        antialias: true // smooth edges
+      });
+
+      // disable scene button
+      (document.getElementById(`otb${this.lastButton}`) as HTMLButtonElement).disabled = false;
+      // enable last scene used's button 
+      (document.getElementById(`otb${event}`) as HTMLButtonElement).disabled = true;
+      this.lastButton = event;
+
+      this.scene = this.scenesAvailable[event]; // set scene
+      await this.scene.createScene(this.canvas, this.renderer); // setup scene
+      await this.scene.animate(); // animate scene
+
+      resolve();
     });
-
-    (document.getElementById(`otb${this.lastButton}`) as HTMLButtonElement).disabled = false;    
-    (document.getElementById(`otb${event}`) as HTMLButtonElement).disabled = true;
-    this.lastButton = event;
-
-    this.scene = this.scenesAvailable[event];
-    await this.scene.createScene(this.canvas, this.renderer);
-    await this.scene.animate();
   }
 
-  async profilePage() {
+  // stop audio instances when routing
+  public async profilePage(): Promise<void> {
+    // completely stop audio service
     this.audioService.hardStop();
     
+    // disconnect spotify
     if (this.spotifySDK.player !== null) {
       this.spotifySDK.player.disconnect();
     }
 
-    //(document.getElementById('audio-file') as HTMLMediaElement).src = '';
-    //(document.getElementById('audio-source') as HTMLMediaElement).src = '';
+    // route to profile page
     await this.router.navigate(['../ProfilePage']);
   }
 
   /**************************************Audio controls**************************************/
 
   // handle play or pause
-  async togglePlay() {
-    if (this.scene.spotifyBool) {
+  public async togglePlay(): Promise<void> {
+    if (this.scene.spotifyBool) { // spotify player toggle
       await this.spotifySDK.player.togglePlay();
-    } else {
+    } else { // audio service toggle
       await this.audioService.playOrPause();
     }
 
-    this.toggleMenu();
+    this.toggleMenu(); // refresh menu timeout
   }
 
-  // load next song from firebase
-  async nextSong() {
+  // load next song, or skip 10 seconds if local
+  public async nextSong(): Promise<void> {
     if (this.scene.spotifyBool) {
-      await this.spotifySDK.player.nextTrack();
+      await this.spotifySDK.player.nextTrack(); // spotify get the next song
     } else {
+      // add 10 seconds with bound detection
       if (this.audioService.getTime() + 10 > this.audioService.getDuration()) {
         this.audioService.setTime(this.audioService.getDuration());
       } else {
@@ -295,11 +299,12 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
   }
 
-  // load previous song from firebase
-  async rewindSong() {
+  // load previous song, or rewind 10 seconds if local
+  public async rewindSong(): Promise<void> {
     if (this.scene.spotifyBool) {
-      await this.spotifySDK.player.previousTrack();
+      await this.spotifySDK.player.previousTrack(); // spotify get previous song
     } else {
+      // subtract 10 seconds with bound detection
       if (this.audioService.getTime() - 10 < 0) {
         this.audioService.setTime(0);
       } else {
@@ -309,17 +314,17 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   // change fft value based on slider input
-  changeFFT(event: any) {
+  public changeFFT(event: any): void {
     this.audioService.setFFT(Math.pow(2, event.value));
   }
 
   // change the smoothing constant
-  changeSC(event: any) {
+  public changeSC(event: any): void {
     this.audioService.setSC(event.value);
   }
 
   // change volume based on slider input
-  changeVolume(event: any) {
+  public changeVolume(event: any): void {
     if (this.scene?.spotifyBool) {
       this.spotifySDK.player.setVolume(event.value);
     }
@@ -328,17 +333,17 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   // change pan based on slider input
-  changePan(event: any) {
+  public changePan(event: any): void {
     this.audioService.setPan(event.value);
   }
 
   // get the duration of the current song
-  duration() {
+  public duration(): number {
     return (this.scene?.spotifyBool) ? Math.floor(this.spotifyAPI.trackDuration / 1000) : Math.floor(this.audioService.getDuration());
   }
 
   // get the current time in the song, and update progress bar
-  progress() {
+  public progress(): number {
     // get the progress bar div on the html page
     let progress = document.getElementById('progress-bar');
 
@@ -372,14 +377,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     return Math.floor(this.audioService.getTime());
   }
 
-  setTime(event: any) {
-    this.audioService.setTime(event.value);
-  }
-
   /**************************************Visuals**************************************/
 
   // displays appropiate play or pause icon based on the state of the audio
-  playPauseIcon() {
+  public playPauseIcon(): void {
     let playElement = (document.getElementById('play') as HTMLMediaElement);
     let playIcon = '../../../assets/icons/play.svg';
     let pauseIcon = '../../../assets/icons/pause.svg';
@@ -405,8 +406,24 @@ export class VisualizationPageComponent implements AfterViewInit {
     return null;
   }
 
+  private setControls(disabled: boolean, localFile: boolean): void {
+    // enable audio playback control buttons
+    (document.getElementById('forward-button') as HTMLButtonElement).disabled = disabled;
+    (document.getElementById('play-button') as HTMLButtonElement).disabled = disabled;
+    (document.getElementById('rewind-button') as HTMLButtonElement).disabled = disabled;
+
+    const forwardIcon: string = '../../../assets/icons/forward.svg';
+    const rewindIcon: string = '../../../assets/icons/rewind.svg';
+    const tenForwardIcon: string = '../../../assets/icons/icons8-forward-10-48.png';
+    const tenRewindIcon: string = '../../../assets/icons/icons8-replay-10-48.png';
+
+    // set fast forward to fast forward svg and rewind to rewind svg
+    (document.getElementById('forward-image') as HTMLImageElement).src = localFile ? tenForwardIcon : forwardIcon;
+    (document.getElementById('rewind-image') as HTMLImageElement).src = localFile ? tenRewindIcon : rewindIcon;
+  }
+
   // convert time in seconds to a formatted output string mm:ss
-  timeString(time: number) {
+  public timeString(time: number): string {
     let secondsTotal = time; // raw seconds of current place in song
     let outputTime = ''; // string used for output
 
@@ -432,17 +449,20 @@ export class VisualizationPageComponent implements AfterViewInit {
     return outputTime;
   }
 
-  toggleMenu() {
-    let menu = document.getElementById('menu');
-    let menu1 = document.getElementById('menu1');
+  // reset the menu timeout
+  public toggleMenu(): void {
+    let menu = document.getElementById('menu'); // bottom overlay: audio controls
+    let menu1 = document.getElementById('menu1'); // top overlay: scene selection
 
     menu.style.opacity = '1';
     menu1.style.opacity = '1';
 
+    // if there's a timeout, clear it
     if (typeof this.timeout !== 'undefined') {
       window.clearTimeout(this.timeout);
     }
 
+    // after menuTimeout ms, hide the overlays
     this.timeout = window.setTimeout(() => {
       menu.style.opacity = '0';
       menu1.style.opacity = '0';
@@ -450,7 +470,7 @@ export class VisualizationPageComponent implements AfterViewInit {
   }
 
   // display or hide control instruction menu
-  toggleInfo() {
+  public toggleInfo(): void {
     let infoBox = document.getElementById('info-menu'); // info box element on html
 
     // hide or show by changing width and opacity
@@ -463,11 +483,9 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
   }
 
-
-
-  toggleUploadMenu() {
+  // toggle display of the upload/source selection menu
+  public toggleUploadMenu(): void {
     let songBox = document.getElementById('upload-menu');
-    let canvas = document.getElementById('renderCanvas');
 
     if (songBox.style.width === '0%') {
       songBox.style.width = '60%';
@@ -478,7 +496,8 @@ export class VisualizationPageComponent implements AfterViewInit {
     }
   }
 
-  toggleEditMenu() {
+  // toggle the display of the edit menu
+  public toggleEditMenu(): void {
     const editBox = document.getElementById('edit-menu');
 
     if (editBox.style.opacity === '0') {

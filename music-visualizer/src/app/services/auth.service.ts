@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   // log the user into firebase, store data as a cookie
-  async loginUser(email: string, password: string, cookies: boolean): Promise<void> {
+  public async loginUser(email: string, password: string, cookies: boolean): Promise<void> {
     // sign into auth service
     await this.ngFireAuth.signInWithEmailAndPassword(email, password).catch((error) => {
       console.log(error); // log the error
@@ -64,7 +64,7 @@ export class AuthService {
   }
 
   // sign up the user and add account to firebase
-  async signUpUser(email: string, password: string, userDict: Dict, cookie: boolean): Promise<void> {
+  public async signUpUser(email: string, password: string, userDict: Dict, cookie: boolean): Promise<void> {
     // create user account in fire auth
     await this.ngFireAuth.createUserWithEmailAndPassword(email, password).catch((error) => {
       console.log(error);
@@ -92,13 +92,13 @@ export class AuthService {
     });
   }
 
-  // reser user's password with a reset email
-  resetPassword(email: string) {
+  // reset user's password with a reset email
+  public resetPassword(email: string): any {
     return this.ngFireAuth.sendPasswordResetEmail(email);
   }
 
   // clear cookies and sign out of auth
-  logOutUser(): Promise<void> {
+  public logOutUser(): Promise<void> {
     // clear cookies
     this.cookieService.deleteAll();
     // clear local user data
@@ -108,7 +108,7 @@ export class AuthService {
   }
 
   // get user data from cookie if it exists, allows for persistent log in
-  getUser() {
+  public getUser(): User {
     var userCookie: string = null;
     var spotifyCookie: string = null;
 
@@ -130,11 +130,12 @@ export class AuthService {
   }
 
   // use cookies to see if user is logged in
-  getLoggedIn() {
+  public getLoggedIn(): boolean {
     return (this.userData.email === '') ? this.cookieService.check('account') : true;
   }
 
-  async setSpotifyAuthToken(token: string) {
+  // set spotify auth token and set to expire in an hour
+  public async setSpotifyAuthToken(token: string): Promise<void> {
     var expireHours: number = 1; // number of hours to expire
     var expireDate: Date = new Date; // current + offset in milliseconds
     expireDate.setHours(expireDate.getHours() + expireHours);
@@ -142,7 +143,8 @@ export class AuthService {
     await this.cookieService.set('spotify', token, {path: '/', sameSite: 'Lax', expires: expireDate}); // set token cookie
   }
 
-  isSpotifyAuthorized() {
+  // check if user is signed into spotify
+  public isSpotifyAuthorized(): boolean {
     return this.cookieService.check('spotify');
   }
 }

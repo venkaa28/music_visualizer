@@ -47,13 +47,6 @@ export class NebulaSceneServiceService implements OnDestroy{
     document.removeEventListener('resize', this.resize);
   }
 
-  public cancelAnimation(): void {
-    if (this.frameId != null) {
-      cancelAnimationFrame(this.frameId);
-      // this.nebulaRenderer.remove();
-    }
-  }
-
   public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
     return new Promise(async (resolve, reject) => {
       this.scene = new THREE.Scene();

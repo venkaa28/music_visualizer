@@ -10,6 +10,7 @@ export class AboutPageComponent implements OnInit {
   public readme: string = "";
 
   constructor(public http: HttpClient) {
+    // load the readme file into the html page
     this.http.get('../../../assets/README.md', {responseType: 'text'})
     .subscribe(data => {
       this.readme = data;

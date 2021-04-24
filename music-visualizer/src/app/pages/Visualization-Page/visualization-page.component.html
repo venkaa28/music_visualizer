@@ -8,16 +8,23 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/magnific-popup.min.css">
   <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
 </header>
+
+<!--Show menu on mousemove listener-->
 <body (mousemove)="toggleMenu()">
+
+  <!--HTML Audio element for local files and microphone-->
   <audio #audioFile id='audio-file' crossorigin="anonymous">
     <source id="audio-source" origin="https://localhost:4200" type="audio/*" src="">
   </audio>
 
+  <!--Canvas used by three js for rendering-->
   <div id="canvas-visualizer">
     <canvas #rendererCanvas id="renderCanvas"></canvas>
   </div>
 
+  <!---->
   <div id="upload-menu" class="glass-pane" style="width: 60%;">
+    <!--Select source title/prompt-->
     <p style="font-size: x-large;">Select an input source to visualize:</p>
     <div id="upload-options">
       <!--File loader-->
@@ -34,6 +41,7 @@
         <p class="select-text">Local files</p>
       </div>
 
+      <!--Microphone loader-->
       <div class="upload-item">
         <div class="select-button" style="background-color: rgba(50, 100, 255, 0.6);">
           <a id="load-mic" (click)="loadMic()" capture>
@@ -44,6 +52,7 @@
         <p class="select-text">Microphone</p>
       </div>
 
+      <!--Spotify loader-->
       <div class="upload-item">
         <div class="select-button" style="background-color: rgba(0, 255, 0, 0.6);">
           <a id="load-spotify" (click)="loadSpotify()">
@@ -58,7 +67,7 @@
   <div id="edit-menu" class="glass-pane" style="width: 0%; opacity: 0;">
     <!--Slider controls: volume, pan-->
           <div id="slider">
-              <p>Settings</p>
+            <p>Settings</p>
 
             <!--FFT slider-->
             <div id="fft" *ngIf="!this.scene?.spotifyBool">
@@ -94,7 +103,7 @@
           </div>
   </div>
 
-  <!--Control info menu listed when info button is pressed-->
+  <!--Select scene top overlay menu-->
   <div id="menu1" class="overlay-top glass-pane">
     <div class="overlay-content">
         <button id="otb0" (click)="changeScene(0)" disabled>Mesh Scene</button>
@@ -106,6 +115,7 @@
     </div>
   </div>
 
+  <!--Audio control playback menu-->
   <div id="menu" style="color:white;" class="overlay glass-pane">
     <div class="overlay-content">
       <!--Song controls-->
@@ -113,11 +123,12 @@
         <!--Song title and album art (if exists)-->
         <div id="song-display">
 
-          <!--Song title-->
+          <!--Album cover image-->
           <div class="song-display-container">
             <img id="album" src="../../../assets/icons/disc.svg">
           </div>
 
+          <!--Song title and artist-->
           <div id="song-display-text" class="song-display-container">
             <p id="song-title" class="song-text">Unknown</p>
             <p id="song-subtitle" class="song-text">Unknown</p>
@@ -143,6 +154,7 @@
           </button>
         </div>
 
+        <!--Buttons to access other menus-->
         <div id="settings">
           <!--Open music chooser menu-->
           <button class="settings-button" style="display: inline-block;" (click)="toggleUploadMenu()">

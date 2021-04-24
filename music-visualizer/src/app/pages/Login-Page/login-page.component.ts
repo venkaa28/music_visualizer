@@ -36,6 +36,7 @@ export class LoginPageComponent implements OnInit {
     return this.loginForm.get('password')?.hasError('minlength') ? `Passwords must be at least ${this.minLength} characters long` : '';
   }
 
+  // set cookie storing policy for user account
   updateCookieUsage(event) {
     this.useCookies = event.srcElement.value;
   }

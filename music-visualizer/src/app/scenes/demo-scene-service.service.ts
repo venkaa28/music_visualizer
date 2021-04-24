@@ -47,12 +47,6 @@ export class DemoSceneServiceService implements OnDestroy{
     document.removeEventListener('resize', this.resize);
   }
 
-  public cancelAnimation() {
-    if (this.frameId != null) {
-      cancelAnimationFrame(this.frameId);
-    }
-  }
-
   public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
     return new Promise((resolve, reject) => {
       this.scene = new THREE.Scene();

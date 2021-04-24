@@ -130,22 +130,21 @@ export class AudioService {
     return false;
   }
 
-  fileLoaded() {
-    return (typeof this.element !== 'undefined');
-  }
-
+  // stop the mic stream
   stopMic() {
     if (this.micTrack !== null) {
       this.micTrack.disconnect();
     }
   }
-
+  
+  // stop the file stream
   stopFile() {
     if (this.fileTrack !== null) {
       this.fileTrack.disconnect();
     }
   }
 
+  // reset the audio context
   hardStop() {
     this.stopMic();
     this.stopFile();

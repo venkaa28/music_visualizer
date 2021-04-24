@@ -12,22 +12,4 @@ export class NotFoundPageComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
-  // Depreciated: set the route to return the user to
-  getRoute(): string {
-    if (this.authService.getLoggedIn()) {
-      return '../VisualizationPage';
-    }
-
-    return '../';
-  }
-
-  // Depreciated: set the name to display for the route
-  getRouteName(): string {
-    if (this.authService.getLoggedIn()) {
-      return 'Visualizer';
-    }
-
-    return 'Home Page';
-  }
 }
