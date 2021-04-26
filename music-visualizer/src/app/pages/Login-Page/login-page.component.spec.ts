@@ -3,7 +3,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { LoginPageComponent } from './login-page.component';
 import {AngularFireModule} from "@angular/fire";
-import {firebaseConfig} from "../../firebase";
+import {firebaseConfig} from "../../../environments/environment";
 import {NotifierModule} from "angular-notifier";
 
 describe('LoginPageComponent', () => {
