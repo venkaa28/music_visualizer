@@ -6,7 +6,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireDatabaseModule} from '@angular/fire/database';
 import { AngularFireAuthModule} from '@angular/fire/auth';
-import { firebaseConfig } from '../../firebase';
+// import { firebaseConfig } from '../../firebase';
 import { NotifierService, NotifierModule } from 'angular-notifier';
 import {ReactiveFormsModule} from "@angular/forms";
 import {ElementRef, ViewChild} from "@angular/core";
@@ -22,7 +22,7 @@ describe('VisualizationPageComponent', () => {
         RouterTestingModule,
         ReactiveFormsModule,
         // BrowserModule,
-        AngularFireModule.initializeApp(firebaseConfig),
+        // AngularFireModule.initializeApp(firebaseConfig),
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
@@ -57,17 +57,16 @@ describe('VisualizationPageComponent', () => {
   // });
 
   it('test createScene()', () => {
-    // @ViewChild('rendererCanvas', {static: true})
-    // var rendererCanvas!: ElementRef<HTMLCanvasElement>;
-    component.nebulaScene.createScene(component.rendererCanvas);
-    component.planeScene.createScene(component.rendererCanvas);
-    component.demoScene.createScene(component.rendererCanvas);
-    //component.planeScene.animate();
-    //expect(true).toBe(false);
+    // component.nebulaScene.createScene(component.rendererCanvas);
+    // component.planeScene.createScene(component.rendererCanvas);
+    // component.demoScene.createScene(component.rendererCanvas);
+
+    expect(true).toBe(false);
   });
 
   it('test animate()', () => {
     //component.nebulaScene.animate();
+    expect(true).toBe(false);
   });
 
 });

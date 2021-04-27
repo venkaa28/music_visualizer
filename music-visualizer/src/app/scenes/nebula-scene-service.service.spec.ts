@@ -3,7 +3,7 @@ import { TemplateSceneServiceService } from './template-scene-service.service';
 import {RouterTestingModule} from "@angular/router/testing";
 import {ReactiveFormsModule} from "@angular/forms";
 import {AngularFireModule} from "@angular/fire";
-import {firebaseConfig} from "../firebase";
+// import {firebaseConfig} from "../firebase";
 import {NotifierModule} from "angular-notifier";
 
 describe('TemplateSceneServiceService', () => {
@@ -15,7 +15,7 @@ describe('TemplateSceneServiceService', () => {
         RouterTestingModule,
         ReactiveFormsModule,
         // BrowserModule,
-        AngularFireModule.initializeApp(firebaseConfig),
+        // AngularFireModule.initializeApp(firebaseConfig),
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
