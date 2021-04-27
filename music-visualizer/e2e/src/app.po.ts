@@ -5,12 +5,19 @@ export class AppPage {
     return browser.get(url);
   }
 
-  // how to get elements by css
-  async getTitleText(): Promise<string> {
-    return element(by.css('app-root .content span')).getText();
+  // // how to get elements by css
+  // async getTitleText(): Promise<string> {
+  //   return element(by.css('app-root .content span')).getText();
+  // }
+
+  async clickElement(xpath): Promise<unknown> {
+    const elem = await element(by.xpath(xpath));
+    return elem.click();
   }
 
-  async getNameText(): Promise<string> {
-    return element(by.name('title')).getText();
+  async getElementText(xpath): Promise<string> {
+    const elem = await element(by.xpath(xpath));
+    const titleText = await elem.getText();
+    return titleText;
   }
 }
