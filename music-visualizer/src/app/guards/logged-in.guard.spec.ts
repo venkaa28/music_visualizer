@@ -4,7 +4,7 @@ import { LoggedInGuard } from './logged-in.guard';
 import {RouterTestingModule} from "@angular/router/testing";
 import {ReactiveFormsModule} from "@angular/forms";
 import {AngularFireModule} from "@angular/fire";
-import {firebaseConfig} from "../firebase";
+// import {firebaseConfig} from "../firebase";
 import {NotifierModule} from "angular-notifier";
 
 describe('LoggedInGuard', () => {
@@ -16,7 +16,7 @@ describe('LoggedInGuard', () => {
         RouterTestingModule,
         ReactiveFormsModule,
         // BrowserModule,
-        AngularFireModule.initializeApp(firebaseConfig),
+        // AngularFireModule.initializeApp(firebaseConfig),
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
@@ -29,4 +29,8 @@ describe('LoggedInGuard', () => {
   it('should be created', () => {
     expect(guard).toBeTruthy();
   });
+
+  it("test checkLogin()", () => {
+    expect(true).toBe(false);
+  })
 });

@@ -4,7 +4,7 @@ import { TestParticlesService } from './test-particles.service';
 import {RouterTestingModule} from "@angular/router/testing";
 import {ReactiveFormsModule} from "@angular/forms";
 import {AngularFireModule} from "@angular/fire";
-import {firebaseConfig} from "../firebase";
+// import {firebaseConfig} from "../firebase";
 import {NotifierModule} from "angular-notifier";
 
 describe('TestParticlesService', () => {
@@ -16,7 +16,7 @@ describe('TestParticlesService', () => {
         RouterTestingModule,
         ReactiveFormsModule,
         // BrowserModule,
-        AngularFireModule.initializeApp(firebaseConfig),
+        // AngularFireModule.initializeApp(firebaseConfig),
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
@@ -61,18 +61,22 @@ describe('TestParticlesService', () => {
   });
 
   it('test fractionate()', () => {
-    expect(service.fractionate(2, 1, 3)).toBe(0.5);
+    // expect(service.fractionate(2, 1, 3)).toBe(0.5);
+    expect(true).toBe(false);
   });
 
   it('test modulate()', () => {
-    expect(service.modulate(2, 1, 3, 4, 10)).toBe(7);
+    // expect(service.modulate(2, 1, 3, 4, 10)).toBe(7);
+    expect(true).toBe(false);
   });
 
   it('test avg()', () => {
-    expect(service.avg([1, 2, 3, 4, 5])).toBe(3);
+    // expect(service.avg([1, 2, 3, 4, 5])).toBe(3);
+    expect(true).toBe(false);
   });
 
   it('test max()', () => {
-    expect(service.max([1, 2, 3, 4, 5])).toBe(5);
+    // expect(service.max([1, 2, 3, 4, 5])).toBe(5);
+    expect(true).toBe(false);
   });
 });

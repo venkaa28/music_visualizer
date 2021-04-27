@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NotFoundPageComponent } from './not-found-page.component';
 import {AngularFireModule} from "@angular/fire";
-import {firebaseConfig} from "../../firebase";
+// import {firebaseConfig} from "../../firebase";
 import {NotifierModule} from "angular-notifier";
 
 describe('NotFoundPageComponent', () => {
@@ -14,7 +14,7 @@ describe('NotFoundPageComponent', () => {
       imports: [
         RouterTestingModule,
         // BrowserModule,
-        AngularFireModule.initializeApp(firebaseConfig),
+        // AngularFireModule.initializeApp(firebaseConfig),
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
@@ -37,13 +37,11 @@ describe('NotFoundPageComponent', () => {
 
   it('test getRoute()', () => {
     // Todo: mock login
-    var ret = component.getRoute();
-    expect(ret).toEqual('../');
+    expect(true).toBe(false);
   });
 
   it('test getRouteName()', () => {
     // Todo: mock login
-    var ret = component.getRouteName();
-    expect(ret).toEqual('Home Page');
+    expect(true).toBe(false);
   });
 });
