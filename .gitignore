@@ -1,19 +1,1 @@
-# dependencies
 node_modules
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
-
-### VisualStudioCode ###
-.vscode
-
-
-## Plugin-specific files:
-/music-visualizer/src/environments/*
-/music-visualizer/src/server.crt
-/music-visualizer/src/server.key
