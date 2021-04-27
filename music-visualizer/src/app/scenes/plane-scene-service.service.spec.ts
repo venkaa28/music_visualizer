@@ -4,8 +4,9 @@ import { PlaneSceneServiceService } from './plane-scene-service.service';
 import {RouterTestingModule} from "@angular/router/testing";
 import {ReactiveFormsModule} from "@angular/forms";
 import {AngularFireModule} from "@angular/fire";
-// import {firebaseConfig} from "../firebase";
+import { firebaseConfig } from '../../environments/environment';
 import {NotifierModule} from "angular-notifier";
+import {HttpClientModule} from "@angular/common/http";
 
 describe('PlaneSceneServiceService', () => {
   let service: PlaneSceneServiceService;
@@ -15,11 +16,12 @@ describe('PlaneSceneServiceService', () => {
       imports: [
         RouterTestingModule,
         // BrowserModule,
-        // AngularFireModule.initializeApp(firebaseConfig),
+        AngularFireModule.initializeApp(firebaseConfig),
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
-        NotifierModule
+        NotifierModule,
+        HttpClientModule,
       ],
     });
     service = TestBed.inject(PlaneSceneServiceService);

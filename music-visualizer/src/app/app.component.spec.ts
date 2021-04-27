@@ -7,7 +7,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireDatabaseModule} from '@angular/fire/database';
 import { AngularFireAuthModule} from '@angular/fire/auth';
-// import { firebaseConfig } from './firebase';
+import { firebaseConfig } from '../environments/environment';
 import { NotifierService, NotifierModule } from 'angular-notifier';
 
 describe('AppComponent', () => {
@@ -17,7 +17,7 @@ describe('AppComponent', () => {
         RouterTestingModule,
         ReactiveFormsModule,
         // BrowserModule,
-        // AngularFireModule.initializeApp(firebaseConfig),
+        AngularFireModule.initializeApp(firebaseConfig),
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
