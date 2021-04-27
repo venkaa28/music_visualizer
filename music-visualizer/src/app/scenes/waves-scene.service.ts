@@ -127,6 +127,7 @@ export class WavesSceneService implements OnDestroy {
       this.mesh = new THREE.Mesh(geometry, material);
 
       resolve();
+      return;
     });
   }
 
@@ -183,6 +184,7 @@ export class WavesSceneService implements OnDestroy {
       this.renderer.render(this.scene, this.camera);
 
       resolve();
+      return;
     });
   }
 
@@ -225,6 +227,7 @@ export class WavesSceneService implements OnDestroy {
       this.water.updateMatrix();
 
       resolve();
+      return;
     });
   }
 

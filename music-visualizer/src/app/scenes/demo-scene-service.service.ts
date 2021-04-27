@@ -102,6 +102,7 @@ export class DemoSceneServiceService implements OnDestroy{
       this.scene.add(this.group);
 
       resolve();
+      return;
     });
   }
 
@@ -136,6 +137,7 @@ export class DemoSceneServiceService implements OnDestroy{
       this.renderer.render(this.scene, this.camera);
       
       resolve();
+      return;
     });
   }
 
@@ -170,6 +172,7 @@ export class DemoSceneServiceService implements OnDestroy{
       this.ball.updateMatrix();
 
       resolve();
+      return;
     });
   }
 

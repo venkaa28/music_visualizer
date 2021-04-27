@@ -100,6 +100,7 @@ export class TestParticlesService implements OnDestroy {
       this.renderer.setSize( window.innerWidth, window.innerHeight );
 
       resolve();
+      return;
     });
   }
 
@@ -134,6 +135,7 @@ export class TestParticlesService implements OnDestroy {
       this.renderer.render(this.scene, this.camera);
 
       resolve();
+      return;
     });
   }
 
@@ -178,6 +180,7 @@ export class TestParticlesService implements OnDestroy {
       }
 
       resolve();
+      return;
     });
   }
 

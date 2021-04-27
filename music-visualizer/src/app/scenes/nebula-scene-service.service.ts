@@ -84,6 +84,7 @@ export class NebulaSceneServiceService implements OnDestroy{
       console.log("finished create scene");
 
       resolve();
+      return;
     });
   }
 
@@ -118,6 +119,7 @@ export class NebulaSceneServiceService implements OnDestroy{
       this.renderer.render(this.scene, this.camera);
 
       resolve();
+      return;
     });
   }
 
@@ -163,6 +165,7 @@ export class NebulaSceneServiceService implements OnDestroy{
       this.nebula.update();
 
       resolve();
+      return;
     });
   }
 

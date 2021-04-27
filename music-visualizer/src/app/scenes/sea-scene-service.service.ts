@@ -288,6 +288,7 @@ export class SeaSceneService implements OnDestroy{
           this.scene.add(this.pivot);
 
           resolve();
+          return;
       });
     }
 
@@ -325,6 +326,7 @@ export class SeaSceneService implements OnDestroy{
       this.renderer.render(this.scene, this.camera);
 
       resolve();
+      return;
     });
   }
 
@@ -363,6 +365,7 @@ export class SeaSceneService implements OnDestroy{
       this.sky.mesh.rotation.z += .01;
 
       resolve();
+      return;
     });
   }
 

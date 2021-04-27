@@ -169,6 +169,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       await this.audioService.play(); // play audio
 
       resolve();
+      return;
     });
   }
 
@@ -198,6 +199,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.toggleUploadMenu(); // get rid of menu
 
       resolve();
+      return;
     });
   }
 
@@ -208,6 +210,8 @@ export class VisualizationPageComponent implements AfterViewInit {
       // reroute to profile page if user doesn't have spotify connected
       if (this.authService.getUser().spotifyAPIKey == null) {
         await this.profilePage();
+        resolve();
+        return;
       }
 
       await this.stopAllAudio();
@@ -225,6 +229,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       this.toggleUploadMenu(); // get rid of upload menu
 
       resolve();
+      return;
     });
   }
 
@@ -255,6 +260,7 @@ export class VisualizationPageComponent implements AfterViewInit {
       await this.scene.animate(); // animate scene
 
       resolve();
+      return;
     });
   }
 

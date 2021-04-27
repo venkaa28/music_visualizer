@@ -56,6 +56,7 @@ export class AuthService {
           }
           
           resolve();
+          return;
         } else {
           reject(new Error('Bad login'));
         }
@@ -89,6 +90,7 @@ export class AuthService {
       }
 
       resolve();
+      return;
     });
   }
 

@@ -134,6 +134,7 @@ export class PlaneSceneServiceService implements OnDestroy{
       this.scene.add(this.group);
 
       resolve();
+      return;
     });
   }
 
@@ -166,6 +167,7 @@ export class PlaneSceneServiceService implements OnDestroy{
       this.renderer.render(this.scene, this.camera);
 
       resolve();
+      return;
     });
   }
 
@@ -201,6 +203,7 @@ export class PlaneSceneServiceService implements OnDestroy{
       this.plane.updateMatrix();
     
       resolve();
+      return;
     });
   }
 
