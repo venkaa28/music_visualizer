@@ -15,6 +15,11 @@ export class AppPage {
     return elem.click();
   }
 
+  async typeElement(xpath, text): Promise<unknown> {
+    const elem = await(element(by.xpath(xpath)));
+    return elem.sendKeys(text);
+  }
+
   async getElementText(xpath): Promise<string> {
     const elem = await element(by.xpath(xpath));
     const titleText = await elem.getText();
