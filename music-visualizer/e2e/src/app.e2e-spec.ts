@@ -9,8 +9,13 @@ describe('workspace-project App', () => {
   });
 
   it('should display welcome message', async () => {
-    await page.navigateTo();
-    expect(await page.getTitleText()).toEqual('music-visualizer app is running!');
+    await page.navigateTo("");
+    expect(await page.getNameText()).toEqual('Home - The Music Visualizer');
+  });
+
+  it('sasdfe', async () => {
+    await page.navigateTo("");
+    expect(true).toEqual(false);
   });
 
   afterEach(async () => {
