@@ -6,11 +6,12 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireDatabaseModule} from '@angular/fire/database';
 import { AngularFireAuthModule} from '@angular/fire/auth';
-// import { firebaseConfig } from '../../firebase';
+import { firebaseConfig } from '../../../environments/environment';
 import { NotifierService, NotifierModule } from 'angular-notifier';
 import {ReactiveFormsModule} from "@angular/forms";
 import {ElementRef, ViewChild} from "@angular/core";
 import {HttpClientModule} from "@angular/common/http";
+import * as THREE from 'three';
 
 describe('VisualizationPageComponent', () => {
   let component: VisualizationPageComponent;
@@ -22,7 +23,7 @@ describe('VisualizationPageComponent', () => {
         RouterTestingModule,
         ReactiveFormsModule,
         // BrowserModule,
-        // AngularFireModule.initializeApp(firebaseConfig),
+        AngularFireModule.initializeApp(firebaseConfig),
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
@@ -38,6 +39,8 @@ describe('VisualizationPageComponent', () => {
     fixture = TestBed.createComponent(VisualizationPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    jasmine.clock().uninstall();
+    jasmine.clock().install();
   });
 
   // it('testing ngAfterViewInit()', () => {
@@ -56,13 +59,105 @@ describe('VisualizationPageComponent', () => {
   //   component.planeScene.animate();
   // });
 
+  // test demo-scene
   it('test createScene()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
     // component.nebulaScene.createScene(component.rendererCanvas);
     // component.planeScene.createScene(component.rendererCanvas);
-    // component.demoScene.createScene(component.rendererCanvas);
-
-    expect(true).toBe(false);
+    component.demoScene.createScene(component.rendererCanvas, renderer);
+    expect((component.demoScene as any).scene).toBeTruthy();
   });
+
+  it('test animate()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    // component.nebulaScene.createScene(component.rendererCanvas);
+    // component.planeScene.createScene(component.rendererCanvas);
+    component.demoScene.createScene(component.rendererCanvas, renderer);
+    jasmine.clock().tick(3000);
+
+    let value_old = (component.demoScene as any).group.rotation.x;
+    component.demoScene.animate();
+
+    jasmine.clock().tick(3000);
+    let value_new = (component.demoScene as any).group.rotation.x;
+    expect(value_new - value_old).toBe(0.001);
+  });
+
+
+
+  // test nebula-scene
+  it('test createScene()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    // component.nebulaScene.createScene(component.rendererCanvas);
+    // component.planeScene.createScene(component.rendererCanvas);
+    component.nebulaScene.createScene(component.rendererCanvas, renderer);
+    expect((component.nebulaScene as any).scene).toBeTruthy();
+  });
+
+  // test partical-scene
+  it('test createScene()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    // component.nebulaScene.createScene(component.rendererCanvas);
+    // component.planeScene.createScene(component.rendererCanvas);
+    component.testParticles.createScene(component.rendererCanvas, renderer);
+    expect((component.testParticles as any).scene).toBeTruthy();
+  });
+
+  // test plane-scene
+  it('test createScene()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    // component.nebulaScene.createScene(component.rendererCanvas);
+    // component.planeScene.createScene(component.rendererCanvas);
+    component.planeScene.createScene(component.rendererCanvas, renderer);
+    expect((component.planeScene as any).scene).toBeTruthy();
+  });
+
+  // test sea-scene
+  it('test createScene()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    // component.nebulaScene.createScene(component.rendererCanvas);
+    // component.planeScene.createScene(component.rendererCanvas);
+    component.seaScene.createScene(component.rendererCanvas, renderer);
+    expect((component.seaScene as any).scene).toBeTruthy();
+  });
+
+  // test wave-scene
+  it('test createScene()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    // component.nebulaScene.createScene(component.rendererCanvas);
+    // component.planeScene.createScene(component.rendererCanvas);
+    component.waveScene.createScene(component.rendererCanvas, renderer);
+    expect((component.waveScene as any).scene).toBeTruthy();
+  });
+
 
   it('test animate()', () => {
     //component.nebulaScene.animate();

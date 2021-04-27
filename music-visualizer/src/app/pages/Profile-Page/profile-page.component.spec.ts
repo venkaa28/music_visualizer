@@ -6,15 +6,21 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireDatabaseModule} from '@angular/fire/database';
 import { AngularFireAuthModule} from '@angular/fire/auth';
-// import { firebaseConfig } from '../../firebase';
+import { firebaseConfig } from '../../../environments/environment';
 import { NotifierService, NotifierModule } from 'angular-notifier';
+import {HttpClientModule} from "@angular/common/http";
 describe('ProfilePageComponent', () => {
   let component: ProfilePageComponent;
   let fixture: ComponentFixture<ProfilePageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
+      imports: [
+        RouterTestingModule,
+        AngularFireModule.initializeApp(firebaseConfig),
+        HttpClientModule,
+        NotifierModule
+      ],
       declarations: [ ProfilePageComponent ],
     })
     .compileComponents();

@@ -107,6 +107,7 @@ export class DemoSceneServiceService implements OnDestroy{
 
   public async animate(): Promise<void> {
     await this.ngZone.runOutsideAngular(async () => {
+      // console.log("we are in animate()");
       if (document.readyState !== 'loading') {
         this.render();
       } else {
@@ -134,7 +135,7 @@ export class DemoSceneServiceService implements OnDestroy{
 
       await this.sceneAnimation();
       this.renderer.render(this.scene, this.camera);
-      
+
       resolve();
     });
   }
