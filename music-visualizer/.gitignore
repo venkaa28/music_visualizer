@@ -87,9 +87,9 @@ workspace.code-workspace
 *.iws
 
 ## Plugin-specific files:
-/src/environments/*
-/src/server.crt
-/src/server.key
+#/src/environments/*
+#/src/server.crt
+#/src/server.key
 # IntelliJ
 /out/
 
