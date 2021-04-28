@@ -115,7 +115,7 @@ export class AudioService {
   // return how long the song is
   getDuration(): number {
     if (typeof this.element !== 'undefined') {
-      return this.element.duration
+      return this.element.duration;
     }
 
     return 0;
@@ -136,7 +136,7 @@ export class AudioService {
       this.micTrack.disconnect();
     }
   }
-  
+
   // stop the file stream
   stopFile() {
     if (this.fileTrack !== null) {
@@ -171,7 +171,7 @@ export class AudioService {
     this.gainNode = this.context.createGain(); // reset volume
     this.panNode = this.context.createStereoPanner(); // reset pan
     this.analyzer = this.context.createAnalyser(); // reset analyser
-    
+
     // connect nodes to the track
     this.micTrack
     .connect(this.gainNode)
@@ -184,7 +184,7 @@ export class AudioService {
     this.dataArray = new Uint8Array(this.bufferLength); // set data array
   }
 
-  
+
 
   // load a song into the audio context
   loadSong(song: HTMLMediaElement = this.element) {
@@ -198,12 +198,12 @@ export class AudioService {
     }
 
     this.stopMic();
-    
+
     // set nodes here
     this.gainNode = this.context.createGain(); // reset volume
     this.panNode = this.context.createStereoPanner(); // reset pan
     this.analyzer = this.context.createAnalyser(); // reset analyser
-    
+
     // connect nodes to the track
     this.fileTrack
     .connect(this.gainNode)

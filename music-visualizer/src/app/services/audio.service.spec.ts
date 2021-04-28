@@ -10,6 +10,10 @@ import {NotifierModule} from "angular-notifier";
 describe('AudioService', () => {
   let service: AudioService;
   let mockAudio;
+  let mockStream = navigator.mediaDevices.getUserMedia({
+    audio: true,
+    video: false
+  });
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -100,24 +104,32 @@ describe('AudioService', () => {
 
   });
 
-  it('test stopMic()', () => {
-    expect(true).toBe(false);
+  it('test stopMic()', async() => {
+    service.loadMic(await mockStream);
+    //expect((service as any).stream.active).toBe(true);
+    service.stopMic();
+    expect((service as any).micTrack).toBe(null);
   });
 
-  it('test stopFile()', () => {
-    expect(true).toBe(false);
+  it('test stopFile()', async() => {
+    service.loadMic(await mockStream);
+    service.stopFile();
+    expect((service as any).fileTrack).toBe(null);
   });
 
-  it('test hardStop()', () => {
-    expect(true).toBe(false);
+  it('test hardStop()', async () => {
+    service.loadMic(await mockStream);
+    service.hardStop();
+    expect((service as any).micTrack).toBe(null);
   });
 
-  it('test loadMic()', () => {
-    expect(false).toBe(true);
+  it('test loadMic()', async () => {
+    service.loadMic(await mockStream);
+    expect((service as any).micStream.active).toBe(true);
   });
 
-  it('test loadSong()', () => {
-    service.loadSong(mockAudio);
+  it('test loadSong()', async () => {
+    service.loadSong(await mockAudio);
     expect(service.analyzer).toBeTruthy();
   });
 

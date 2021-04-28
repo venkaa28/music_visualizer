@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 
 import { AuthService } from './auth.service';
-import {RouterTestingModule} from "@angular/router/testing";
-import {ReactiveFormsModule} from "@angular/forms";
-import {AngularFireModule} from "@angular/fire";
-import {firebaseConfig} from "../../environments/environment";
-import {NotifierModule} from "angular-notifier";
+import {RouterTestingModule} from '@angular/router/testing';
+import {ReactiveFormsModule} from '@angular/forms';
+import {AngularFireModule} from '@angular/fire';
+import {firebaseConfig} from '../../environments/environment';
+import {NotifierModule} from 'angular-notifier';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -31,7 +31,8 @@ describe('AuthService', () => {
   });
 
   it('test loginUser()', () => {
-    expect(true).toBe(false);
+    service.loginUser('eromero5@wisc.edu', '123456', true);
+    expect((service as any).userData.email).toEqual('eromero5@wisc.edu');
   });
 
   it('test signUpUser()', () => {
