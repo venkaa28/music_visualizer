@@ -41,6 +41,8 @@ describe('VisualizationPageComponent', () => {
     fixture.detectChanges();
     jasmine.clock().uninstall();
     jasmine.clock().install();
+
+    // audio = audioFile.nativeElement;
   });
 
   // it('testing ngAfterViewInit()', () => {
@@ -162,6 +164,22 @@ describe('VisualizationPageComponent', () => {
   it('test animate()', () => {
     //component.nebulaScene.animate();
     expect(true).toBe(false);
+  });
+
+
+  it('test animate()', () => {
+    //component.nebulaScene.animate();
+    expect(true).toBe(false);
+  });
+
+
+  // test APIs in audio service
+  it('test getDuration()', () => {
+    expect(component.audioService.getDuration()).toBe(0);
+    component.audio.src = '../../../assets/music/juice.mp3';
+    component.audioService.loadSong(component.audio);
+    jasmine.clock().tick(3000);
+    expect(component.audioService.getDuration()).toBe((component.audioService as any).element.duration);
   });
 
 });
