@@ -55,7 +55,7 @@ export class LoginPageComponent implements OnInit {
     });
   }
 
-  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder, 
+  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder,
               private readonly  notifierService: NotifierService) { }
 
   ngOnInit(): void {
