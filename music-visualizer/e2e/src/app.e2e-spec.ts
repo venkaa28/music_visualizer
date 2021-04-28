@@ -197,15 +197,68 @@ describe('Login Page', () => {
     await page.typeElement(emailXPath, 'user2@wisc.edu');
     // Enter sample password
     await page.typeElement(passXPath, 'password123');
+
+    await browser.waitForAngularEnabled(false);
+
     // Click login button
     await page.clickElement(loginXPath);
 
     // This is a large page to load, must chill for a sec
 
-    //browser.wait(ExpectedConditions.visibilityOf(element(by.xpath('/html/body/app-root/app-visualization-page/html/body/div[2]/p'))), 1000);
+    await browser.wait(ExpectedConditions.visibilityOf(element(by.xpath('/html/body/app-root/app-visualization-page/html/body/div[2]/p'))), 1000);
+
+    //await browser.wa
 
     expect(await browser.getCurrentUrl()).toEqual(baseUrl + 'VisualizationPage');
+    browser.waitForAngularEnabled(true);
   });
+
+  afterEach(async () => {
+    // Assert that there are no errors emitted from the browser
+    const logs = await browser.manage().logs().get(logging.Type.BROWSER);
+    expect(logs).not.toContain(jasmine.objectContaining({
+      level: logging.Level.SEVERE,
+    } as logging.Entry));
+  });
+});
+
+describe('Visualization Page', () => {
+  let page: AppPage;
+
+  beforeEach(async () => {
+    // Make new page starting at Login Page
+    page = new AppPage();
+    await page.navigateTo(baseUrl + 'LoginPage');
+    await browser.waitForAngularEnabled(false);
+    await page.logInAs('user2@wisc.edu', 'password123');
+  });
+
+  it('Title', async () => {
+    // location of the title text
+    const xpath = '/html/body/app-root/app-visualization-page/html/body/div[2]/p';
+    expect(await page.getElementText(xpath)).toEqual('Select an input source to visualize:');
+  });
+
+  it('URL', async () => {
+    expect(await browser.getCurrentUrl()).toEqual(baseUrl + 'VisualizationPage');
+  });
+
+  // it('Nav Profile Page, Profile Button', async () => {
+  //   // Location of profile page button
+  //   const xpath = '/html/body/app-root/app-visualization-page/html/body/div[5]/div/div/div[3]/button[2]';
+  //   page.clickElement(xpath);
+  //   await browser.waitForAngularEnabled(true);
+  //   expect(await browser.getCurrentUrl()).toEqual(baseUrl + 'ProfilePage');
+  // });
+
+  // it('Select Spotify as Source, noAuth', async () => {
+  //   // location of spotify source button
+  //   const sourceButtonXPath = '/html/body/app-root/app-visualization-page/html/body/div[2]/div/div[3]/div/a';
+  //   page.clickElement(sourceButtonXPath);
+  //   await browser.waitForAngularEnabled(true);
+  //   expect(await browser.getCurrentUrl()).toEqual(baseUrl + 'ProfilePage');
+  // });
+
 
   afterEach(async () => {
     // Assert that there are no errors emitted from the browser
