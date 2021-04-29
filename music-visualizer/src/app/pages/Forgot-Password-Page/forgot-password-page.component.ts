@@ -35,7 +35,6 @@ export class ForgotPasswordPageComponent implements OnInit {
   // prints error msg if email invalid, nothing if valid
   getEmailMessage = () => {
     return this.emailForm.get('email')?.hasError ? 'Not a valid email' : '';
-    // return this.email.hasError('email') ? 'Not a valid email' : '';
   }
 
 }

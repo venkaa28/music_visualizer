@@ -19,19 +19,14 @@ export class ProfilePageComponent implements OnInit {
   public userData: User;
   // Temporary variable for determining whether or not Spotify is linked
   // until we get the api hooked up
-  public spotifyLinked: boolean;
 
   constructor(public router: Router, private authService: AuthService, private cookieService: CookieService, private spotifyService: SpotifyService,
              private readonly notifierService: NotifierService) {
               this.userData = this.authService.getUser();
             }
 
-  ngOnInit(): void {
-    this.spotifyLinked = this.cookieService.check('spotify');
-    // if (this.spotifyLinked) {
-    //   document.getElementById('');
-    // }
-  }
+
+  ngOnInit(): void { }
 
   async passwordReset(): Promise<void> {
     // request reset password email
@@ -47,6 +42,7 @@ export class ProfilePageComponent implements OnInit {
     // I've seen services do this. It'd be super easy to just wait
     // a couple seconds then kick the user back to the homepage so they
     // need to log in again. Something to think about.
+    this.logout();
   }
 
   async logout() {
@@ -56,6 +52,10 @@ export class ProfilePageComponent implements OnInit {
 
   async goBackToVisualPage() {
     await this.router.navigate(['../../VisualizationPage']);
+  }
+
+  async goToAboutPage() {
+    await this.router.navigate(['../../AboutPage']);
   }
 
   async authorizeSpotify() {

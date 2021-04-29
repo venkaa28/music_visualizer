@@ -9,7 +9,7 @@ type Dict = {[key: string]: any};
 })
 export class AudioService {
   // Audio elements
-  private context: AudioContext = new AudioContext(); // The audio context
+  private context: AudioContext; // The audio context
   private element: HTMLAudioElement; // The html audio element
   private micStream: MediaStream; // the media stream of the mic
   private fileTrack: MediaStreamTrackAudioSourceNode; // Set audio source
@@ -28,6 +28,8 @@ export class AudioService {
 
   constructor() {
     this.context = new AudioContext();
+    this.fileTrack = null;
+    this.micTrack = null;
     this.smoothConstant = 0.74;
     this.fftSize = 512;
 
@@ -128,27 +130,35 @@ export class AudioService {
     return false;
   }
 
-  fileLoaded() {
-    return (typeof this.element !== 'undefined');
-  }
-
+  // stop the mic stream
   stopMic() {
-    if (typeof this.micStream !== 'undefined') {
+    if (this.micTrack !== null) {
       this.micTrack.disconnect();
     }
   }
-
+  
+  // stop the file stream
   stopFile() {
-    if (typeof this.fileTrack !== 'undefined') {
+    if (this.fileTrack !== null) {
       this.fileTrack.disconnect();
     }
+  }
+
+  // reset the audio context
+  hardStop() {
+    this.stopMic();
+    this.stopFile();
+    this.context.close();
+    this.context = new AudioContext();
+    this.fileTrack = null;
+    this.micTrack = null;
   }
 
   // load the mic as the audio context
   loadMic(stream: MediaStream) {
 
     // initialize the track if it doesn't exist
-    if (typeof this.micTrack === 'undefined') {
+    if (this.micTrack === null) {
       this.micTrack = this.context.createMediaStreamSource(stream);
     } else {
       this.stopMic();
@@ -181,7 +191,7 @@ export class AudioService {
     this.element = song; // set the audio as the song
 
     // initialize the track if it doesn't exist
-    if (typeof this.fileTrack === 'undefined') {
+    if (this.fileTrack === null) {
       this.fileTrack = this.context.createMediaElementSource(song);
     } else {
       this.stopFile();

@@ -3,7 +3,7 @@ import {AudioService} from '../services/audio.service';
 // threejs
 import * as THREE from 'three';
 import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
-import Nebula, { Rate } from 'three-nebula';
+import { Rate } from 'three-nebula';
 
 
 @Injectable({
@@ -12,17 +12,32 @@ import Nebula, { Rate } from 'three-nebula';
 export class ToolsService {
 
   // frequency scalor range
-  public lowFreqAvgScalor;
-  public midFreqAvgScalor;
-  public highFreqAvgScalor;
-  public lowerMaxFr;
-  public upperAvgFr;
-  public lowFreqDownScaled;
-  public midFreqDownScaled;
-  public highFreqDownScaled;
-  private noise: SimplexNoise = new SimplexNoise();
+  public lowFreqAvgScalor: number;
+  public midFreqAvgScalor: number;
+  public highFreqAvgScalor: number;
+  public lowerMaxFr: number;
+  public upperAvgFr: number;
+  public lowFreqDownScaled: number;
+  public midFreqDownScaled: number;
+  public highFreqDownScaled: number;
 
-  public freqSetup() {
+  private noise: SimplexNoise;
+
+  constructor(public audioService: AudioService) {
+    this.lowFreqAvgScalor = 0;
+    this.midFreqAvgScalor = 0;
+    this.highFreqAvgScalor = 0;
+    this.lowerMaxFr = 0;
+    this.upperAvgFr = 0;
+    this.lowFreqDownScaled = 0;
+    this.midFreqDownScaled = 0;
+    this.highFreqDownScaled = 0;
+
+    this.noise = new SimplexNoise();
+  }
+
+  // generate frequency data
+  public freqSetup(): void {
     this.audioService.analyzer.getByteFrequencyData(this.audioService.dataArray);
     const numBins = this.audioService.analyzer.frequencyBinCount;
 
@@ -56,7 +71,7 @@ export class ToolsService {
     this.upperAvgFr = upperAvg / upperHalfFrequncyData.length;
   }
 
-  wavesBuffer( waveSize, magnitude1,  magnitude2, timeScalar, plane) {
+  public wavesBuffer( waveSize, magnitude1,  magnitude2, timeScalar, plane): void {
 
     const pos = plane.geometry.attributes.position;
     const center = new THREE.Vector3(0, 0, 0);
@@ -76,18 +91,18 @@ export class ToolsService {
   }
 
 
-
-  makeRoughBall(ball, low, mid, high, radius){
+  // generate three js sphere deformed based off of audio data with simplex noise applied
+  public makeRoughBall(ball: any, low: number, mid: number, high: number, radius: number = 30): void {
     const position = ball.geometry.attributes.position;
-    const vector = new THREE.Vector3();
-    const time = window.performance.now() / 5;
+    const vector: THREE.Vector3 = new THREE.Vector3();
+    const time: number = window.performance.now() / 5;
     for (let i = 0, l = position.count; i < l; i++) {
       vector.fromBufferAttribute(position, i);
-      const offset = radius;
-      const amp = mid;
+      const offset: number = radius;
+      const amp: number = mid;
       vector.normalize();
-      const rf = 0.1;
-      const distance = (offset + low) + this.noise.noise3d((vector.x + rf * 50 * Math.sin((i + time) / l * Math.PI * 2)), (vector.y + rf * 5),
+      const rf: number = 0.1;
+      const distance: number = (offset + low) + this.noise.noise3d((vector.x + rf * 50 * Math.sin((i + time) / l * Math.PI * 2)), (vector.y + rf * 5),
         (vector.z + rf * 5)) * amp * high;
 
       vector.multiplyScalar(distance);
@@ -101,45 +116,53 @@ export class ToolsService {
     ball.updateMatrix();
   };
 
-  // Helper methods
-  avg = (arr) => {
+  // return average of array
+  public avg(arr: any): number {
     const total = arr.reduce((sum, b) => sum + b);
     return (total / arr.length);
   }
 
-  absAvg = (arr) => {
+  // return absolute value of average
+  public absAvg(arr: any): number {
     const total = arr.reduce((sum, b) => sum + Math.abs(b));
     return (total / arr.length);
   }
 
-  modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number) {
+  // scale val from (minVal -> maxVal) to (outMin -> outMax)
+  public modulate(val: any, minVal: any, maxVal: any, outMin: number, outMax: number): number {
     const fr = this.fractionate(val, minVal, maxVal);
     const delta = outMax - outMin;
     return outMin + (fr * delta);
   }
 
-  fractionate(val: number, minVal: number, maxVal: number) {
+  // turns number into fraction
+  public fractionate(val: number, minVal: number, maxVal: number): number {
     return (val - minVal) / (maxVal - minVal);
   }
 
-  min = (arr) => arr.reduce((a, b) => Math.min(a, b));
-  max = (arr) => arr.reduce((a, b) => Math.max(a, b));
+  // returns first index of min of array
+  public min(arr: any): number {
+    return arr.reduce((a, b) => Math.min(a, b));
+  }
 
-  constructor(public audioService: AudioService) {}
+  // returns first index of max of array
+  public max(arr: any): number {
+    return arr.reduce((a, b) => Math.max(a, b));
+  }
 
   // given original array and number of indices to find, get the indices
   // for 'length' number of indices
   // expects array to contain more than one element and length to be shorter than array
-  public getIndicesOfMax(origArray: Array<number>, length) {
-    let sortedPitches = [...origArray];
+  public getIndicesOfMax(origArray: Array<number>, length: number): number[] {
+    let sortedPitches: Array<number> = [...origArray];
     sortedPitches.sort((a, b) => a - b);
 
-    let keptPitches = [];
+    let keptPitches: number[] = [];
     for (let i = origArray.length - 1; i > origArray.length - length - 1; i--) {
       keptPitches.push(sortedPitches[i]);
     }
 
-    let keptIndices = [];
+    let keptIndices: number[] = [];
     for (let i = 0; i < length; i++) {
       keptIndices.push(origArray.indexOf(keptPitches[i]));
     }
@@ -156,8 +179,4 @@ export class ToolsService {
     };
     emitter.setRate(Rate.fromJSON(json));
   }
-
-
-
-
 }

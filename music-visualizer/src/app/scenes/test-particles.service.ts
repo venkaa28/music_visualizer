@@ -1,6 +1,5 @@
 import { Injectable, ElementRef, NgZone, OnDestroy } from '@angular/core';
 import * as THREE from 'three';
-import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 import {AudioService} from '../services/audio.service';
 import {SpotifyService} from "../services/spotify.service";
 import {SpotifyPlaybackSdkService} from "../services/spotify-playback-sdk.service";
@@ -9,7 +8,7 @@ import {ToolsService} from "../services/tools.service";
 @Injectable({
   providedIn: 'root'
 })
-export class TestParticlesService {
+export class TestParticlesService implements OnDestroy {
 
   constructor(private ngZone: NgZone, public audioService: AudioService,
               private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlaybackSdkService,
@@ -51,7 +50,6 @@ export class TestParticlesService {
     }
   }
 
-  private canvas!: HTMLCanvasElement;
   private canvasRef: ElementRef<HTMLCanvasElement>;
   private renderer!: THREE.WebGLRenderer;
   private camera!: THREE.PerspectiveCamera;
@@ -59,7 +57,6 @@ export class TestParticlesService {
   private AMOUNTX = 125;
   private AMOUNTY = 125;
   private particles: THREE.Points;
-  private count = 0;
   public t = 0;
   public frame = 0;
   public trackProgress = 0;
@@ -73,38 +70,37 @@ export class TestParticlesService {
     if (this.frameId != null) {
       cancelAnimationFrame(this.frameId);
     }
-  }
 
-  public cancelAnimation() {
-    if (this.frameId != null) {
-      cancelAnimationFrame(this.frameId);
-    }
+    document.removeEventListener('DOMContentLoaded', this.render);
+    document.removeEventListener('resize', this.resize);
   }
 
   public async createScene(canvas: ElementRef<HTMLCanvasElement>, renderer: THREE.WebGLRenderer): Promise<void> {
-    this.canvasRef = canvas;
-    this.canvas = canvas.nativeElement;
-    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 4000 );
-    this.camera.position.set(100, 25, 50);
-    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-    this.scene = new THREE.Scene();
+    return new Promise((resolve, reject) => {
+      this.canvasRef = canvas;
+      this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 4000 );
+      this.camera.position.set(100, 25, 50);
+      this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+      this.scene = new THREE.Scene();
 
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute( 'position', new THREE.BufferAttribute( this.positions, 3 ) );
-    geometry.setAttribute( 'scale', new THREE.BufferAttribute( this.scales, 1 ) );
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute( 'position', new THREE.BufferAttribute( this.positions, 3 ) );
+      geometry.setAttribute( 'scale', new THREE.BufferAttribute( this.scales, 1 ) );
 
-    //const material = new THREE.PointsMaterial( { color: this.getRandomColor() } );
-    const material = new THREE.PointsMaterial( {color:0xFFFFFF});
-    //
+      //const material = new THREE.PointsMaterial( { color: this.getRandomColor() } );
+      const material = new THREE.PointsMaterial( {color:0xFFFFFF});
+      //
 
-    this.particles = new THREE.Points( geometry, material );
-    this.scene.add( this.particles );
+      this.particles = new THREE.Points( geometry, material );
+      this.scene.add( this.particles );
 
-    this.renderer = renderer;
-    this.renderer.setClearColor(0x000000);
-    this.renderer.setSize( window.innerWidth, window.innerHeight );
+      this.renderer = renderer;
+      this.renderer.setClearColor(0x000000);
+      this.renderer.setSize( window.innerWidth, window.innerHeight );
 
+      resolve();
+    });
   }
 
   public async animate(): Promise<void> {
@@ -112,84 +108,77 @@ export class TestParticlesService {
       if (document.readyState !== 'loading') {
         await this.render();
       } else {
-        window.addEventListener('DOMContentLoaded', async () => {
-          await this.render();
-        });
+        window.addEventListener('DOMContentLoaded', this.render);
       }
-      window.addEventListener('resize', async () => {
-        await this.resize();
-      });
+      window.addEventListener('resize', this.resize);
     });
   }
 
   public async render(): Promise<void> {
-    this.frameId = requestAnimationFrame(() => {
-      this.render();
-    });
-
-    if (this.spotifyBool === true) {
-      this.spotifyPlayer.player.getCurrentState().then(async state => {
-        if (!state) {
-          // console.error('User is not playing music through the Web Playback SDK');
-        } else {
-          this.trackProgress = state.position;
-          await this.sceneAnimation();
-          this.renderer.render(this.scene, this.camera);
-        }
+    return new Promise(async (resolve, reject) => {
+      this.frameId = requestAnimationFrame(() => {
+        this.render();
       });
-    } else {
+
+      if (this.spotifyBool === true) {
+        this.spotifyPlayer.player.getCurrentState().then(async state => {
+          if (!state) {
+            // console.error('User is not playing music through the Web Playback SDK');
+          } else {
+            this.trackProgress = state.position;
+          }
+        });
+      }
+      
       await this.sceneAnimation();
       this.renderer.render(this.scene, this.camera);
-    }
 
+      resolve();
+    });
   }
 
-  async sceneAnimation() {
+  async sceneAnimation(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      this.radius = 20;
 
-    if (!this.spotifyBool) {
-      this.tool.freqSetup();
+      if (!this.spotifyBool) {
+        this.tool.freqSetup();
 
-      this.tool.makeRoughBall(this.particles,
-        this.tool.modulate(Math.pow(this.tool.lowFreqDownScaled, 0.8), 0, 1, 0, 4),
-        this.tool.midFreqDownScaled,
-        this.tool.highFreqDownScaled, this.radius);
-      //this.particles.rotation.x += 0.01;
-      this.particles.rotation.y += 0.005;
-      this.particles.rotation.z += 0.005;
+        this.tool.makeRoughBall(this.particles,
+          this.tool.modulate(Math.pow(this.tool.lowFreqDownScaled, 0.8), 0, 1, 0, 4),
+          this.tool.midFreqDownScaled,
+          this.tool.highFreqDownScaled, this.radius);
 
-      this.count += 0.1;
-      this.particles.geometry.attributes.position.needsUpdate = true;
-      this.particles.geometry.attributes.scale.needsUpdate = true;
-    } else {
-      if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
-        if (this.spotifyService.firstTimbrePreProcess === null) {
-          await this.spotifyService.getTimbrePreProcessing();
-        } else {
-          const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
-          const timbreAvg = this.spotifyService.getTimbreAvg(this.trackProgress);
-          const segmentLoudness = this.spotifyService.getSegmentLoudness(this.trackProgress);
-          const timeScalar = this.spotifyService.getTimeScalar(this.trackProgress);
-          // const scaledTimbreAvg = this.modulate(timbreAvg, 0, 0.1, 0, 30);
-          //this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 2
-          //this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)] * 0.75
-          const maxValScalor1 = this.tool.max(this.spotifyService.firstTimbrePreProcess!);
-          const maxValScalor2 = this.tool.max(this.spotifyService.brightnessTimbrePreProcess!);
-          this.tool.makeRoughBall(this.particles,
-            this.tool.modulate(Math.pow(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/maxValScalor1, 0.8), 0, 1, 0, 4),
-            this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/maxValScalor2,
-            scaledAvgPitch, this.radius);
-          //this.particles.rotation.x += 0.01;
-          this.particles.rotation.y += 0.005;
-          this.particles.rotation.z += 0.005;
+        this.particles.rotation.y += 0.005;
+        this.particles.rotation.z += 0.005;
 
-          this.count += 0.1;
-          this.particles.geometry.attributes.position.needsUpdate = true;
-          this.particles.geometry.attributes.scale.needsUpdate = true;
+        this.particles.geometry.attributes.position.needsUpdate = true;
+        this.particles.geometry.attributes.scale.needsUpdate = true;
+      } else {
+        if (typeof this.spotifyService.analysis !== 'undefined' && typeof this.spotifyService.feature !== 'undefined') {
+          if (this.spotifyService.firstTimbrePreProcess === null) {
+            await this.spotifyService.getTimbrePreProcessing();
+          } else {
+            const scaledAvgPitch = this.spotifyService.getScaledAvgPitch(this.trackProgress);
+            const maxValScalor1 = this.tool.max(this.spotifyService.firstTimbrePreProcess!);
+            const maxValScalor2 = this.tool.max(this.spotifyService.brightnessTimbrePreProcess!);
+
+            this.tool.makeRoughBall(this.particles,
+              this.tool.modulate(Math.pow(this.spotifyService.firstTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/maxValScalor1, 0.8), 0, 1, 0, 4),
+              this.spotifyService.brightnessTimbrePreProcess![Math.floor((this.trackProgress) / 16.7)]/maxValScalor2,
+              scaledAvgPitch, this.radius);
+              
+            this.particles.rotation.y += 0.005;
+            this.particles.rotation.z += 0.005;
+
+            this.particles.geometry.attributes.position.needsUpdate = true;
+            this.particles.geometry.attributes.scale.needsUpdate = true;
+          }
         }
       }
-    }
 
-
+      resolve();
+    });
   }
 
   public resize(): void {

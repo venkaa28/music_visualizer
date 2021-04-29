@@ -22,6 +22,9 @@ export class TemplateSceneServiceService {
     if (this.frameId != null) {
       cancelAnimationFrame(this.frameId);
     }
+
+    document.removeEventListener('DOMContentLoaded', this.render);
+    document.removeEventListener('resize', this.resize);
   }
 
   public createScene(canvas: ElementRef<HTMLCanvasElement>): void {
@@ -73,13 +76,9 @@ export class TemplateSceneServiceService {
       if (document.readyState !== 'loading') {
         this.render();
       } else {
-        window.addEventListener('DOMContentLoaded', () => {
-          this.render();
-        });
+        window.addEventListener('DOMContentLoaded', this.render);
       }
-      window.addEventListener('resize', () => {
-        this.resize();
-      });
+      window.addEventListener('resize', this.resize);
     });
   }
 
