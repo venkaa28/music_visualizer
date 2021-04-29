@@ -347,6 +347,10 @@ export class VisualizationPageComponent implements AfterViewInit {
     // get the progress bar div on the html page
     let progress = document.getElementById('progress-bar');
 
+    if (progress === null) {
+      return -1;
+    }
+
     if (this.scene?.spotifyBool) {
       try {
         progress.style.width = Math.floor(this.scene.trackProgress / this.spotifyAPI.trackDuration * 100) + '%';
