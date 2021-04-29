@@ -15,6 +15,15 @@ export class AppPage {
     return elem.click();
   }
 
+  // This is awful
+  // but it's what is required for protractor to work on non-angular pages
+  async nonAngularClickElement(xpath): Promise<unknown> {
+    const elem = await(element(by.xpath(xpath)));
+    await browser.actions().mouseMove(elem).click().perform();
+    await browser.sleep(1000);
+    return elem.click();
+  }
+
   async typeElement(xpath, text): Promise<unknown> {
     const elem = await(element(by.xpath(xpath)));
     return elem.sendKeys(text);
@@ -35,10 +44,17 @@ export class AppPage {
     // Location of Log In button
     const loginXPath = '/html/body/app-root/app-login-page/html/body/section/form/div[4]/button';
 
+    // Location of 'remember me' checkbox
+    const remXPath = '/html/body/app-root/app-login-page/html/body/section/form/div[3]/input';
+
+
     // Enter sample email
     await this.typeElement(emailXPath, userName);
     // Enter sample password
     await this.typeElement(passXPath, userPassword);
+
+    // click remember me
+    // await this.clickElement(remXPath);
 
     await browser.waitForAngularEnabled(false);
 
@@ -46,6 +62,6 @@ export class AppPage {
     await this.clickElement(loginXPath);
 
     // This is a large page to load, must chill for a sec
-    return await browser.wait(ExpectedConditions.visibilityOf(element(by.xpath('/html/body/app-root/app-visualization-page/html/body/div[2]/p'))), 1000);
+    return await browser.wait(ExpectedConditions.visibilityOf(element(by.xpath('/html/body/app-root/app-visualization-page/html/body/div[2]/p'))), 5000);
   }
 }
