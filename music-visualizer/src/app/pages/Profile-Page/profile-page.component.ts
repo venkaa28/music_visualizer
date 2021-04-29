@@ -20,10 +20,11 @@ export class ProfilePageComponent implements OnInit {
   // Temporary variable for determining whether or not Spotify is linked
   // until we get the api hooked up
 
-  constructor(public router: Router, private authService: AuthService, private cookieService: CookieService, private spotifyService: SpotifyService, 
+  constructor(public router: Router, private authService: AuthService, private cookieService: CookieService, private spotifyService: SpotifyService,
              private readonly notifierService: NotifierService) {
               this.userData = this.authService.getUser();
             }
+
 
   ngOnInit(): void { }
 
@@ -37,7 +38,7 @@ export class ProfilePageComponent implements OnInit {
       console.log(error);
       this.notifierService.notify('error', 'Whoops, looks like something went wrong!');
     }
-    // TODO should this log the user out afterwards? 
+    // TODO should this log the user out afterwards?
     // I've seen services do this. It'd be super easy to just wait
     // a couple seconds then kick the user back to the homepage so they
     // need to log in again. Something to think about.

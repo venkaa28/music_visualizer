@@ -12,6 +12,13 @@ exports.config = {
   specs: [
     './src/**/*.e2e-spec.ts'
   ],
+  plugins: [{
+    path: '../node_modules/protractor-istanbul-plugin',
+    package: '../node_modules/protractor-console-plugin',
+    failOnWarning: false,
+    failOnError: false,
+    logWarnings: false
+  }],
   capabilities: {
     browserName: 'chrome'
   },
