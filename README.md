@@ -10,7 +10,9 @@ Create an "environments" folder within source:
 In that folder create two files: environment.ts, and environment.prod.ts.
 
 The contents of the files should look like this for both files:
+
 environment.prod.ts
+
 export const environment = {
     production: true,
     clientId: "Enter spotify client id here (instructions below)"
@@ -22,8 +24,9 @@ export const firebaseConfig = {
 }
 
 environment.ts
+
 export const environment = {
-    production: true,
+    production: false,
     clientId: "Enter spotify client id here (instructions below)"
     clientSecret: "Enter Spotify Client Secret here"   
 }
