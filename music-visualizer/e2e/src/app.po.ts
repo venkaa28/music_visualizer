@@ -62,6 +62,6 @@ export class AppPage {
     await this.clickElement(loginXPath);
 
     // This is a large page to load, must chill for a sec
-    return await browser.wait(ExpectedConditions.visibilityOf(element(by.xpath('/html/body/app-root/app-visualization-page/html/body/div[2]/p'))), 5000);
+    return await browser.wait(ExpectedConditions.visibilityOf(element(by.xpath('/html/body/app-root/app-visualization-page/html/body/div[2]/p'))), 50000);
   }
 }
