@@ -1,21 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 
 import { AudioService } from './audio.service';
-import {RouterTestingModule} from "@angular/router/testing";
-import {ReactiveFormsModule} from "@angular/forms";
-import {AngularFireModule} from "@angular/fire";
+import {RouterTestingModule} from '@angular/router/testing';
+import {ReactiveFormsModule} from '@angular/forms';
+import {AngularFireModule} from '@angular/fire';
 import { firebaseConfig } from '../../environments/environment';
-import {NotifierModule} from "angular-notifier";
-import {ElementRef} from "@angular/core";
+import {NotifierModule} from 'angular-notifier';
+import {ElementRef} from '@angular/core';
 
 describe('AudioService', () => {
   let service: AudioService;
   let mockAudio;
-
-  let mockStream = navigator.mediaDevices.getUserMedia({
+  const mockStream = navigator.mediaDevices.getUserMedia({
     audio: true,
     video: false
   });
+  const audioStream = navigator.mediaDevices.getUserMedia({ audio: true });
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -110,28 +110,33 @@ describe('AudioService', () => {
 
   });
 
-  it('test stopMic()', async() => {
+  it('test stopMic()', async () => {
     service.loadMic(await mockStream);
-    //expect((service as any).stream.active).toBe(true);
+    // expect((service as any).stream.active).toBe(true);
     service.stopMic();
     expect((service as any).micTrack).toBeNull();
   });
 
-  it('test stopFile()', async() => {
+  it('test stopFile()', async () => {
     service.loadMic(await mockStream);
     service.stopFile();
     expect((service as any).fileTrack).toBe(null);
   });
 
   it('test hardStop()', async () => {
-    service.loadMic(await mockStream);
-    service.hardStop();
-    expect((service as any).micTrack).toBe(null);
+    const promise = Promise.resolve(audioStream);
+    const spy = spyOn(navigator.mediaDevices, 'getUserMedia').and.callFake(async () => {
+      service.hardStop();
+      expect((service as any).micTrack).toBe(null);
+    });
   });
 
   it('test loadMic()', async () => {
-    service.loadMic(await mockStream);
-    expect((service as any).micStream.active).toBe(true);
+    const promise = Promise.resolve(audioStream);
+    const spy = spyOn(navigator.mediaDevices, 'getUserMedia').and.callFake(async () => {
+      service.loadMic(await audioStream);
+      expect((service as any).micStream.active).toBe(true);
+    });
   });
 
   it('test loadSong()', async () => {
