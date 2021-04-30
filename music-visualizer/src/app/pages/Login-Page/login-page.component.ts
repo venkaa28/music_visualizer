@@ -11,6 +11,7 @@ import { AuthService } from '../../services/auth.service';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import { NotifierService } from 'angular-notifier';
 
+
 @Component({
   selector: 'app-login-page',
   templateUrl: './login-page.component.html',
@@ -55,7 +56,7 @@ export class LoginPageComponent implements OnInit {
     });
   }
 
-  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder, 
+  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder,
               private readonly  notifierService: NotifierService) { }
 
   ngOnInit(): void {
