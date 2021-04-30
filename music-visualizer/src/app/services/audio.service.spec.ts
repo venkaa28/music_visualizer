@@ -114,7 +114,7 @@ describe('AudioService', () => {
     service.loadMic(await mockStream);
     //expect((service as any).stream.active).toBe(true);
     service.stopMic();
-    expect((service as any).micTrack).toBe(null);
+    expect((service as any).micTrack).toBeNull();
   });
 
   it('test stopFile()', async() => {
