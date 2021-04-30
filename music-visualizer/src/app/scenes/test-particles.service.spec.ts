@@ -4,8 +4,9 @@ import { TestParticlesService } from './test-particles.service';
 import {RouterTestingModule} from "@angular/router/testing";
 import {ReactiveFormsModule} from "@angular/forms";
 import {AngularFireModule} from "@angular/fire";
-import {firebaseConfig} from "../../environments/environment";
+import { firebaseConfig } from '../../environments/environment';
 import {NotifierModule} from "angular-notifier";
+import {HttpClientModule} from "@angular/common/http";
 
 describe('TestParticlesService', () => {
   let service: TestParticlesService;
@@ -20,7 +21,8 @@ describe('TestParticlesService', () => {
         // AngularFireDatabaseModule,
         // AngularFireAuthModule,
         // AngularFirestoreModule,
-        NotifierModule
+        NotifierModule,
+        HttpClientModule,
       ],
     });
     service = TestBed.inject(TestParticlesService);
@@ -30,50 +32,4 @@ describe('TestParticlesService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('test createScene()', () => {
-    // TODO: Integrate
-    expect(true).toBe(false);
-  });
-
-  it('test animate()', () => {
-    // TODO: Integrate
-    expect(true).toBe(false);
-  });
-
-  it('test render()', () => {
-    // TODO: Integrate
-    expect(true).toBe(false);
-  });
-
-  it('test sceneAnimation()', () => {
-    // TODO: Integrate
-    expect(true).toBe(false);
-  });
-
-  it('test resize()', () => {
-    // TODO: Integrate
-    expect(true).toBe(false);
-  });
-
-  it('test makeRoughBall()', () => {
-    // TODO: Integrate
-    expect(true).toBe(false);
-  });
-
-  // moved to tools
-  // it('test fractionate()', () => {
-  //   expect(service.fractionate(2, 1, 3)).toBe(0.5);
-  // });
-
-  // it('test modulate()', () => {
-  //   expect(service.modulate(2, 1, 3, 4, 10)).toBe(7);
-  // });
-
-  // it('test avg()', () => {
-  //   expect(service.avg([1, 2, 3, 4, 5])).toBe(3);
-  // });
-
-  // it('test max()', () => {
-  //   expect(service.max([1, 2, 3, 4, 5])).toBe(5);
-  // });
 });

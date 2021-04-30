@@ -7,7 +7,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireDatabaseModule} from '@angular/fire/database';
 import { AngularFireAuthModule} from '@angular/fire/auth';
-import {firebaseConfig} from "../../../environments/environment";
+import { firebaseConfig } from '../../../environments/environment';
 import { NotifierService, NotifierModule } from 'angular-notifier';
 
 describe('ForgotPasswordPageComponent', () => {
@@ -41,21 +41,14 @@ describe('ForgotPasswordPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('test onSubmit()', () => {
-    component.onSubmit();
-    // Todo: expect something
-  });
-
-  it('test getEmailMessage() with empty email', () => {
+  it('test getEmailMessage()', () => {
     // an invalid email
-    component.emailForm.controls.email.setValue('');
+    component.emailForm.controls.email.setValue('randomEmail');
     var ret = component.getEmailMessage();
     expect(ret).toEqual('Not a valid email');
-  });
 
-  it('test getEmailMessage() with vaild email', () => {
-    // a valid email
-    component.emailForm.controls.email.setValue('b@bbb.com');
+    // an valid email
+    component.emailForm.controls.email.setValue('b@b.bbb');
     var ret = component.getEmailMessage();
     expect(ret).toEqual('');
   });
