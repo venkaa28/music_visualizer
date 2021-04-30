@@ -39,24 +39,21 @@ describe('RegisterPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('test getEmailMessage() with empty email', () => {
+  it('test getEmailMessage() with invalid email', () => {
     // an invalid email
-    component.signUpForm.controls.email.setValue('');
+    component.signUpForm.controls.email.setValue('dfsdfsd');
     var ret = component.getEmailMessage();
     expect(ret).toEqual('Not a valid email');
   });
 
   it('test getEmailMessage() with vaild email', () => {
     // a valid email
-    component.signUpForm.controls.email.setValue('b@b.bbb');
-    var ret = component.getEmailMessage();
-    expect(ret).toEqual('');
+    component.signUpForm.controls.email.setValue('test@gmail.com');
+    expect(component.signUpForm.controls.email.valid).toBeTruthy();
   });
 
   it('test passwordMessage() with empty password', () => {
-    component.signUpForm.controls.password.setValue('');
-    var ret = component.getPasswordMessage();
-    expect(ret).toEqual(`Passwords must be at least ${component.minLength} characters long`);
+    expect(component.signUpForm.controls.password.valid).toBeFalsy();
   });
 
   it('test passwordMessage() with short password', () => {

@@ -30,7 +30,8 @@
               "src/favicon.ico",
               "src/assets",
               "src/assets/music",
-              "src/assets/3d_models"
+              "src/assets/3d_models",
+              "src/assets/mock data for tests"
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
