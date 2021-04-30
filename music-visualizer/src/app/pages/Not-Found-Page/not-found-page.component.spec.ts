@@ -35,13 +35,13 @@ describe('NotFoundPageComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('test getRoute()', () => {
-    // Todo: mock login
-    expect(true).toBe(false);
-  });
-
-  it('test getRouteName()', () => {
-    // Todo: mock login
-    expect(true).toBe(false);
-  });
+  // it('test getRoute()', () => {
+  //   // Todo: mock login
+  //   expect(true).toBe(false);
+  // });
+  //
+  // it('test getRouteName()', () => {
+  //   // Todo: mock login
+  //   expect(true).toBe(false);
+  // });
 });

@@ -32,7 +32,7 @@ describe('SeaSceneService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('test createScene()', () => {
-    expect(true).toBe(false);
-  });
+  // it('test createScene()', () => {
+  //   expect(true).toBe(false);
+  // });
 });

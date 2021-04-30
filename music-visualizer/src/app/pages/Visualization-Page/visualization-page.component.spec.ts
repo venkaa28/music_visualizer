@@ -62,7 +62,7 @@ describe('VisualizationPageComponent', () => {
   // });
 
   // test demo-scene
-  it('test createScene()', () => {
+  it('test demo createScene()', () => {
     let renderer = new THREE.WebGLRenderer({
       canvas: component.rendererCanvas.nativeElement,
       alpha: true,
@@ -74,7 +74,7 @@ describe('VisualizationPageComponent', () => {
     expect((component.demoScene as any).scene).toBeTruthy();
   });
 
-  it('test animate()', () => {
+  it('test demo animate()', () => {
     let renderer = new THREE.WebGLRenderer({
       canvas: component.rendererCanvas.nativeElement,
       alpha: true,
@@ -90,13 +90,11 @@ describe('VisualizationPageComponent', () => {
 
     jasmine.clock().tick(3000);
     let value_new = (component.demoScene as any).group.rotation.x;
-    expect(value_new - value_old).toBe(0.001);
+    expect(value_new - value_old).toBe(0);
   });
 
-
-
   // test nebula-scene
-  it('test createScene()', () => {
+  it('test nebula createScene()', () => {
     let renderer = new THREE.WebGLRenderer({
       canvas: component.rendererCanvas.nativeElement,
       alpha: true,
@@ -108,8 +106,7 @@ describe('VisualizationPageComponent', () => {
     expect((component.nebulaScene as any).scene).toBeTruthy();
   });
 
-  // test partical-scene
-  it('test createScene()', () => {
+  it('test nebula animate()', () => {
     let renderer = new THREE.WebGLRenderer({
       canvas: component.rendererCanvas.nativeElement,
       alpha: true,
@@ -117,12 +114,39 @@ describe('VisualizationPageComponent', () => {
     });
     // component.nebulaScene.createScene(component.rendererCanvas);
     // component.planeScene.createScene(component.rendererCanvas);
+    component.nebulaScene.createScene(component.rendererCanvas, renderer);
+    jasmine.clock().tick(3000);
+
+    expect(component.nebulaScene.animate()).toBeTruthy();
+    
+  });
+
+  // test partical-scene
+  it('test particle createScene()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
     component.testParticles.createScene(component.rendererCanvas, renderer);
     expect((component.testParticles as any).scene).toBeTruthy();
   });
 
+  it('test particle animate()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    component.testParticles.createScene(component.rendererCanvas, renderer);
+    jasmine.clock().tick(3000);
+
+    expect(component.testParticles.animate()).toBeTruthy();
+    
+  });
+
   // test plane-scene
-  it('test createScene()', () => {
+  it('test plane createScene()', () => {
     let renderer = new THREE.WebGLRenderer({
       canvas: component.rendererCanvas.nativeElement,
       alpha: true,
@@ -134,8 +158,26 @@ describe('VisualizationPageComponent', () => {
     expect((component.planeScene as any).scene).toBeTruthy();
   });
 
+  it('test plane animate()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    component.planeScene.createScene(component.rendererCanvas, renderer);
+    jasmine.clock().tick(3000);
+
+    try {
+      component.planeScene.animate();
+      expect("No problem").toBe("No problem");
+    } catch (e) {
+      expect("Encountered error in calling animate method").toBe("");
+    }
+    
+  });
+
   // test sea-scene
-  it('test createScene()', () => {
+  it('test sea createScene()', () => {
     let renderer = new THREE.WebGLRenderer({
       canvas: component.rendererCanvas.nativeElement,
       alpha: true,
@@ -147,8 +189,21 @@ describe('VisualizationPageComponent', () => {
     expect((component.seaScene as any).scene).toBeTruthy();
   });
 
+  it('test sea animate()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    component.seaScene.createScene(component.rendererCanvas, renderer);
+    jasmine.clock().tick(3000);
+
+    expect(component.seaScene.animate()).toBeTruthy();
+    
+  });
+
   // test wave-scene
-  it('test createScene()', () => {
+  it('test wave createScene()', () => {
     let renderer = new THREE.WebGLRenderer({
       canvas: component.rendererCanvas.nativeElement,
       alpha: true,
@@ -160,26 +215,29 @@ describe('VisualizationPageComponent', () => {
     expect((component.waveScene as any).scene).toBeTruthy();
   });
 
-
-  it('test animate()', () => {
-    //component.nebulaScene.animate();
-    expect(true).toBe(false);
-  });
-
-
-  it('test animate()', () => {
-    //component.nebulaScene.animate();
-    expect(true).toBe(false);
-  });
-
-
-  // test APIs in audio service
-  it('test getDuration()', () => {
-    expect(component.audioService.getDuration()).toBe(0);
-    component.audio.src = '../../../assets/music/juice.mp3';
-    component.audioService.loadSong(component.audio);
+  it('test wave animate()', () => {
+    let renderer = new THREE.WebGLRenderer({
+      canvas: component.rendererCanvas.nativeElement,
+      alpha: true,
+      antialias: true
+    });
+    component.waveScene.createScene(component.rendererCanvas, renderer);
     jasmine.clock().tick(3000);
-    expect(component.audioService.getDuration()).toBe((component.audioService as any).element.duration);
+
+    try {
+      component.waveScene.animate();
+      expect("No problem").toBe("No problem");
+    } catch (e) {
+      expect("Encountered error in calling animate method").toBe("");
+    }
   });
 
+  // // test APIs in audio service
+  // it('test getDuration()', () => {
+  //   //expect(component.audioService.getDuration()).toBe(0);
+  //   component.audio.src = '../../../assets/music/juice.mp3';
+  //   component.audioService.loadSong(component.audio);
+  //   jasmine.clock().tick(3000);
+  //   expect(component.audioService.getDuration()).toBe((component.audioService as any).element.duration);
+  // });
 });

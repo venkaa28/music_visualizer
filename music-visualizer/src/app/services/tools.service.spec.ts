@@ -7,7 +7,7 @@ import {SimplexNoise} from 'three/examples/jsm/math/SimplexNoise';
 
 describe('ToolsService', () => {
   let service: ToolsService;
-  //let 
+  //let
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(ToolsService);
@@ -61,7 +61,7 @@ describe('ToolsService', () => {
     var magnitude1 = null;
     var magnitude2 = null;
     var timeScalar = null;
-    var plane = new THREE.Mesh(new THREE.PlaneGeometry(1600, 1600, 100, 100), 
+    var plane = new THREE.Mesh(new THREE.PlaneGeometry(1600, 1600, 100, 100),
     new THREE.MeshLambertMaterial({
       color: 0x25E0EC,
       side: THREE.DoubleSide,
@@ -70,16 +70,16 @@ describe('ToolsService', () => {
     service.wavesBuffer(waveSize, magnitude1, magnitude2, timeScalar, plane);
     //expect(plane).toBe(?);
   });
-  
+
   // Test Helper Methods
   it('should be correct avg', () => {
     var arr = [1, 2, 3, 4, 5];
-    expect(service.avg(arr)).toBe(3);
+    expect(service.avg(arr)).toEqual(3);
   });
 
   it('should be correct absAvg', () => {
     var arr = [-1, -2, -3, -4, -5];
-    expect(service.absAvg(arr)).toBe(2.6);
+    expect(service.absAvg(arr)).toEqual(2.6);
   });
 
   it('should be correct fractionate', () => {
@@ -89,5 +89,5 @@ describe('ToolsService', () => {
     expect(service.fractionate(val, minVal, maxVal)).toBeCloseTo(0.0008001600320064013);
   });
 
-});
+ });
 
