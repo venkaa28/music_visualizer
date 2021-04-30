@@ -28,7 +28,6 @@ export class AuthService {
 
   // log the user into firebase, store data as a cookie
   public async loginUser(email: string, password: string, cookies: boolean): Promise<void> {
-    //this.userData.name = '0';
     // sign into auth service
     await this.ngFireAuth.signInWithEmailAndPassword(email, password).catch((error) => {
       console.log(error); // log the error
@@ -39,18 +38,15 @@ export class AuthService {
 
     const uid = email.replace(/[@.]/g, '_'); // get id string to access account info from rtdb
 
-    //this.userData.name = '1';
 
     return new Promise(async (resolve, reject) => {
       // Get stored user data from realtime database
       await firebase.database().ref('accounts/' + uid).on('value', async (snapshot) => {
         // make sure account exists
-        //this.userData.name = '2';
         if (snapshot.exists()) {
           this.userData.email = snapshot.val().email; // grab email
           this.userData.name = snapshot.val().name; // grab user's name
 
-          //this.userData.name = '3';
 
           if (cookies) {
             var userDict: Dict = {}; // used to store user data from firebase
@@ -58,7 +54,6 @@ export class AuthService {
             userDict.email = this.userData.email;
             userDict.name = this.userData.name;
 
-            //this.userData.name = '4';
 
             // convert json dict to string and set as account cookie
             this.cookieService.set('account', JSON.stringify(userDict));
@@ -66,7 +61,6 @@ export class AuthService {
 
           resolve();
         } else {
-          //this.userData.name = '5';
           reject(new Error('Bad login'));
         }
       });
